@@ -69,7 +69,7 @@ export function renderPlatform(student) {
             </p>
 
             <h1>
-              WELCOME BACK,
+              Welcome Back,
               <span>${student.name}.</span>
             </h1>
 
@@ -223,9 +223,6 @@ export function renderPlatform(student) {
         <!-- MY ROADMAP -->
 
         <div id="roadmap">
-        div style="background: red; color: white; padding: 30px; font-size: 30px;">
-  ROADMAP TEST
-</div>
 
           ${renderRoadmap(student)}
 
@@ -234,10 +231,12 @@ export function renderPlatform(student) {
 
         <!-- MY MATERIALS -->
 
-${renderMaterials(student)}
-<div id="class-materials-view">
-  ${renderClassMaterials(student)}
-</div>
+        ${renderMaterials(student)}
+
+        <div id="class-materials-view">
+          ${renderClassMaterials(student)}
+        </div>
+
 
         <!-- MY PROGRESS -->
 
@@ -249,7 +248,7 @@ ${renderMaterials(student)}
           <div class="platform-section-heading">
 
             <p class="platform-label">
-              03 — MY PROGRESS
+              04 — MY PROGRESS
             </p>
 
             <h2>
