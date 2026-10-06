@@ -8,7 +8,7 @@ export function renderMaterials(student) {
       <div class="platform-section-heading">
 
         <p class="platform-label">
-          02 — MY MATERIALS
+          03 — MY MATERIALS
         </p>
 
         <h2>

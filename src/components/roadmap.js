@@ -5,7 +5,7 @@ export function renderRoadmap(student) {
       <div class="platform-section-heading">
 
         <p class="platform-label">
-          01 — MY ROADMAP
+          02 — MY ROADMAP
         </p>
 
         <h2>
