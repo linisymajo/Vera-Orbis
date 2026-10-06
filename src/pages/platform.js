@@ -69,7 +69,7 @@ export function renderPlatform(student) {
             </p>
 
             <h1>
-              Welcome back,
+              WELCOME BACK,
               <span>${student.name}.</span>
             </h1>
 
@@ -223,6 +223,9 @@ export function renderPlatform(student) {
         <!-- MY ROADMAP -->
 
         <div id="roadmap">
+        div style="background: red; color: white; padding: 30px; font-size: 30px;">
+  ROADMAP TEST
+</div>
 
           ${renderRoadmap(student)}
 
