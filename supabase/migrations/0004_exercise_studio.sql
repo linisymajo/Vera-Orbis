@@ -84,8 +84,8 @@ create policy "students read own exercise assignments" on public.exercise_assign
 drop policy if exists "students read assigned exercise content" on public.exercises;
 
 drop policy if exists "students manage own exercise attempts" on public.exercise_attempts;
-create policy "students manage own exercise attempts" on public.exercise_attempts for all to authenticated
-  using (student_id = (select auth.uid()))
+drop policy if exists "students insert own exercise attempts" on public.exercise_attempts;
+create policy "students insert own exercise attempts" on public.exercise_attempts for insert to authenticated
   with check (
     student_id = (select auth.uid())
     and exists (
@@ -95,6 +95,10 @@ create policy "students manage own exercise attempts" on public.exercise_attempt
         and a.status <> 'revoked'
     )
   );
+
+drop policy if exists "students read own exercise attempts" on public.exercise_attempts;
+create policy "students read own exercise attempts" on public.exercise_attempts for select to authenticated
+  using (student_id = (select auth.uid()));
 
 drop policy if exists "teachers read own exercise attempts" on public.exercise_attempts;
 drop policy if exists "teachers manage own exercise attempts" on public.exercise_attempts;
