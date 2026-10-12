@@ -1,0 +1,40 @@
+-- TEMPLATE ONLY. Rename to a numbered .sql migration only after validating
+-- every table, column, relationship, and existing policy against an exported
+-- Supabase schema. This file is intentionally not executable by Supabase CLI.
+--
+-- The application currently references:
+--   teachers(id)
+--   profiles(id)
+--   teacher_notes(teacher_id, student_id)
+--
+-- Expected policy shape after schema verification:
+--
+-- alter table public.teacher_notes enable row level security;
+--
+-- create policy "teachers read their notes"
+-- on public.teacher_notes for select
+-- to authenticated
+-- using (
+--   teacher_id = (select auth.uid())
+-- );
+--
+-- create policy "teachers write their notes"
+-- on public.teacher_notes for insert
+-- to authenticated
+-- with check (
+--   teacher_id = (select auth.uid())
+-- );
+--
+-- create policy "teachers update their notes"
+-- on public.teacher_notes for update
+-- to authenticated
+-- using (
+--   teacher_id = (select auth.uid())
+-- )
+-- with check (
+--   teacher_id = (select auth.uid())
+-- );
+--
+-- Do not apply these examples until teacher-to-student assignment rules are
+-- verified. A teacher_id check alone is insufficient if teachers must be
+-- restricted to assigned students.

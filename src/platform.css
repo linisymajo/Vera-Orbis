@@ -1,1039 +1,2041 @@
-/* =========================================
-   VERA ORBIS — STUDENT PLATFORM
-========================================= */
+/* =========================================================
+   VERA ORBIS — PLATFORM
+   Dynamic Experience
+   ========================================================= */
+
+:root {
+  --vo-turquoise: #18b7a0;
+  --vo-purple: #6c4ccf;
+  --vo-yellow: #f4c542;
+  --vo-orange: #f28c28;
+  --vo-coral: #e85d5d;
+  --vo-navy: #18243a;
+  --vo-cream: #fff9f0;
+  --vo-white: #ffffff;
+  --vo-muted: #697386;
+  --vo-border: rgba(24, 36, 58, 0.1);
+
+  --vo-shadow:
+    0 24px 70px rgba(24, 36, 58, 0.12);
+
+  --vo-shadow-hover:
+    0 30px 90px rgba(24, 36, 58, 0.18);
+}
+
+/* =========================================================
+   RESET
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: "DM Sans", sans-serif;
+  background: var(--vo-cream);
+  color: var(--vo-navy);
+  overflow-x: hidden;
+}
+
+button,
+a {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* =========================================================
+   PAGE
+   ========================================================= */
 
 .platform-page {
   min-height: 100vh;
-  background: #fff9f0;
-  color: #183b66;
-  font-family: "DM Sans", sans-serif;
+  position: relative;
+  overflow: hidden;
 }
 
+.platform-page::before {
+  content: "";
+  position: fixed;
+  width: 520px;
+  height: 520px;
+  border-radius: 50%;
+  background: rgba(24, 183, 160, 0.07);
+  top: 8%;
+  right: -280px;
+  pointer-events: auto;
+  animation: ambientFloat 12s ease-in-out infinite;
+}
 
-/* =========================================
-   PLATFORM NAVBAR
-========================================= */
+.platform-page::after {
+  content: "";
+  position: fixed;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  background: rgba(108, 76, 207, 0.06);
+  bottom: 5%;
+  left: -230px;
+  pointer-events: none;
+  animation: ambientFloatReverse 15s ease-in-out infinite;
+}
+
+/* =========================================================
+   NAVBAR
+   ========================================================= */
 
 .platform-navbar {
-  height: 86px;
-  padding: 0 5vw;
+  width: min(1380px, calc(100% - 64px));
+  margin: 0 auto;
+  min-height: 88px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 30px;
 
-  background: #fff9f0;
-  border-bottom: 1px solid rgba(24, 59, 102, 0.12);
-
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  position: relative;
+  z-index: 20;
 }
 
-
 .platform-logo {
-  color: #183b66;
-  text-decoration: none;
-
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
 }
 
 .platform-logo span {
-  color: #6c3bff;
+  color: var(--vo-purple);
 }
-
-
-/* =========================================
-   NAVIGATION
-========================================= */
 
 .platform-nav {
   display: flex;
   align-items: center;
-  gap: 35px;
+  gap: 8px;
 }
 
 .platform-nav a {
-  color: #183b66;
-  text-decoration: none;
-
+  position: relative;
+  padding: 10px 15px;
   font-size: 13px;
   font-weight: 600;
-
+  color: var(--vo-muted);
+  border-radius: 999px;
   transition:
-    color 0.3s ease;
+    color 0.3s ease,
+    background 0.3s ease,
+    transform 0.3s ease;
 }
 
-.platform-nav a:hover,
+.platform-nav a:hover {
+  color: var(--vo-navy);
+  background: rgba(255, 255, 255, 0.75);
+  transform: translateY(-2px);
+}
+
 .platform-nav a.active {
-  color: #6c3bff;
+  color: var(--vo-navy);
+  background: var(--vo-white);
+  box-shadow: 0 8px 30px rgba(24, 36, 58, 0.07);
 }
-
-
-/* =========================================
-   PROFILE
-========================================= */
 
 .student-profile {
-  border: none;
+  border: 0;
   background: transparent;
 
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 9px;
 
-  color: #183b66;
-
-  font-family: inherit;
+  color: var(--vo-navy);
   font-size: 13px;
   font-weight: 600;
-
-  cursor: pointer;
 }
 
 .profile-avatar {
   width: 38px;
   height: 38px;
-
   border-radius: 50%;
 
-  background: #6c3bff;
-  color: #fff9f0;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-size: 11px;
-  font-weight: 800;
-}
-
-
-/* =========================================
-   PLATFORM CONTENT
-========================================= */
-
-.platform-content {
-  overflow: hidden;
-}
-
-
-/* =========================================
-   WELCOME
-========================================= */
-
-.platform-welcome {
-  min-height: 620px;
-
-  padding: 110px 7vw;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  background: #183b66;
-  color: #fff9f0;
-
-  position: relative;
-  overflow: hidden;
-}
-
-.platform-welcome::before {
-  content: "";
-
-  position: absolute;
-
-  width: 750px;
-  height: 750px;
-
-  border: 1px solid rgba(255, 249, 240, 0.12);
-  border-radius: 50%;
-
-  right: -260px;
-  top: -230px;
-}
-
-.platform-welcome::after {
-  content: "";
-
-  position: absolute;
-
-  width: 350px;
-  height: 350px;
-
-  border: 1px solid rgba(255, 200, 61, 0.2);
-  border-radius: 50%;
-
-  left: -190px;
-  bottom: -190px;
-}
-
-
-.platform-label {
-  margin: 0;
-
-  font-size: 11px;
-  font-weight: 800;
-
-  letter-spacing: 0.16em;
-
-  color: #ff6b35;
-}
-
-
-.platform-welcome h1 {
-  max-width: 800px;
-
-  font-family: "Playfair Display", serif;
-
-  font-size: clamp(60px, 8vw, 115px);
-  font-weight: 500;
-
-  line-height: 0.9;
-  letter-spacing: -0.04em;
-
-  margin: 25px 0 35px;
-
-  position: relative;
-  z-index: 2;
-}
-
-.platform-welcome h1 span {
-  display: block;
-
-  color: #ffc83d;
-
-  font-style: italic;
-}
-
-
-.platform-intro {
-  max-width: 540px;
-
-  font-size: 17px;
-  line-height: 1.7;
-
-  color: rgba(255, 249, 240, 0.68);
-
-  position: relative;
-  z-index: 2;
-}
-
-
-/* =========================================
-   WELCOME ORBIT
-========================================= */
-
-.welcome-orbit {
-  width: 360px;
-  height: 360px;
-
-  position: relative;
-
-  margin-right: 5vw;
-
-  flex-shrink: 0;
-}
-
-.orbit-ring {
-  position: absolute;
-
-  border-radius: 50%;
-
-  border: 1px solid rgba(255, 249, 240, 0.35);
-}
-
-.ring-one {
-  width: 360px;
-  height: 360px;
-
-  transform: rotate(20deg);
-}
-
-.ring-two {
-  width: 250px;
-  height: 250px;
-
-  top: 55px;
-  left: 55px;
-
-  border-color: rgba(32, 199, 181, 0.6);
-
-  transform: rotate(-25deg);
-}
-
-.orbit-center {
-  width: 100px;
-  height: 100px;
-
-  border-radius: 50%;
-
-  background: #6c3bff;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  position: absolute;
-
-  top: 130px;
-  left: 130px;
-
-  font-family: "Playfair Display", serif;
-
-  font-size: 30px;
-
-  z-index: 3;
-}
-
-.orbit-dot {
-  width: 14px;
-  height: 14px;
-
-  background: #ffc83d;
-
-  border-radius: 50%;
-
-  position: absolute;
-
-  top: 35px;
-  right: 70px;
-}
-
-
-/* =========================================
-   SECTIONS
-========================================= */
-
-.passport-section,
-.journey-section {
-  padding: 140px 7vw;
-}
-
-.passport-section {
-  background: #fff9f0;
-}
-
-.journey-section {
-  background: #f5eee2;
-}
-
-
-.platform-section-heading {
-  max-width: 850px;
-}
-
-.platform-section-heading h2 {
-  font-family: "Playfair Display", serif;
-
-  font-size: clamp(50px, 7vw, 100px);
-  font-weight: 500;
-
-  line-height: 0.92;
-  letter-spacing: -0.04em;
-
-  margin: 25px 0 70px;
-}
-
-.platform-section-heading h2 span {
-  display: block;
-
-  color: #6c3bff;
-
-  font-style: italic;
-}
-
-
-/* =========================================
-   PASSPORT DASHBOARD
-========================================= */
-
-.passport-dashboard {
   display: grid;
+  place-items: center;
 
-  grid-template-columns:
-    minmax(400px, 1.1fr)
-    minmax(280px, 0.6fr);
+  color: white;
+  background: linear-gradient(
+    135deg,
+    var(--vo-purple),
+    var(--vo-turquoise)
+  );
 
-  gap: 35px;
-}
-
-
-/* =========================================
-   PASSPORT
-========================================= */
-
-.passport-main {
-  min-height: 450px;
-
-  padding: 32px;
-
-  background: #183b66;
-  color: #fff9f0;
-
-  position: relative;
-  overflow: hidden;
-
-  box-shadow:
-    0 30px 70px rgba(24, 59, 102, 0.18);
-}
-
-.passport-main::before {
-  content: "";
-
-  position: absolute;
-
-  width: 400px;
-  height: 400px;
-
-  border: 1px solid rgba(255, 249, 240, 0.15);
-
-  border-radius: 50%;
-
-  right: -180px;
-  bottom: -130px;
-}
-
-.passport-header {
-  display: flex;
-  justify-content: space-between;
-
-  font-size: 10px;
-  font-weight: 800;
-
-  letter-spacing: 0.16em;
-
-  position: relative;
-  z-index: 2;
-}
-
-.passport-main-content {
-  margin-top: 80px;
-
-  display: flex;
-  align-items: center;
-
-  gap: 45px;
-
-  position: relative;
-  z-index: 2;
-}
-
-.passport-emblem {
-  width: 140px;
-  height: 140px;
-
-  border: 1px solid rgba(255, 249, 240, 0.5);
-
-  border-radius: 50%;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-family: "Playfair Display", serif;
-
-  font-size: 42px;
-
-  flex-shrink: 0;
-}
-
-.passport-small-label {
-  margin: 0 0 10px;
-
-  color: #ffc83d;
-
-  font-size: 10px;
-  font-weight: 800;
-
-  letter-spacing: 0.16em;
-}
-
-.passport-main h3 {
-  margin: 0;
-
-  font-family: "Playfair Display", serif;
-
-  font-size: 58px;
-  font-weight: 500;
-
-  line-height: 1;
-}
-
-.passport-level {
-  font-size: 12px;
-  font-weight: 700;
-
-  letter-spacing: 0.12em;
-
-  opacity: 0.65;
-}
-
-.passport-footer {
-  position: absolute;
-
-  bottom: 28px;
-  left: 32px;
-  right: 32px;
-
-  padding-top: 18px;
-
-  border-top: 1px solid rgba(255, 249, 240, 0.2);
-
-  display: flex;
-  justify-content: space-between;
-
-  font-size: 9px;
-  font-weight: 800;
-
-  letter-spacing: 0.14em;
-}
-
-
-/* =========================================
-   PROGRESS
-========================================= */
-
-.progress-card {
-  min-height: 450px;
-
-  padding: 32px;
-
-  background: #20c7b5;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.progress-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  margin-bottom: 25px;
-}
-
-.progress-top span {
   font-size: 11px;
   font-weight: 800;
 
-  letter-spacing: 0.12em;
-}
-
-.progress-top strong {
-  font-family: "Playfair Display", serif;
-
-  font-size: 48px;
-  font-weight: 500;
-}
-
-.progress-bar {
-  width: 100%;
-  height: 10px;
-
-  background: rgba(24, 59, 102, 0.15);
-
-  overflow: hidden;
-}
-
-.progress-fill {
-  width: 68%;
-  height: 100%;
-
-  background: #183b66;
-}
-
-.progress-card p {
-  max-width: 250px;
-
-  margin-top: 25px;
-
-  font-family: "Playfair Display", serif;
-
-  font-size: 27px;
-  line-height: 1.1;
-}
-
-
-/* =========================================
-   JOURNEY GRID
-========================================= */
-
-.journey-grid {
-  display: grid;
-
-  grid-template-columns: repeat(2, 1fr);
-
-  border-top: 1px solid rgba(24, 59, 102, 0.2);
-}
-
-.journey-card {
-  min-height: 280px;
-
-  padding: 28px;
-
-  border-right: 1px solid rgba(24, 59, 102, 0.2);
-  border-bottom: 1px solid rgba(24, 59, 102, 0.2);
-
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-
-  position: relative;
-
-  transition:
-    transform 0.4s ease,
-    background 0.4s ease;
-}
-
-.journey-card:nth-child(odd) {
-  border-left: 1px solid rgba(24, 59, 102, 0.2);
-}
-
-.journey-card:hover {
-  background: #fff9f0;
-
-  transform: translateY(-8px);
-}
-
-.journey-number {
-  font-size: 11px;
-  font-weight: 800;
-
-  color: #6c3bff;
-
-  letter-spacing: 0.12em;
-}
-
-.journey-card h3 {
-  margin: 0 0 15px;
-
-  font-size: 27px;
-}
-
-.journey-card p {
-  max-width: 400px;
-
-  margin: 0;
-
-  font-size: 15px;
-  line-height: 1.7;
-
-  color: rgba(24, 59, 102, 0.65);
-}
-
-.journey-arrow {
-  width: 38px;
-  height: 38px;
-
-  border: 1px solid rgba(24, 59, 102, 0.25);
-
-  border-radius: 50%;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  align-self: flex-end;
-
-  transition:
-    transform 0.4s ease,
-    background 0.4s ease;
-}
-
-.journey-card:hover .journey-arrow {
-  transform: rotate(45deg);
-
-  background: #6c3bff;
-
-  color: #fff9f0;
-}
-
-
-/* =========================================
-   NEXT STEP
-========================================= */
-
-.next-step {
-  min-height: 600px;
-
-  padding: 140px 7vw;
-
-  background: #ff6b35;
-  color: #fff9f0;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-
-  position: relative;
-
-  overflow: hidden;
-}
-
-.next-step::before {
-  content: "";
-
-  position: absolute;
-
-  width: 600px;
-  height: 600px;
-
-  border: 1px solid rgba(255, 249, 240, 0.3);
-
-  border-radius: 50%;
-
-  right: -250px;
-  top: -150px;
-}
-
-.next-step h2 {
-  max-width: 900px;
-
-  font-family: "Playfair Display", serif;
-
-  font-size: clamp(65px, 9vw, 140px);
-  font-weight: 500;
-
-  line-height: 0.88;
-
-  letter-spacing: -0.05em;
-
-  margin: 30px 0 55px;
-
-  position: relative;
-  z-index: 2;
-}
-
-.next-step h2 span {
-  display: block;
-
-  color: #ffc83d;
-
-  font-style: italic;
-}
-
-.next-step-button {
-  width: fit-content;
-
-  padding: 18px 28px;
-
-  border: none;
-
-  background: #183b66;
-  color: #fff9f0;
-
-  font-family: inherit;
-
-  font-size: 13px;
-  font-weight: 800;
-
-  letter-spacing: 0.08em;
-
-  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(108, 76, 207, 0.25);
 
   transition:
     transform 0.4s ease,
     box-shadow 0.4s ease;
 }
 
-.next-step-button:hover {
-  transform: translateY(-5px);
-
-  box-shadow:
-    0 18px 40px rgba(24, 59, 102, 0.2);
+.student-profile:hover .profile-avatar {
+  transform: rotate(8deg) scale(1.1);
+  box-shadow: 0 12px 35px rgba(108, 76, 207, 0.35);
 }
 
+.student-profile-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
 
-/* =========================================
-   FOOTER
-========================================= */
+.platform-logout-btn {
+  border: 1px solid rgba(24, 36, 58, 0.14);
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--vo-navy);
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
 
-.platform-footer {
-  min-height: 100px;
+.platform-logout-btn:hover {
+  background: var(--vo-navy);
+  color: white;
+  border-color: var(--vo-navy);
+  transform: translateY(-1px);
+}
 
-  padding: 30px 7vw;
+/* =========================================================
+   CONTENT
+   ========================================================= */
 
-  background: #183b66;
-  color: #fff9f0;
+.platform-content {
+  width: min(1380px, calc(100% - 64px));
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.platform-section-heading {
+  margin-bottom: 42px;
+}
+
+.platform-label {
+  margin: 0 0 15px;
+
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+
+  color: var(--vo-purple);
+}
+
+.platform-section-heading h2 {
+  margin: 0;
+
+  font-family: "Playfair Display", serif;
+  font-size: clamp(42px, 5vw, 68px);
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+}
+
+.platform-section-heading h2 span {
+  display: block;
+  font-style: italic;
+  color: var(--vo-purple);
+}
+
+/* =========================================================
+   WELCOME
+   ========================================================= */
+
+.platform-welcome {
+  min-height: 650px;
+
+  display: grid;
+  grid-template-columns: 1fr 0.8fr;
+  align-items: center;
+  gap: 50px;
+
+  position: relative;
+}
+
+.platform-welcome > div:first-child {
+  animation: heroTextIn 1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.platform-welcome .platform-label {
+  animation: fadeUp 0.7s 0.15s both;
+}
+
+.platform-welcome h1 {
+  margin: 0;
+  max-width: 800px;
+
+  font-family: "Playfair Display", serif;
+  font-size: clamp(58px, 7vw, 104px);
+  font-weight: 400;
+  letter-spacing: -0.065em;
+  line-height: 0.9;
+
+  animation: fadeUp 0.8s 0.25s both;
+}
+
+.platform-welcome h1 span {
+  display: block;
+  color: var(--vo-purple);
+  font-style: italic;
+}
+
+.platform-intro {
+  max-width: 530px;
+  margin: 30px 0 0;
+
+  color: var(--vo-muted);
+  font-size: 17px;
+  line-height: 1.7;
+
+  animation: fadeUp 0.8s 0.4s both;
+}
+
+/* =========================================================
+   ORBIT
+   ========================================================= */
+
+.welcome-orbit {
+  width: min(470px, 80vw);
+  aspect-ratio: 1;
+
+  margin: auto;
+
+  position: relative;
+
+  display: grid;
+  place-items: center;
+
+  animation: orbitEntrance 1.4s 0.2s both;
+}
+
+.orbit-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(24, 36, 58, 0.13);
+}
+
+.ring-one {
+  width: 100%;
+  height: 100%;
+  animation: orbitSpin 20s linear infinite;
+}
+
+.ring-two {
+  width: 72%;
+  height: 72%;
+  border-color: rgba(108, 76, 207, 0.18);
+  animation: orbitSpinReverse 14s linear infinite;
+}
+
+.ring-one::before,
+.ring-two::before {
+  content: "";
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+}
+
+.ring-one::before {
+  top: 9%;
+  left: 17%;
+  background: var(--vo-turquoise);
+  box-shadow: 0 0 0 8px rgba(24, 183, 160, 0.1);
+}
+
+.ring-two::before {
+  bottom: 8%;
+  right: 12%;
+  background: var(--vo-yellow);
+  box-shadow: 0 0 0 8px rgba(244, 197, 66, 0.12);
+}
+
+.orbit-center {
+  width: 150px;
+  height: 150px;
+
+  border-radius: 50%;
+
+  display: grid;
+  place-items: center;
+
+  color: white;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.06em;
+
+  background:
+    radial-gradient(
+      circle at 35% 30%,
+      #9178ef,
+      var(--vo-purple) 48%,
+      #4930a5
+    );
+
+  box-shadow:
+    0 30px 80px rgba(108, 76, 207, 0.32),
+    inset 0 1px 1px rgba(255, 255, 255, 0.4);
+
+  animation: centerFloat 4s ease-in-out infinite;
+}
+
+.orbit-dot {
+  position: absolute;
+  width: 23px;
+  height: 23px;
+
+  top: 19%;
+  right: 16%;
+
+  border-radius: 50%;
+
+  background: var(--vo-coral);
+  box-shadow:
+    0 0 0 10px rgba(232, 93, 93, 0.1),
+    0 0 30px rgba(232, 93, 93, 0.3);
+
+  animation: pulseDot 2.8s ease-in-out infinite;
+}
+
+/* =========================================================
+   PASSPORT
+   ========================================================= */
+
+.passport-section {
+  padding: 110px 0;
+  scroll-margin-top: 50px;
+}
+
+.passport-dashboard {
+  display: grid;
+  grid-template-columns: 1.25fr 0.75fr;
+  gap: 28px;
+  align-items: stretch;
+}
+
+/* Legacy passport card */
+
+.passport-main {
+  min-height: 350px;
+
+  padding: 30px;
+
+  position: relative;
+  overflow: hidden;
+
+  border-radius: 30px;
+
+  color: white;
+
+  background:
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(24, 183, 160, 0.4),
+      transparent 30%
+    ),
+    linear-gradient(
+      135deg,
+      #171f34 0%,
+      #243151 48%,
+      #4d369e 100%
+    );
+
+  box-shadow: var(--vo-shadow);
+
+  transition:
+    transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.5s ease;
+}
+
+.passport-main:hover {
+  transform: translateY(-8px) rotateX(1deg);
+  box-shadow: var(--vo-shadow-hover);
+}
+
+.passport-main::before {
+  content: "";
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  right: -90px;
+  top: -100px;
+  animation: passportOrbit 16s linear infinite;
+}
+
+.passport-main::after {
+  content: "";
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: rgba(24, 183, 160, 0.14);
+  right: -50px;
+  bottom: -100px;
+  filter: blur(5px);
+}
+
+.passport-header,
+.passport-footer {
+  position: relative;
+  z-index: 2;
 
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  gap: 20px;
 
   font-size: 10px;
-  font-weight: 700;
-
+  font-weight: 800;
   letter-spacing: 0.14em;
 }
 
-
-/* =========================================
-   RESPONSIVE
-========================================= */
-
-@media (max-width: 1000px) {
-
-  .platform-nav {
-    gap: 18px;
-  }
-
-  .welcome-orbit {
-    width: 280px;
-    height: 280px;
-  }
-
-  .ring-one {
-    width: 280px;
-    height: 280px;
-  }
-
-  .ring-two {
-    width: 200px;
-    height: 200px;
-
-    top: 40px;
-    left: 40px;
-  }
-
-  .orbit-center {
-    top: 100px;
-    left: 100px;
-  }
-
-  .passport-dashboard {
-    grid-template-columns: 1fr;
-  }
-
+.passport-header {
+  opacity: 0.7;
 }
 
+.passport-main-content {
+  min-height: 235px;
 
-@media (max-width: 750px) {
+  display: flex;
+  align-items: center;
+  gap: 28px;
 
-  .platform-navbar {
-    height: auto;
-
-    padding: 18px 6vw;
-
-    flex-wrap: wrap;
-
-    gap: 20px;
-  }
-
-  .platform-nav {
-    order: 3;
-
-    width: 100%;
-
-    overflow-x: auto;
-
-    padding-bottom: 5px;
-  }
-
-  .student-profile span:not(.profile-avatar) {
-    display: none;
-  }
-
-  .platform-welcome {
-    min-height: auto;
-
-    padding: 100px 6vw;
-
-    display: block;
-  }
-
-  .welcome-orbit {
-    margin: 70px auto 0;
-  }
-
-  .passport-section,
-  .journey-section {
-    padding: 100px 6vw;
-  }
-
-  .passport-main-content {
-    flex-direction: column;
-
-    align-items: flex-start;
-
-    gap: 30px;
-  }
-
-  .passport-main h3 {
-    font-size: 48px;
-  }
-
-  .journey-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .journey-card,
-  .journey-card:nth-child(odd) {
-    border-left: 1px solid rgba(24, 59, 102, 0.2);
-  }
-
-  .next-step {
-    min-height: 500px;
-
-    padding: 100px 6vw;
-  }
-
-  .platform-footer {
-    padding: 25px 6vw;
-
-    flex-direction: column;
-
-    gap: 15px;
-
-    align-items: flex-start;
-  }
-
+  position: relative;
+  z-index: 2;
 }
 
+.passport-emblem {
+  width: 125px;
+  height: 125px;
 
-@media (max-width: 500px) {
+  flex-shrink: 0;
 
-  .platform-welcome h1 {
-    font-size: 58px;
-  }
+  border-radius: 50%;
 
-  .welcome-orbit {
-    width: 240px;
-    height: 240px;
-  }
+  display: grid;
+  place-items: center;
 
-  .ring-one {
-    width: 240px;
-    height: 240px;
-  }
+  font-size: 28px;
+  font-weight: 800;
 
-  .ring-two {
-    width: 170px;
-    height: 170px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
 
-    top: 35px;
-    left: 35px;
-  }
+  background:
+    radial-gradient(
+      circle at 30% 25%,
+      rgba(255, 255, 255, 0.2),
+      rgba(255, 255, 255, 0.03)
+    );
 
-  .orbit-center {
-    width: 80px;
-    height: 80px;
+  box-shadow:
+    inset 0 0 30px rgba(255, 255, 255, 0.05),
+    0 20px 40px rgba(0, 0, 0, 0.18);
 
-    top: 80px;
-    left: 80px;
+  animation: emblemFloat 4s ease-in-out infinite;
+}
 
-    font-size: 25px;
-  }
+.passport-small-label {
+  margin: 0 0 8px;
 
-  .passport-main {
-    min-height: 500px;
-  }
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
 
-  .passport-emblem {
-    width: 110px;
-    height: 110px;
-  }
+  opacity: 0.55;
+}
 
-  .passport-main h3 {
-    font-size: 42px;
-  }
+.passport-main-content h3 {
+  margin: 0;
 
-  .next-step h2 {
-    font-size: 65px;
-  }
+  font-family: "Playfair Display", serif;
+  font-size: clamp(36px, 5vw, 62px);
+  font-weight: 400;
+  line-height: 0.95;
+}
 
-}/* =========================================
-   MY MATERIALS
-========================================= */
+.passport-level {
+  margin: 12px 0 0;
+
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+
+  color: var(--vo-yellow);
+}
+
+.passport-footer {
+  position: absolute;
+  bottom: 28px;
+  left: 30px;
+  right: 30px;
+}
+
+/* =========================================================
+   PROGRESS CARD
+   ========================================================= */
+
+.progress-card {
+  min-height: 350px;
+
+  padding: 34px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  border-radius: 30px;
+
+  background: var(--vo-white);
+  box-shadow: var(--vo-shadow);
+
+  position: relative;
+  overflow: hidden;
+
+  transition:
+    transform 0.5s ease,
+    box-shadow 0.5s ease;
+}
+
+.progress-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--vo-shadow-hover);
+}
+
+.progress-card::before {
+  content: "";
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: rgba(244, 197, 66, 0.12);
+  right: -70px;
+  top: -70px;
+}
+
+.progress-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+
+  position: relative;
+  z-index: 2;
+}
+
+.progress-top span {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  color: var(--vo-muted);
+}
+
+.progress-top strong {
+  font-size: 48px;
+  line-height: 1;
+  color: var(--vo-purple);
+}
+
+.progress-bar {
+  width: 100%;
+  height: 11px;
+
+  margin: 35px 0 25px;
+
+  border-radius: 99px;
+  overflow: hidden;
+
+  background: #eeeaf7;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0;
+
+  border-radius: inherit;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--vo-purple),
+      var(--vo-turquoise)
+    );
+
+  transition: width 1.8s cubic-bezier(0.16, 1, 0.3, 1);
+
+  position: relative;
+}
+
+.progress-fill::after {
+  content: "";
+  position: absolute;
+  width: 70px;
+  height: 100%;
+  right: 0;
+  top: 0;
+
+  background: rgba(255, 255, 255, 0.4);
+
+  filter: blur(7px);
+
+  animation: progressShine 2.5s ease-in-out infinite;
+}
+
+.progress-card p {
+  position: relative;
+  z-index: 2;
+
+  margin: 0;
+
+  color: var(--vo-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* =========================================================
+   LANGUAGE PASSPORT — SIGNATURE DESIGN
+   ========================================================= */
+
+.passport-section-intro {
+  max-width: 520px;
+  margin: 20px 0 0;
+
+  color: var(--vo-muted);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.language-passport-wrapper {
+  perspective: 1600px;
+  padding: 25px 10px 50px;
+}
+
+.language-passport {
+  min-height: 540px;
+
+  position: relative;
+  overflow: hidden;
+
+  padding: 34px 38px 26px;
+
+  border-radius: 34px;
+
+  color: white;
+
+  background:
+    radial-gradient(
+      circle at 8% 15%,
+      rgba(24, 183, 160, 0.28),
+      transparent 26%
+    ),
+    radial-gradient(
+      circle at 92% 85%,
+      rgba(108, 76, 207, 0.35),
+      transparent 30%
+    ),
+    linear-gradient(
+      125deg,
+      #10192d 0%,
+      #18243a 42%,
+      #30245f 100%
+    );
+
+  box-shadow:
+    0 35px 100px rgba(24, 36, 58, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+
+  transform-style: preserve-3d;
+
+  transition:
+    transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.6s ease;
+
+  animation:
+    passportReveal 1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.language-passport::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+
+  opacity: 0.045;
+
+  background-image:
+    radial-gradient(
+      rgba(255, 255, 255, 0.8) 0.7px,
+      transparent 0.7px
+    );
+
+  background-size: 5px 5px;
+}
+
+.language-passport::after {
+  content: "";
+
+  position: absolute;
+
+  width: 800px;
+  height: 1px;
+
+  right: -260px;
+  top: 50%;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.15),
+      transparent
+    );
+
+  transform: rotate(-25deg);
+
+  pointer-events: none;
+}
+
+/* =========================================================
+   PASSPORT GLOW
+   ========================================================= */
+
+.passport-glow {
+  position: absolute;
+
+  width: 350px;
+  height: 350px;
+
+  right: -100px;
+  top: -140px;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(24, 183, 160, 0.22),
+      transparent 68%
+    );
+
+  filter: blur(5px);
+
+  animation:
+    passportGlowMove 8s ease-in-out infinite;
+
+  pointer-events: none;
+}
+
+/* =========================================================
+   PASSPORT ORBITS
+   ========================================================= */
+
+.passport-orbit {
+  position: absolute;
+
+  border-radius: 50%;
+
+  border: 1px solid rgba(255, 255, 255, 0.09);
+
+  pointer-events: none;
+}
+
+.orbit-a {
+  width: 430px;
+  height: 430px;
+
+  right: -180px;
+  top: -150px;
+
+  animation:
+    passportOrbitSpin 20s linear infinite;
+}
+
+.orbit-b {
+  width: 300px;
+  height: 300px;
+
+  right: -110px;
+  top: -90px;
+
+  border-color:
+    rgba(244, 197, 66, 0.16);
+
+  animation:
+    passportOrbitSpinReverse 13s linear infinite;
+}
+
+/* =========================================================
+   PASSPORT TOP
+   ========================================================= */
+
+.passport-top {
+  position: relative;
+  z-index: 3;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 30px;
+
+  padding-bottom: 28px;
+
+  border-bottom:
+    1px solid rgba(255, 255, 255, 0.12);
+}
+
+.passport-brand {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+/* REAL VERA ORBIS LOGO — TOP */
+
+.passport-brand-logo {
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.96);
+
+  overflow: hidden;
+
+  box-shadow:
+    0 8px 25px rgba(24, 183, 160, 0.22);
+}
+
+.passport-brand-logo img {
+  width: 82%;
+  height: 82%;
+
+  object-fit: contain;
+
+  display: block;
+}
+
+.passport-brand strong {
+  display: block;
+
+  font-size: 14px;
+  letter-spacing: 0.12em;
+}
+
+.passport-brand small {
+  display: block;
+
+  margin-top: 4px;
+
+  font-size: 8px;
+  font-weight: 700;
+
+  letter-spacing: 0.17em;
+
+  opacity: 0.45;
+}
+
+.passport-number {
+  text-align: right;
+}
+
+.passport-number span {
+  display: block;
+
+  margin-bottom: 5px;
+
+  font-size: 7px;
+  font-weight: 800;
+
+  letter-spacing: 0.18em;
+
+  opacity: 0.45;
+}
+
+.passport-number strong {
+  font-family: "DM Sans", sans-serif;
+
+  font-size: 11px;
+  letter-spacing: 0.1em;
+
+  color: var(--vo-yellow);
+}
+
+/* =========================================================
+   PASSPORT BODY
+   ========================================================= */
+
+.passport-body {
+  position: relative;
+  z-index: 3;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(230px, 0.65fr)
+    minmax(0, 1.35fr);
+
+  gap: 55px;
+
+  min-height: 350px;
+
+  padding: 42px 0;
+}
+
+/* =========================================================
+   PASSPORT IDENTITY
+   ========================================================= */
+
+.passport-identity {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 30px;
+}
+
+.passport-seal {
+  width: 205px;
+  height: 205px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 50%;
+
+  position: relative;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.08),
+      rgba(255, 255, 255, 0.015) 62%,
+      transparent 63%
+    );
+
+  animation:
+    sealFloat 5s ease-in-out infinite;
+}
+
+.passport-seal::before {
+  content: "";
+
+  position: absolute;
+  inset: 8px;
+
+  border-radius: 50%;
+
+  border:
+    1px dashed rgba(255, 255, 255, 0.28);
+
+  animation:
+    passportOrbitSpin 20s linear infinite;
+}
+
+.passport-seal::after {
+  content: "";
+
+  position: absolute;
+  inset: 22px;
+
+  border-radius: 50%;
+
+  border:
+    1px solid rgba(24, 183, 160, 0.28);
+}
+
+.passport-seal-ring {
+  width: 125px;
+  height: 125px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 4px;
+
+  border-radius: 50%;
+
+  border:
+    1px solid rgba(255, 255, 255, 0.28);
+
+  background:
+    radial-gradient(
+      circle at 35% 25%,
+      rgba(255, 255, 255, 0.18),
+      rgba(255, 255, 255, 0.025)
+    );
+
+  box-shadow:
+    inset 0 0 35px rgba(255, 255, 255, 0.04),
+    0 20px 50px rgba(0, 0, 0, 0.2);
+}
+
+/* REAL VERA ORBIS LOGO — CENTER */
+
+.passport-seal-ring img {
+  width: 42px;
+  height: 42px;
+
+  object-fit: contain;
+
+  display: block;
+
+  margin: 0 auto;
+}
+
+.passport-seal-ring small {
+  text-align: center;
+
+  font-size: 6px;
+  line-height: 1.25;
+
+  letter-spacing: 0.2em;
+
+  opacity: 0.5;
+}
+
+/* =========================================================
+   STAMPS
+   ========================================================= */
+
+.passport-stamps {
+  display: flex;
+  justify-content: center;
+  gap: 9px;
+}
+
+.passport-stamp {
+  padding: 7px 10px;
+
+  border: 1px solid;
+
+  border-radius: 3px;
+
+  font-size: 7px;
+  font-weight: 800;
+
+  letter-spacing: 0.13em;
+
+  transform: rotate(-4deg);
+
+  opacity: 0.72;
+}
+
+.passport-stamp:nth-child(2) {
+  transform: rotate(3deg);
+}
+
+.passport-stamp:nth-child(3) {
+  transform: rotate(-2deg);
+}
+
+.stamp-turquoise {
+  color: var(--vo-turquoise);
+  border-color: var(--vo-turquoise);
+}
+
+.stamp-purple {
+  color: #a893ff;
+  border-color: #a893ff;
+}
+
+.stamp-yellow {
+  color: var(--vo-yellow);
+  border-color: var(--vo-yellow);
+}
+
+/* =========================================================
+   PASSPORT INFORMATION
+   ========================================================= */
+
+.passport-information {
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+}
+
+.passport-field span {
+  display: block;
+
+  margin-bottom: 7px;
+
+  font-size: 7px;
+  font-weight: 800;
+
+  letter-spacing: 0.18em;
+
+  opacity: 0.43;
+}
+
+.passport-field strong {
+  display: block;
+
+  font-size: 17px;
+  font-weight: 600;
+
+  letter-spacing: -0.02em;
+}
+
+.passport-name {
+  padding-bottom: 23px;
+
+  margin-bottom: 25px;
+
+  border-bottom:
+    1px solid rgba(255, 255, 255, 0.1);
+}
+
+.passport-name strong {
+  font-family: "Playfair Display", serif;
+
+  font-size: 38px;
+  font-weight: 400;
+
+  line-height: 1;
+}
+
+.passport-info-grid {
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 25px 35px;
+}
+
+.passport-field small {
+  display: block;
+
+  margin-top: 4px;
+
+  font-size: 7px;
+  font-weight: 700;
+
+  letter-spacing: 0.12em;
+
+  color: var(--vo-turquoise);
+
+  opacity: 0.8;
+}
+
+/* =========================================================
+   JOURNEY PROGRESS
+   ========================================================= */
+
+.passport-journey {
+  margin-top: 30px;
+
+  padding-top: 24px;
+
+  border-top:
+    1px solid rgba(255, 255, 255, 0.1);
+}
+
+.passport-journey-top {
+  display: flex;
+
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 20px;
+}
+
+.passport-journey-top > div {
+  display: flex;
+
+  align-items: baseline;
+
+  gap: 15px;
+}
+
+.passport-journey-top span {
+  font-size: 8px;
+  font-weight: 800;
+
+  letter-spacing: 0.14em;
+
+  opacity: 0.45;
+}
+
+.passport-journey-top strong {
+  font-size: 28px;
+
+  color: var(--vo-turquoise);
+}
+
+.passport-journey-top .journey-status {
+  color: var(--vo-yellow);
+
+  opacity: 0.75;
+}
+
+.passport-progress-track {
+  width: 100%;
+  height: 7px;
+
+  margin-top: 15px;
+
+  overflow: hidden;
+
+  border-radius: 99px;
+
+  background:
+    rgba(255, 255, 255, 0.08);
+}
+
+.passport-progress-fill {
+  width: var(--passport-progress);
+
+  height: 100%;
+
+  border-radius: inherit;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--vo-purple),
+      var(--vo-turquoise)
+    );
+
+  box-shadow:
+    0 0 18px rgba(24, 183, 160, 0.35);
+
+  transform-origin: left;
+
+  animation:
+    passportProgressIn 1.8s
+    cubic-bezier(0.16, 1, 0.3, 1)
+    both;
+}
+
+.passport-progress-labels {
+  display: flex;
+
+  justify-content: space-between;
+
+  margin-top: 9px;
+
+  font-size: 6px;
+  font-weight: 800;
+
+  letter-spacing: 0.13em;
+
+  opacity: 0.35;
+}
+
+/* =========================================================
+   PASSPORT BOTTOM
+   ========================================================= */
+
+.passport-bottom {
+  position: relative;
+  z-index: 3;
+
+  display: flex;
+
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 20px;
+
+  padding-top: 21px;
+
+  border-top:
+    1px solid rgba(255, 255, 255, 0.12);
+}
+
+.passport-motto {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  font-size: 7px;
+  font-weight: 800;
+
+  letter-spacing: 0.18em;
+
+  opacity: 0.55;
+}
+
+.passport-motto i {
+  width: 3px;
+  height: 3px;
+
+  border-radius: 50%;
+
+  background: var(--vo-yellow);
+}
+
+.passport-status {
+  display: flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  font-size: 7px;
+  font-weight: 800;
+
+  letter-spacing: 0.14em;
+
+  color: var(--vo-turquoise);
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+
+  background: var(--vo-turquoise);
+
+  box-shadow:
+    0 0 0 5px rgba(24, 183, 160, 0.1);
+
+  animation:
+    statusPulse 2s ease-in-out infinite;
+}
+
+/* =========================================================
+   PASSPORT DECORATIVE DETAILS
+   ========================================================= */
+
+.passport-coordinate {
+  position: absolute;
+
+  z-index: 2;
+
+  font-size: 7px;
+  font-weight: 700;
+
+  letter-spacing: 0.12em;
+
+  color: rgba(255, 255, 255, 0.18);
+
+  writing-mode: vertical-rl;
+}
+
+.coordinate-one {
+  left: 16px;
+  top: 45%;
+}
+
+.coordinate-two {
+  right: 16px;
+  bottom: 28%;
+  transform: rotate(180deg);
+}
+
+.passport-star {
+  position: absolute;
+
+  color: var(--vo-yellow);
+
+  font-size: 13px;
+
+  opacity: 0.5;
+
+  animation:
+    starFloat 4s ease-in-out infinite;
+}
+
+.star-one {
+  left: 30%;
+  top: 17%;
+}
+
+.star-two {
+  right: 30%;
+  bottom: 17%;
+
+  animation-delay: 1s;
+}
+
+.star-three {
+  left: 8%;
+  bottom: 20%;
+
+  color: var(--vo-turquoise);
+
+  animation-delay: 2s;
+}
+
+/* =========================================================
+   ROADMAP
+   ========================================================= */
+
+.roadmap-section {
+  padding: 110px 0;
+  position: relative;
+  scroll-margin-top: 50px;
+}
+
+.roadmap-container {
+  position: relative;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.roadmap-container::before {
+  content: "";
+  position: absolute;
+
+  left: 32px;
+  top: 35px;
+  bottom: 35px;
+
+  width: 2px;
+
+  background:
+    linear-gradient(
+      to bottom,
+      var(--vo-turquoise),
+      var(--vo-purple),
+      var(--vo-yellow)
+    );
+
+  opacity: 0.2;
+}
+
+.roadmap-step {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 30px;
+
+  position: relative;
+
+  padding: 20px 0 50px;
+
+  opacity: 1;
+  transform: translateY(0);
+
+  transition:
+    opacity 0.8s ease,
+    transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.roadmap-step.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.roadmap-marker {
+  width: 64px;
+  height: 64px;
+
+  border-radius: 50%;
+
+  display: grid;
+  place-items: center;
+
+  position: relative;
+  z-index: 2;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  background: var(--vo-white);
+  border: 2px solid rgba(24, 36, 58, 0.1);
+
+  box-shadow: 0 12px 30px rgba(24, 36, 58, 0.08);
+
+  transition:
+    transform 0.4s ease,
+    border-color 0.4s ease,
+    background 0.4s ease;
+}
+
+.roadmap-step:hover .roadmap-marker {
+  transform: scale(1.12) rotate(-6deg);
+}
+
+.roadmap-step.completed .roadmap-marker {
+  background: var(--vo-turquoise);
+  color: white;
+  border-color: var(--vo-turquoise);
+}
+
+.roadmap-step.current .roadmap-marker {
+  background: var(--vo-purple);
+  color: white;
+  border-color: var(--vo-purple);
+
+  animation: currentPulse 2.5s ease-in-out infinite;
+}
+
+.roadmap-step.destination .roadmap-marker {
+  background: var(--vo-yellow);
+  border-color: var(--vo-yellow);
+}
+
+.roadmap-content {
+  position: relative;
+  overflow: hidden;
+
+  padding: 34px 38px;
+
+  min-height: 190px;
+
+  border-radius: 28px;
+
+  background:
+  linear-gradient(
+    135deg,
+    rgba(108, 59, 255, 0.14) 0%,
+    rgba(32, 199, 181, 0.10) 55%,
+    rgba(255, 200, 61, 0.18) 100%
+  );
+
+  border: 1px solid rgba(24, 59, 102, 0.08);
+
+  box-shadow:
+    0 18px 45px rgba(24, 36, 58, 0.08),
+    0 4px 12px rgba(24, 36, 58, 0.04);
+
+  transition:
+    transform 0.4s cubic-bezier(.2,.8,.2,1),
+    box-shadow 0.4s ease,
+    background 0.4s ease;
+}.roadmap-content::before {
+  content: "";
+  position: absolute;
+
+  width: 220px;
+  height: 220px;
+
+  right: -90px;
+  bottom: -120px;
+
+  border: 1px solid rgba(108, 59, 255, 0.10);
+  border-radius: 50%;
+
+  box-shadow:
+    0 0 0 30px rgba(108, 59, 255, 0.025),
+    0 0 0 60px rgba(108, 59, 255, 0.018);
+
+  pointer-events: none;
+}
+
+.roadmap-content::after {
+  content: "✦";
+
+  position: absolute;
+
+  right: 34px;
+  top: 28px;
+
+  font-size: 2rem;
+
+  color: var(--vo-purple);
+  opacity: 0.18;
+
+  transform: rotate(15deg);
+
+  pointer-events: none;
+}/* ROADMAP — individual stage colors */
+
+.roadmap-step.completed .roadmap-content {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(32, 199, 181, 0.20) 0%,
+      rgba(255, 249, 240, 0.82) 100%
+    );
+
+  border-color: rgba(32, 199, 181, 0.22);
+}
+
+.roadmap-step.current .roadmap-content {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(108, 59, 255, 0.20) 0%,
+      rgba(32, 199, 181, 0.12) 100%
+    );
+
+  border-color: rgba(108, 59, 255, 0.22);
+
+  box-shadow:
+    0 22px 55px rgba(108, 59, 255, 0.12),
+    0 5px 16px rgba(24, 36, 58, 0.05);
+}
+
+.roadmap-step.upcoming .roadmap-content {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 200, 61, 0.22) 0%,
+      rgba(255, 107, 53, 0.10) 100%
+    );
+
+  border-color: rgba(255, 200, 61, 0.28);
+}
+
+.roadmap-step.destination .roadmap-content {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 107, 53, 0.18) 0%,
+      rgba(108, 59, 255, 0.14) 100%
+    );
+
+  border-color: rgba(255, 107, 53, 0.22);
+}
+
+.roadmap-step:hover .roadmap-content {
+  transform: translateX(8px);
+  background: white;
+  box-shadow: 0 20px 50px rgba(24, 36, 58, 0.1);
+}
+
+.roadmap-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+
+  margin-bottom: 13px;
+
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+
+  color: var(--vo-muted);
+}
+
+.roadmap-step.current .roadmap-meta span:last-child {
+  color: var(--vo-purple);
+}
+
+.roadmap-content h3 {
+  margin: 0;
+
+  font-family: "Playfair Display", serif;
+  font-size: 32px;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+}
+
+.roadmap-content p {
+  max-width: 650px;
+
+  margin: 10px 0 0;
+
+  color: var(--vo-muted);
+  line-height: 1.65;
+  font-size: 14px;
+}
+
+.roadmap-progress {
+  margin-top: 25px;
+}
+
+.roadmap-progress-top {
+  display: flex;
+  justify-content: space-between;
+
+  margin-bottom: 8px;
+
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.roadmap-progress-bar {
+  height: 7px;
+  border-radius: 99px;
+  overflow: hidden;
+  background: #eeeaf7;
+}
+
+.roadmap-progress-fill {
+  height: 100%;
+  width: 0;
+
+  border-radius: inherit;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--vo-purple),
+      var(--vo-turquoise)
+    );
+
+  transition: width 1.6s ease;
+}
+
+/* =========================================================
+   MATERIALS
+   ========================================================= */
 
 .materials-section {
-  padding: 140px 7vw;
-  background: #fff9f0;
-}
-
-.materials-intro {
-  max-width: 600px;
-  margin: -35px 0 75px;
-  font-size: 16px;
-  line-height: 1.7;
-  color: rgba(24, 59, 102, 0.65);
+  padding: 110px 0;
+  scroll-margin-top: 50px;
 }
 
 .materials-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
 }
 
 .material-card {
-  min-height: 330px;
-  padding: 32px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  min-height: 260px;
   position: relative;
-  overflow: hidden;
-  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  border-radius: 28px;
+  perspective: 1400px;
+
+  transition:
+    transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.5s ease;
+
+  cursor: pointer;
 }
 
 .material-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 25px 60px rgba(24, 59, 102, 0.14);
-}
-
-.material-primary {
-  background: #183b66;
-  color: #fff9f0;
-}
-
-.material-violet {
-  background: #6c3bff;
-  color: #fff9f0;
-}
-
-.material-yellow {
-  background: #ffc83d;
-  color: #183b66;
-}
-
-.material-orange {
-  background: #ff6b35;
-  color: #fff9f0;
+  transform: translateY(-10px) rotate(-1deg);
+  box-shadow: var(--vo-shadow-hover);
 }
 
 .material-card::after {
   content: "";
   position: absolute;
-  width: 260px;
-  height: 260px;
-  border: 1px solid rgba(255, 249, 240, 0.2);
+
+  width: 160px;
+  height: 160px;
+
+  right: -50px;
+  bottom: -70px;
+
   border-radius: 50%;
-  right: -130px;
-  bottom: -130px;
-  transition: transform 0.6s ease;
+
+  border: 1px solid rgba(255, 255, 255, 0.35);
+
+  pointer-events: none;
+
+  transition:
+    transform 0.6s ease;
+}
+
+.material-card-inner {
+  min-height: 260px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.material-card.is-flipped .material-card-inner {
+  transform: rotateY(180deg);
+}
+
+.material-card-face {
+  width: 100%;
+  min-height: 260px;
+  padding: 30px;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 28px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.material-card-front {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  color: inherit;
+}
+
+.material-card-back {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  transform: rotateY(180deg);
+  color: var(--vo-navy);
+  background:
+    radial-gradient(circle at 85% 15%, rgba(255, 200, 61, 0.3), transparent 30%),
+    linear-gradient(135deg, var(--vo-cream), #ece7ff);
+}
+
+.material-primary .material-card-front {
+  background: var(--vo-navy);
+}
+
+.material-violet .material-card-front {
+  background: var(--vo-purple);
+}
+
+.material-yellow .material-card-front {
+  background: var(--vo-yellow);
+}
+
+.material-orange .material-card-front {
+  background: var(--vo-orange);
+}
+
+.material-card-back-label {
+  margin-bottom: 12px;
+  color: var(--vo-purple);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.material-card-back h3 {
+  max-width: 360px;
+  margin: 0;
+  font-family: "Playfair Display", serif;
+  font-size: clamp(30px, 3vw, 42px);
+  font-weight: 400;
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+}
+
+.material-card-back p {
+  max-width: 390px;
+  margin: 12px 0 0;
+  color: var(--vo-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.material-card-detail {
+  margin-top: 16px;
+  color: var(--vo-navy);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.material-flip-trigger {
+  margin-top: 18px;
+  padding: 10px 0;
+  border: 0;
+  color: var(--vo-purple);
+  background: transparent;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.material-card-front .material-flip-front-trigger {
+  position: absolute;
+  right: 104px;
+  bottom: 25px;
+  margin-top: 0;
+}
+
+.material-flip-trigger:hover,
+.material-flip-trigger:focus-visible {
+  transform: translateX(4px);
+}
+
+.material-card:focus-visible {
+  outline: 3px solid var(--vo-yellow);
+  outline-offset: 6px;
 }
 
 .material-card:hover::after {
-  transform: scale(1.2);
+  transform: scale(1.5);
+}
+
+.material-primary {
+  background: var(--vo-navy);
+  color: white;
+}
+
+.material-violet {
+  background: var(--vo-purple);
+  color: white;
+}
+
+.material-yellow {
+  background: var(--vo-yellow);
+  color: var(--vo-navy);
+}
+
+.material-orange {
+  background: var(--vo-orange);
+  color: white;
 }
 
 .material-icon {
-  width: 58px;
-  height: 58px;
-  border: 1px solid currentColor;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
+  width: 56px;
+  height: 56px;
+
+  border-radius: 17px;
+
+  display: grid;
+  place-items: center;
+
+  font-size: 14px;
   font-weight: 800;
-  letter-spacing: 0.08em;
-  position: relative;
-  z-index: 2;
+
+  background: rgba(255, 255, 255, 0.15);
+
+  transition:
+    transform 0.5s ease,
+    border-radius 0.5s ease;
+}
+
+.material-card:hover .material-icon,
+.material-card:focus-visible .material-icon {
+  transform: rotate(8deg) scale(1.1);
+  border-radius: 50%;
 }
 
 .material-content {
@@ -1043,500 +2045,1088 @@
 
 .material-type {
   display: block;
-  margin-bottom: 12px;
+
+  margin-top: 45px;
+
   font-size: 9px;
   font-weight: 800;
-  letter-spacing: 0.16em;
-  opacity: 0.7;
+  letter-spacing: 0.15em;
+
+  opacity: 0.65;
 }
 
 .material-content h3 {
-  margin: 0 0 12px;
+  margin: 8px 0 0;
+
   font-family: "Playfair Display", serif;
-  font-size: 38px;
-  font-weight: 500;
-  line-height: 1;
+  font-size: 30px;
+  font-weight: 400;
 }
 
 .material-content p {
   max-width: 430px;
-  margin: 0;
-  font-size: 14px;
+
+  margin: 8px 0 0;
+
+  font-size: 13px;
   line-height: 1.6;
-  opacity: 0.72;
+
+  opacity: 0.75;
 }
 
 .material-button {
-  width: fit-content;
-  padding: 11px 18px;
-  border: 1px solid currentColor;
+  position: absolute;
+  right: 26px;
+  bottom: 25px;
+  z-index: 5;
+  border: 0;
   background: transparent;
   color: inherit;
-  font-family: inherit;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
-  letter-spacing: 0.1em;
-  cursor: pointer;
-  position: relative;
-  z-index: 3;
-  transition: background 0.3s ease, color 0.3s ease;
+  transition: transform 0.3s ease;
 }
 
-.material-primary .material-button:hover,
-.material-violet .material-button:hover,
-.material-orange .material-button:hover {
-  background: #fff9f0;
-  color: #183b66;
-}
-
-.material-yellow .material-button:hover {
-  background: #183b66;
-  color: #fff9f0;
+.material-button:hover {
+  transform: translateX(5px);
 }
 
 .materials-footer {
-  max-width: 1200px;
-  margin: 35px auto 0;
-  padding-top: 20px;
-  border-top: 1px solid rgba(24, 59, 102, 0.15);
   display: flex;
   justify-content: space-between;
+
+  margin-top: 20px;
+
+  color: var(--vo-muted);
+
   font-size: 9px;
   font-weight: 800;
-  letter-spacing: 0.14em;
-  color: rgba(24, 59, 102, 0.5);
+  letter-spacing: 0.15em;
 }
 
-@media (max-width: 750px) {
-  .materials-section {
-    padding: 100px 6vw;
-  }
-
-  .materials-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .material-content h3 {
-    font-size: 34px;
-  }
-
-  .materials-footer {
-    flex-direction: column;
-    gap: 10px;
-  }
-}/* =========================================
+/* =========================================================
    CLASS MATERIALS
-========================================= */
+   ========================================================= */
 
 .class-materials-section {
-  padding: 140px 7vw;
-  background: #f5eee2;
+  padding: 90px 0 110px;
 }
 
 .class-materials-header {
-  max-width: 850px;
-  margin-bottom: 75px;
+  margin-bottom: 45px;
 }
 
 .class-materials-header h2 {
+  margin: 0;
+
   font-family: "Playfair Display", serif;
-  font-size: clamp(50px, 7vw, 100px);
-  font-weight: 500;
-  line-height: 0.92;
-  letter-spacing: -0.04em;
-  margin: 25px 0 30px;
+  font-size: clamp(40px, 5vw, 64px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.045em;
 }
 
 .class-materials-header h2 span {
-  display: block;
-  color: #6c3bff;
+  color: var(--vo-purple);
   font-style: italic;
 }
 
-.class-materials-header > p:last-child {
-  max-width: 600px;
-  font-size: 16px;
-  line-height: 1.7;
-  color: rgba(24, 59, 102, 0.65);
+.class-materials-header p:last-child {
+  max-width: 550px;
+
+  margin-top: 15px;
+
+  color: var(--vo-muted);
+  line-height: 1.6;
 }
 
 .class-materials-list {
-  max-width: 1200px;
-  margin: 0 auto;
-  border-top: 1px solid rgba(24, 59, 102, 0.2);
+  display: grid;
+  gap: 12px;
 }
 
 .class-material-item {
   display: grid;
-  grid-template-columns: 80px 1fr auto;
+  grid-template-columns: 70px 1fr auto;
   align-items: center;
-  gap: 35px;
-  padding: 38px 20px;
-  border-bottom: 1px solid rgba(24, 59, 102, 0.2);
-  transition: background 0.3s ease, padding 0.3s ease;
+  gap: 25px;
+
+  padding: 22px 25px;
+
+  border-radius: 20px;
+
+  background: white;
+  border: 1px solid var(--vo-border);
+
+  transition:
+    transform 0.4s ease,
+    box-shadow 0.4s ease;
 }
 
 .class-material-item:hover {
-  background: #fff9f0;
-  padding-left: 30px;
-  padding-right: 30px;
+  transform: translateX(8px);
+  box-shadow: 0 18px 45px rgba(24, 36, 58, 0.09);
 }
 
 .class-material-number {
   font-family: "Playfair Display", serif;
-  font-size: 32px;
-  color: #6c3bff;
+  font-size: 30px;
+  color: var(--vo-purple);
 }
 
 .class-material-info span {
-  display: block;
-  margin-bottom: 10px;
   font-size: 9px;
   font-weight: 800;
-  letter-spacing: 0.16em;
-  color: #ff6b35;
+  letter-spacing: 0.14em;
+  color: var(--vo-muted);
 }
 
 .class-material-info h3 {
-  margin: 0 0 8px;
-  font-family: "Playfair Display", serif;
-  font-size: 34px;
-  font-weight: 500;
+  margin: 5px 0 3px;
+
+  font-size: 18px;
 }
 
 .class-material-info p {
   margin: 0;
-  font-size: 14px;
-  line-height: 1.6;
-  color: rgba(24, 59, 102, 0.6);
+
+  font-size: 12px;
+  color: var(--vo-muted);
 }
 
 .class-material-button {
-  padding: 12px 20px;
-  border: 1px solid #183b66;
-  background: transparent;
-  color: #183b66;
-  font-family: inherit;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  cursor: pointer;
-  transition: background 0.3s ease, color 0.3s ease;
+  border: 0;
+
+  padding: 12px 17px;
+
+  border-radius: 999px;
+
+  color: white;
+  background: var(--vo-navy);
+
+  font-size: 11px;
+  font-weight: 700;
+
+  transition:
+    transform 0.3s ease,
+    background 0.3s ease;
 }
 
 .class-material-button:hover {
-  background: #183b66;
-  color: #fff9f0;
+  transform: translateX(4px);
+  background: var(--vo-purple);
+}
+/* =========================================================
+   LEARNING ACCESS
+   ========================================================= */
+
+.platform-learning-access {
+  padding: 70px 0 110px;
+  scroll-margin-top: 50px;
 }
 
-@media (max-width: 750px) {
-  .class-materials-section {
-    padding: 100px 6vw;
-  }
-
-  .class-material-item {
-    grid-template-columns: 50px 1fr;
-    gap: 20px;
-  }
-
-  .class-material-button {
-    grid-column: 2;
-    justify-self: start;
-  }
-
-  .class-material-info h3 {
-    font-size: 28px;
-  }
-}/* =========================================
-   MY ROADMAP
-========================================= */
-
-.roadmap-section {
-  padding: 140px 7vw;
-  background: #f5eee2;
+.platform-learning-access
+.platform-section-heading {
+  max-width: 720px;
 }
 
-.roadmap-intro {
-  max-width: 600px;
-  margin: -35px 0 75px;
-  font-size: 16px;
-  line-height: 1.7;
-  color: rgba(24, 59, 102, 0.65);
+.learning-access-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
 }
 
-.roadmap-container {
-  max-width: 1100px;
-  margin: 0 auto;
+.learning-access-card {
+  min-height: 300px;
+
+  padding: 30px;
+
   position: relative;
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  border-radius: 28px;
+
+  color: white;
+
+  transition:
+    transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.5s ease;
 }
 
-/* Vertical line */
+.learning-access-card:hover {
+  transform: translateY(-10px) rotate(-1deg);
+  box-shadow: var(--vo-shadow-hover);
+}
 
-.roadmap-container::before {
+.learning-access-card::before {
   content: "";
+
   position: absolute;
 
-  left: 29px;
-  top: 0;
-  bottom: 0;
+  width: 220px;
+  height: 220px;
 
-  width: 1px;
-
-  background: rgba(24, 59, 102, 0.2);
-}
-
-
-/* =========================================
-   ROADMAP STEP
-========================================= */
-
-.roadmap-step {
-  display: grid;
-
-  grid-template-columns: 60px 1fr;
-
-  gap: 35px;
-
-  position: relative;
-
-  padding: 0 0 65px;
-}
-
-.roadmap-step:last-child {
-  padding-bottom: 0;
-}
-
-
-/* =========================================
-   ROADMAP MARKER
-========================================= */
-
-.roadmap-marker {
-  width: 60px;
-  height: 60px;
+  right: -80px;
+  top: -100px;
 
   border-radius: 50%;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.18);
 
+  transition:
+    transform 0.7s ease;
+}
+
+.learning-access-card:hover::before {
+  transform: scale(1.35);
+}
+
+.learning-access-card::after {
+  content: "";
+
+  position: absolute;
+
+  width: 140px;
+  height: 140px;
+
+  left: -60px;
+  bottom: -80px;
+
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.08);
+
+  transition:
+    transform 0.7s ease;
+}
+
+.learning-access-card:hover::after {
+  transform: scale(1.4);
+}
+
+
+/* FEEDBACK */
+
+.learning-access-feedback {
+  background:
+    radial-gradient(
+      circle at 85% 20%,
+      rgba(24, 183, 160, 0.35),
+      transparent 35%
+    ),
+    linear-gradient(
+      135deg,
+      var(--vo-navy),
+      #263c5d
+    );
+}
+
+
+/* CHALLENGES */
+
+.learning-access-challenges {
+  background:
+    radial-gradient(
+      circle at 85% 20%,
+      rgba(244, 197, 66, 0.35),
+      transparent 35%
+    ),
+    linear-gradient(
+      135deg,
+      var(--vo-purple),
+      #4930a5
+    );
+}
+
+
+.learning-access-number {
   position: relative;
   z-index: 2;
 
-  background: #f5eee2;
+  font-family: "Playfair Display", serif;
 
-  border: 1px solid #183b66;
+  font-size: 42px;
+  line-height: 1;
 
-  color: #183b66;
-
-  font-size: 12px;
-  font-weight: 800;
-
-  letter-spacing: 0.04em;
+  opacity: 0.45;
 }
 
 
-/* COMPLETED */
+.learning-access-card > div {
+  position: relative;
+  z-index: 2;
 
-.roadmap-step.completed .roadmap-marker {
-  background: #20c7b5;
-  border-color: #20c7b5;
+  max-width: 470px;
 }
 
 
-/* CURRENT */
+.learning-access-label {
+  display: block;
 
-.roadmap-step.current .roadmap-marker {
-  background: #6c3bff;
-  border-color: #6c3bff;
-  color: #fff9f0;
-
-  box-shadow:
-    0 0 0 8px rgba(108, 59, 255, 0.1);
-}
-
-
-/* UPCOMING */
-
-.roadmap-step.upcoming .roadmap-marker {
-  border-color: rgba(24, 59, 102, 0.35);
-  color: rgba(24, 59, 102, 0.55);
-}
-
-
-/* DESTINATION */
-
-.roadmap-step.destination .roadmap-marker {
-  background: #ff6b35;
-  border-color: #ff6b35;
-  color: #fff9f0;
-}
-
-
-/* =========================================
-   ROADMAP CONTENT
-========================================= */
-
-.roadmap-content {
-  min-height: 150px;
-
-  padding: 5px 0 0;
-}
-
-.roadmap-meta {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-
-  margin-bottom: 14px;
+  margin-bottom: 9px;
 
   font-size: 9px;
   font-weight: 800;
 
   letter-spacing: 0.16em;
 
-  color: rgba(24, 59, 102, 0.5);
-}
-
-.roadmap-meta span:last-child {
-  color: #ff6b35;
+  opacity: 0.65;
 }
 
 
-.roadmap-content h3 {
-  margin: 0 0 12px;
+.learning-access-card h3 {
+  margin: 0;
 
   font-family: "Playfair Display", serif;
 
-  font-size: 42px;
-  font-weight: 500;
+  font-size: clamp(32px, 4vw, 48px);
 
-  line-height: 1;
+  font-weight: 400;
+
+  line-height: 0.98;
+
+  letter-spacing: -0.04em;
 }
 
-.roadmap-content p {
-  max-width: 650px;
 
+.learning-access-card h3 span {
+  display: block;
+
+  font-style: italic;
+
+  color: var(--vo-yellow);
+}
+
+
+.learning-access-card p {
+  max-width: 430px;
+
+  margin: 14px 0 0;
+
+  font-size: 13px;
+
+  line-height: 1.65;
+
+  opacity: 0.72;
+}
+
+
+.learning-access-arrow {
+  position: absolute;
+
+  right: 28px;
+  bottom: 25px;
+
+  z-index: 3;
+
+  width: 48px;
+  height: 48px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.14);
+
+  font-size: 17px;
+
+  transition:
+    transform 0.4s ease,
+    background 0.4s ease;
+}
+
+
+.learning-access-card:hover
+.learning-access-arrow {
+  transform: translate(5px, -5px);
+
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* =========================================================
+   VERA VOICE ACCESS
+   ========================================================= */
+
+.vera-voice-access {
+  padding: 80px 0 100px;
+  scroll-margin-top: 50px;
+}
+
+.vera-voice-access .platform-section-heading {
+  max-width: 720px;
+}
+
+.vera-voice-card {
+  min-height: 310px;
+  position: relative;
+  cursor: pointer;
+  perspective: 1400px;
+  transform-style: preserve-3d;
+  --card-tilt-x: 0deg;
+  --card-tilt-y: 0deg;
+  transform:
+    perspective(1400px)
+    rotateX(var(--card-tilt-x))
+    rotateY(var(--card-tilt-y));
+  transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.vera-voice-card.is-flipped {
+  transform:
+    perspective(1400px)
+    rotateX(var(--card-tilt-x))
+    rotateY(calc(180deg + var(--card-tilt-y)));
+}
+
+.vera-voice-card:focus-visible {
+  outline: 3px solid var(--vo-yellow);
+  outline-offset: 6px;
+  border-radius: 30px;
+}
+
+.vera-voice-card-face {
+  width: 100%;
+  min-height: 310px;
+  padding: 34px;
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+  border-radius: 30px;
+  box-shadow: var(--vo-shadow);
+}
+
+.vera-voice-card-front {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  color: white;
+  background:
+    radial-gradient(circle at 88% 15%, rgba(255, 200, 61, .42), transparent 27%),
+    linear-gradient(120deg, var(--vo-navy), #2f4e78 58%, var(--vo-purple));
+}
+
+.vera-voice-card-back {
+  display: flex;
+  align-items: center;
+  color: var(--vo-navy);
+  transform: rotateY(180deg);
+  background:
+    radial-gradient(circle at 10% 90%, rgba(32, 199, 181, .24), transparent 30%),
+    linear-gradient(135deg, var(--vo-cream), #ece7ff);
+}
+
+.vera-voice-card-copy {
+  position: relative;
+  z-index: 1;
+  max-width: 590px;
+}
+
+.vera-voice-card-label {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--vo-yellow);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .18em;
+}
+
+.vera-voice-card h3 {
+  margin: 0;
+  font-family: "Playfair Display", serif;
+  font-size: clamp(34px, 4vw, 56px);
+  font-weight: 400;
+  line-height: .98;
+}
+
+.vera-voice-card-front p {
+  margin: 12px 0 0;
+  font-size: 17px;
+}
+
+.vera-voice-flip-hint {
+  display: block;
+  margin-top: 30px;
+  color: rgba(255,255,255,.72);
+  font-size: 12px;
+}
+
+.vera-voice-avatar {
+  width: clamp(130px, 19vw, 205px);
+  aspect-ratio: 1;
+  flex: 0 0 auto;
+  border: 5px solid var(--vo-yellow);
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center;
+  box-shadow: 0 14px 30px rgba(0,0,0,.22);
+}
+
+.vera-voice-card-back h3 {
+  max-width: 620px;
+  color: var(--vo-navy);
+  font-size: clamp(32px, 4vw, 52px);
+}
+
+.vera-voice-card-back p {
+  max-width: 560px;
+  color: var(--vo-muted);
+  line-height: 1.6;
+}
+
+.vera-voice-launch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  margin-top: 10px;
+  padding: 13px 22px;
+  border-radius: 999px;
+  color: white;
+  background: linear-gradient(135deg, var(--vo-orange), #dc4b2c);
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 10px 24px rgba(232, 93, 93, .2);
+}
+
+.vera-voice-launch:hover,
+.vera-voice-launch:focus-visible {
+  background: linear-gradient(135deg, var(--vo-purple), #5133ba);
+}
+
+.vera-voice-launch:focus-visible {
+  outline: 3px solid var(--vo-yellow);
+  outline-offset: 3px;
+}
+
+.vera-voice-status {
+  min-height: 20px;
+  margin: 12px 0 0;
+  color: var(--vo-navy);
+  font-size: 12px;
+}
+
+/* =========================================================
+   LEARNING DETAIL VIEWS
+   ========================================================= */
+
+.learning-detail-view {
+  display: none;
+}
+
+.learning-detail-view:target {
+  display: block;
+}
+/* =========================================================
+   NEXT STEP
+   ========================================================= */
+
+.next-step {
+  min-height: 500px;
+
+  margin: 80px 0;
+
+  padding: 80px 50px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  position: relative;
+  overflow: hidden;
+
+  border-radius: 40px;
+
+  color: white;
+
+  background:
+    radial-gradient(
+      circle at 15% 20%,
+      rgba(24, 183, 160, 0.4),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 85% 80%,
+      rgba(244, 197, 66, 0.25),
+      transparent 28%
+    ),
+    linear-gradient(
+      135deg,
+      #18243a,
+      #4930a5
+    );
+
+  box-shadow: var(--vo-shadow);
+}
+
+.next-step::before,
+.next-step::after {
+  content: "";
+  position: absolute;
+
+  border-radius: 50%;
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+
+  pointer-events: none;
+}
+
+.next-step::before {
+  width: 500px;
+  height: 500px;
+
+  right: -180px;
+  top: -250px;
+
+  animation: orbitSpin 18s linear infinite;
+}
+
+.next-step::after {
+  width: 350px;
+  height: 350px;
+
+  left: -130px;
+  bottom: -200px;
+
+  animation: orbitSpinReverse 15s linear infinite;
+}
+
+.next-step .platform-label,
+.next-step h2,
+.next-step-button {
+  position: relative;
+  z-index: 2;
+}
+
+.next-step .platform-label {
+  color: var(--vo-yellow);
+}
+
+.next-step h2 {
   margin: 0;
 
-  font-size: 15px;
-  line-height: 1.7;
-
-  color: rgba(24, 59, 102, 0.65);
+  font-family: "Playfair Display", serif;
+  font-size: clamp(50px, 7vw, 90px);
+  font-weight: 400;
+  line-height: 0.9;
+  letter-spacing: -0.06em;
 }
 
-
-/* =========================================
-   CURRENT STEP
-========================================= */
-
-.roadmap-step.current .roadmap-content {
-  padding: 28px;
-
-  background: #fff9f0;
-
-  box-shadow:
-    0 20px 50px rgba(24, 59, 102, 0.08);
+.next-step h2 span {
+  display: block;
+  color: var(--vo-turquoise);
+  font-style: italic;
 }
 
-.roadmap-step.current .roadmap-content h3 {
-  font-size: 48px;
+.next-step-button {
+  margin-top: 35px;
+
+  padding: 17px 25px;
+
+  border: 0;
+  border-radius: 999px;
+
+  color: var(--vo-navy);
+  background: white;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.18);
+
+  transition:
+    transform 0.4s ease,
+    box-shadow 0.4s ease;
 }
 
-
-/* =========================================
-   ROADMAP PROGRESS
-========================================= */
-
-.roadmap-progress {
-  margin-top: 30px;
-  max-width: 600px;
+.next-step-button:hover {
+  transform: translateY(-5px) scale(1.04);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
 }
 
-.roadmap-progress-top {
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.platform-footer {
+  width: min(1380px, calc(100% - 64px));
+
+  margin: 0 auto;
+
+  padding: 40px 0 55px;
+
   display: flex;
   justify-content: space-between;
-  align-items: center;
 
-  margin-bottom: 10px;
+  border-top: 1px solid var(--vo-border);
+
+  color: var(--vo-muted);
 
   font-size: 9px;
   font-weight: 800;
-
   letter-spacing: 0.14em;
 }
 
-.roadmap-progress-top strong {
-  font-family: "Playfair Display", serif;
+/* =========================================================
+   SCROLL REVEAL
+   ========================================================= */
 
-  font-size: 22px;
-  font-weight: 500;
+.reveal {
+  opacity: 0;
+  transform: translateY(35px);
+  transition:
+    opacity 0.8s ease,
+    transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.roadmap-progress-bar {
-  width: 100%;
-  height: 7px;
-
-  background: rgba(24, 59, 102, 0.12);
-
-  overflow: hidden;
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-.roadmap-progress-fill {
-  height: 100%;
+/* =========================================================
+   ANIMATIONS
+   ========================================================= */
 
-  background: #6c3bff;
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
 
-  transition: width 0.6s ease;
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
+@keyframes heroTextIn {
+  from {
+    opacity: 0;
+    transform: translateX(-35px);
+  }
 
-/* =========================================
-   UPCOMING
-========================================= */
-
-.roadmap-step.upcoming .roadmap-content {
-  opacity: 0.75;
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
+@keyframes orbitEntrance {
+  from {
+    opacity: 0;
+    transform: scale(0.7) rotate(-15deg);
+  }
 
-/* =========================================
-   DESTINATION
-========================================= */
-
-.roadmap-step.destination {
-  padding-bottom: 0;
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
 }
 
-.roadmap-step.destination .roadmap-content {
-  padding: 30px;
+@keyframes orbitSpin {
+  from {
+    transform: rotate(0deg);
+  }
 
-  background: #183b66;
-  color: #fff9f0;
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.roadmap-step.destination .roadmap-content p {
-  color: rgba(255, 249, 240, 0.65);
+@keyframes orbitSpinReverse {
+  from {
+    transform: rotate(360deg);
+  }
+
+  to {
+    transform: rotate(0deg);
+  }
 }
 
-.roadmap-step.destination .roadmap-meta {
-  color: rgba(255, 249, 240, 0.5);
+@keyframes centerFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
 }
 
-.roadmap-step.destination .roadmap-meta span:last-child {
-  color: #ffc83d;
+@keyframes emblemFloat {
+  0%,
+  100% {
+    transform: rotate(0deg) translateY(0);
+  }
+
+  50% {
+    transform: rotate(4deg) translateY(-6px);
+  }
 }
 
+@keyframes pulseDot {
+  0%,
+  100% {
+    transform: scale(1);
 
-/* =========================================
-   ROADMAP RESPONSIVE
-========================================= */
+    box-shadow:
+      0 0 0 10px rgba(232, 93, 93, 0.1),
+      0 0 30px rgba(232, 93, 93, 0.3);
+  }
 
-@media (max-width: 750px) {
+  50% {
+    transform: scale(1.25);
 
-  .roadmap-section {
-    padding: 100px 6vw;
+    box-shadow:
+      0 0 0 17px rgba(232, 93, 93, 0.05),
+      0 0 45px rgba(232, 93, 93, 0.4);
+  }
+}
+
+@keyframes currentPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(108, 76, 207, 0.25);
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 12px rgba(108, 76, 207, 0.05);
+  }
+}
+
+@keyframes passportOrbit {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes progressShine {
+  0% {
+    transform: translateX(-100px);
+    opacity: 0;
+  }
+
+  30%,
+  70% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(100px);
+    opacity: 0;
+  }
+}
+
+@keyframes ambientFloat {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+
+  50% {
+    transform: translate(-50px, 40px);
+  }
+}
+
+@keyframes ambientFloatReverse {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+
+  50% {
+    transform: translate(45px, -35px);
+  }
+}
+
+@keyframes passportReveal {
+  from {
+    opacity: 0;
+
+    transform:
+      translateY(35px)
+      rotateX(8deg)
+      scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translateY(0)
+      rotateX(0)
+      scale(1);
+  }
+}
+
+@keyframes sealFloat {
+  0%,
+  100% {
+    transform:
+      translateY(0)
+      rotate(0deg);
+  }
+
+  50% {
+    transform:
+      translateY(-8px)
+      rotate(2deg);
+  }
+}
+
+@keyframes passportGlowMove {
+  0%,
+  100% {
+    transform:
+      translate(0, 0)
+      scale(1);
+  }
+
+  50% {
+    transform:
+      translate(-35px, 35px)
+      scale(1.15);
+  }
+}
+
+@keyframes passportOrbitSpin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes passportOrbitSpinReverse {
+  from {
+    transform: rotate(360deg);
+  }
+
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes passportProgressIn {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes statusPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 4px rgba(24, 183, 160, 0.08);
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 9px rgba(24, 183, 160, 0.02);
+  }
+}
+
+@keyframes starFloat {
+  0%,
+  100% {
+    transform:
+      translateY(0)
+      rotate(0deg);
+  }
+
+  50% {
+    transform:
+      translateY(-7px)
+      rotate(20deg);
+  }
+}
+
+/* =========================================================
+   PASSPORT HOVER
+   ========================================================= */
+
+@media (hover: hover) and (pointer: fine) {
+  .language-passport:hover {
+    transform:
+      translateY(-8px)
+      rotateX(1deg)
+      rotateY(-1deg);
+
+    box-shadow:
+      0 45px 110px rgba(24, 36, 58, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  .passport-seal:hover {
+    transform:
+      scale(1.05)
+      rotate(3deg);
+  }
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1000px) {
+  .platform-welcome {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    padding: 100px 0;
+  }
+
+  .welcome-orbit {
+    width: min(400px, 70vw);
+  }
+
+  .passport-dashboard {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 800px) {.learning-access-grid {
+    grid-template-columns: 1fr;
+  }
+  .platform-navbar,
+  .platform-content,
+  .platform-footer {
+    width: min(100% - 36px, 1380px);
+  }
+
+  .platform-nav {
+    display: none;
+  }
+
+  .platform-welcome h1 {
+    font-size: clamp(52px, 14vw, 82px);
+  }
+
+  .materials-grid {
+    grid-template-columns: 1fr;
   }
 
   .roadmap-container::before {
@@ -1544,66 +3134,1462 @@
   }
 
   .roadmap-step {
-    grid-template-columns: 50px 1fr;
-
-    gap: 20px;
-
-    padding-bottom: 50px;
+    grid-template-columns: 48px 1fr;
+    gap: 18px;
   }
 
   .roadmap-marker {
-    width: 50px;
-    height: 50px;
-
-    font-size: 10px;
+    width: 48px;
+    height: 48px;
   }
 
   .roadmap-content h3 {
-    font-size: 32px;
+    font-size: 27px;
   }
 
-  .roadmap-step.current .roadmap-content h3 {
+  .next-step {
+    padding: 70px 25px;
+    border-radius: 30px;
+  }
+
+  .vera-voice-card-face {
+    padding: 28px;
+  }
+
+  /* Passport */
+
+  .language-passport {
+    padding: 27px;
+  }
+
+  .passport-body {
+    grid-template-columns: 1fr;
+    gap: 35px;
+    padding: 35px 0;
+  }
+
+  .passport-identity {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 25px;
+  }
+
+  .passport-seal {
+    width: 150px;
+    height: 150px;
+  }
+}
+
+@media (max-width: 600px) {.platform-learning-access {
+    padding: 80px 0;
+  }
+
+  .learning-access-card {
+    min-height: 270px;
+    padding: 25px;
+  }
+
+  .learning-access-card h3 {
     font-size: 36px;
   }
 
-  .roadmap-step.current .roadmap-content {
+  .vera-voice-access {
+    padding: 70px 0 80px;
+  }
+
+  .vera-voice-card,
+  .vera-voice-card-face {
+    min-height: 390px;
+  }
+
+  .vera-voice-card-front {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .vera-voice-avatar {
+    width: 132px;
+    align-self: flex-end;
+    margin-top: -10px;
+  }
+  .platform-navbar {
+    min-height: 72px;
+  }
+
+  .student-profile > span:not(.profile-avatar) {
+    display: none;
+  }
+
+  .platform-welcome {
+    padding: 80px 0;
+  }
+
+  .welcome-orbit {
+    width: min(330px, 80vw);
+  }
+
+  .orbit-center {
+    width: 110px;
+    height: 110px;
+    font-size: 27px;
+  }
+
+  .passport-section,
+  .roadmap-section,
+  .materials-section {
+    padding: 80px 0;
+  }
+
+  .passport-main {
+    min-height: 420px;
+    padding: 25px;
+  }
+
+  .passport-main-content {
+    min-height: 290px;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  .passport-emblem {
+    width: 95px;
+    height: 95px;
+  }
+
+  .passport-footer {
+    left: 25px;
+    right: 25px;
+    bottom: 23px;
+  }
+
+  .progress-card {
+    min-height: 300px;
+  }
+
+  .roadmap-content {
     padding: 22px;
   }
 
-  .roadmap-step.destination .roadmap-content {
-    padding: 22px;
+  .roadmap-content h3 {
+    font-size: 24px;
+  }
+
+  .class-material-item {
+    grid-template-columns: 45px 1fr;
+    gap: 15px;
+  }
+
+  .class-material-button {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .materials-footer,
+  .platform-footer {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Signature passport */
+
+  .passport-seal-ring {
+    width: 125px;
+    height: 125px;
+  }
+
+  .passport-seal-ring img {
+    width: 42px;
+    height: 42px;
+  }
+}
+
+@media (max-width: 550px) {
+  .language-passport-wrapper {
+    padding: 15px 0 35px;
+  }
+
+  .language-passport {
+    min-height: 0;
+    padding: 23px 20px;
+    border-radius: 25px;
+  }
+
+  .passport-top {
+    gap: 15px;
+  }
+
+  .passport-brand strong {
+    font-size: 11px;
+  }
+
+  .passport-number strong {
+    font-size: 8px;
+  }
+
+  .passport-body {
+    padding: 30px 0;
+  }
+
+  .passport-identity {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .passport-seal {
+    width: 155px;
+    height: 155px;
+  }
+
+  .passport-name strong {
+    font-size: 31px;
+  }
+
+  .passport-info-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .passport-journey-top {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .passport-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .passport-coordinate {
+    display: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .platform-navbar,
+  .platform-content,
+  .platform-footer {
+    width: calc(100% - 28px);
+  }
+
+  .platform-welcome h1 {
+    font-size: 48px;
+  }
+
+  .platform-section-heading h2 {
+    font-size: 42px;
+  }
+
+  .material-card {
+    min-height: 280px;
+  }
+
+  .material-card-inner,
+  .material-card-face {
+    min-height: 280px;
+  }
+
+  .next-step h2 {
+    font-size: 48px;
+  }
+
+  .passport-brand-logo {
+    width: 42px;
+    height: 42px;
+  }
+
+  .passport-brand-logo img {
+    width: 82%;
+    height: 82%;
+  }
+
+  .passport-seal-ring img {
+    width: 38px;
+    height: 38px;
+  }
+}
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* =========================================================
+   VERA ORBIS REAL LOGO — PLATFORM BRANDING
+   ========================================================= */
+
+/* Top-left platform logo */
+
+.platform-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+
+  transition:
+    transform 0.35s ease;
+}
+
+.platform-logo img {
+  width: 42px;
+  height: 42px;
+
+  object-fit: contain;
+  display: block;
+
+  background: transparent;
+}
+
+.platform-logo span {
+  color: var(--vo-navy);
+}
+
+.platform-logo span strong {
+  color: var(--vo-purple);
+}
+
+.platform-logo:hover {
+  transform: translateY(-2px);
+}
+
+
+/* Student avatar */
+
+.profile-avatar {
+  width: 38px;
+  height: 38px;
+
+  padding: 2px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background: transparent;
+
+  overflow: hidden;
+
+  box-shadow:
+    0 6px 18px rgba(24, 36, 58, 0.08);
+
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+
+  display: block;
+
+  background: transparent;
+}
+
+.student-profile:hover .profile-avatar {
+  transform: rotate(6deg) scale(1.08);
+
+  box-shadow:
+    0 9px 25px rgba(108, 76, 207, 0.18);
+}
+
+
+/* Welcome orbit logo */
+
+.orbit-center {
+  width: 150px;
+  height: 150px;
+
+  border-radius: 50%;
+
+  display: grid;
+  place-items: center;
+
+  padding: 18px;
+
+  background: transparent;
+
+  box-shadow:
+    0 30px 80px rgba(108, 76, 207, 0.18);
+
+  animation:
+    centerFloat 4s ease-in-out infinite;
+
+  overflow: hidden;
+}
+
+.orbit-center img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+
+  display: block;
+
+  background: transparent;
+}
+
+
+/* Mobile */
+
+@media (max-width: 600px) {
+
+  .platform-logo {
+    font-size: 17px;
+  }
+
+  .platform-logo img {
+    width: 36px;
+    height: 36px;
+  }
+
+  .profile-avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .orbit-center {
+    width: 110px;
+    height: 110px;
+    padding: 13px;
+  }
+
+}
+/* =========================================================
+   INTERNAL PLATFORM VIEWS
+========================================================= */
+
+.platform-view {
+  width: 100%;
+}
+
+.platform-home-view {
+  display: none;
+}
+
+.platform-home-view.is-active {
+  display: block;
+}
+
+
+.platform-internal-view {
+  display: none;
+  min-height: calc(100vh - 90px);
+  animation: platformViewIn 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+
+.platform-internal-view.is-active {
+  display: block;
+}
+
+
+.platform-internal-header {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 28px 40px 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+
+.platform-back-button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+
+  padding: 10px 0;
+
+  font: inherit;
+  font-weight: 600;
+
+  color: inherit;
+
+  cursor: pointer;
+
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+
+.platform-back-button:hover {
+  opacity: 0.7;
+  transform: translateX(-4px);
+}
+
+
+.platform-internal-kicker {
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  font-weight: 700;
+  opacity: 0.55;
+}
+
+
+.platform-view-content {
+  width: 100%;
+  max-width: 1400px;
+
+  margin: 0 auto;
+
+  padding: 30px 40px 100px;
+}
+
+
+.platform-detail-section {
+  width: 100%;
+}
+
+
+.platform-detail-section > .platform-section-heading {
+  margin-bottom: 50px;
+}
+
+
+.platform-detail-section
+  .class-materials-section,
+.platform-detail-section
+  .feedback-section {
+  padding-top: 0;
+}
+
+
+/* =========================================================
+   NAV ACTIVE STATE
+========================================================= */
+
+.platform-nav a {
+  transition:
+    color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+
+.platform-nav a:not(.active) {
+  opacity: 0.72;
+}
+
+
+.platform-nav a.active {
+  opacity: 1;
+}
+
+
+/* =========================================================
+   SMOOTH PAGE TRANSITION
+========================================================= */
+
+@keyframes platformPageEnter {
+
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 
 }
 
 
-@media (max-width: 500px) {
+@keyframes platformPageLeave {
 
-  .roadmap-container::before {
-    left: 20px;
+  from {
+    opacity: 1;
+    transform: translateX(0);
   }
 
-  .roadmap-step {
-    grid-template-columns: 40px 1fr;
-
-    gap: 15px;
+  to {
+    opacity: 0;
+    transform: translateX(-12px);
   }
 
-  .roadmap-marker {
-    width: 40px;
-    height: 40px;
+}
+
+
+@keyframes platformPageEnterReverse {
+
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
   }
 
-  .roadmap-content h3 {
-    font-size: 28px;
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 
-  .roadmap-step.current .roadmap-content h3 {
-    font-size: 32px;
+}
+
+
+@keyframes platformPageLeaveReverse {
+
+  from {
+    opacity: 1;
+    transform: translateX(0);
   }
 
-  .roadmap-content p {
-    font-size: 14px;
+  to {
+    opacity: 0;
+    transform: translateX(12px);
   }
 
+}
+
+
+.platform-page-leaving {
+
+  animation:
+    platformPageLeave
+    450ms
+    cubic-bezier(0.22, 1, 0.36, 1)
+    both;
+
+}
+
+
+.platform-page-entering {
+
+  animation:
+    platformPageEnter
+    450ms
+    cubic-bezier(0.22, 1, 0.36, 1)
+    both;
+
+}
+/* =========================================================
+   LEARNING ACCESS BUTTONS
+========================================================= */
+
+.learning-access-card {
+  appearance: none;
+  border: 0;
+
+  width: 100%;
+
+  text-align: left;
+
+  font: inherit;
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+  .platform-internal-header {
+    padding:
+      22px
+      20px
+      0;
+  }
+
+
+ .platform-view-content {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 30px 40px 100px;
+}
+
+.content-enter {
+  animation: platformContentIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+}@keyframes platformContentIn {
+  0% {
+    opacity: 0;
+    transform: translateY(35px) scale(0.96);
+    filter: blur(8px);
+  }
+
+  55% {
+    opacity: 0.9;
+    transform: translateY(-4px) scale(1.01);
+    filter: blur(1px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+
+  .platform-internal-kicker {
+    display: none;
+  }
+/* =========================================================
+   VERA ORBIS — FLASHCARD NAVIGATION
+========================================================= */
+/* =========================================================
+   FLASHCARD NAVIGATION
+========================================================= */
+
+.platform-floating-card {
+  position: fixed;
+  z-index: 1000;
+
+  left: var(--card-start-x);
+  top: var(--card-start-y);
+
+  width: var(--card-start-width);
+  height: var(--card-start-height);
+
+  background: var(--vo-cream);
+  border-radius: 28px;
+
+  overflow: hidden;
+
+  transform-origin: center center;
+  transform-style: preserve-3d;
+
+  opacity: 0;
+
+  pointer-events: auto;
+
+  box-shadow:
+    0 45px 120px rgba(24, 36, 58, 0.22),
+    0 15px 45px rgba(24, 36, 58, 0.12);
+
+  will-change:
+    left,
+    top,
+    width,
+    height,
+    transform,
+    opacity;
+}
+
+
+/* =========================================================
+   OPEN
+   LEVANTAR → GIRAR → CRECER → ATERRIZAR
+========================================================= */
+
+.platform-floating-card.is-opening {
+  animation:
+    veraFlashcardOpen
+    1100ms
+    cubic-bezier(0.22, 0.8, 0.22, 1)
+    forwards;
+}
+
+
+@keyframes veraFlashcardOpen {
+
+  /* START — exactly on the clicked element */
+
+  0% {
+    left: var(--card-start-x);
+    top: var(--card-start-y);
+
+    width: var(--card-start-width);
+    height: var(--card-start-height);
+
+    opacity: 1;
+
+    transform:
+      perspective(1400px)
+      translateY(0)
+      rotateX(0deg)
+      rotateY(0deg)
+      rotateZ(0deg)
+      scale(1);
+  }
+
+
+  /* LIFT */
+
+  18% {
+    left: var(--card-start-x);
+    top: var(--card-start-y);
+
+    width: var(--card-start-width);
+    height: var(--card-start-height);
+
+    opacity: 1;
+
+    transform:
+      perspective(1400px)
+      translateY(-35px)
+      rotateX(12deg)
+      rotateY(-8deg)
+      rotateZ(-2deg)
+      scale(1.08);
+  }
+
+
+  /* START MOVING TOWARD CENTER */
+
+  38% {
+    left: calc(
+      var(--card-start-x) * 0.65 +
+      var(--card-final-x) * 0.35
+    );
+
+    top: calc(
+      var(--card-start-y) * 0.65 +
+      var(--card-final-y) * 0.35
+    );
+
+    width: calc(
+      var(--card-start-width) * 0.65 +
+      var(--card-final-width) * 0.35
+    );
+
+    height: calc(
+      var(--card-start-height) * 0.65 +
+      var(--card-final-height) * 0.35
+    );
+
+    opacity: 1;
+
+    transform:
+      perspective(1400px)
+      translateY(-45px)
+      rotateX(8deg)
+      rotateY(45deg)
+      rotateZ(2deg)
+      scale(1.02);
+  }
+
+
+  /* BIG FLIP */
+
+  55% {
+    left: calc(
+      var(--card-start-x) * 0.35 +
+      var(--card-final-x) * 0.65
+    );
+
+    top: calc(
+      var(--card-start-y) * 0.35 +
+      var(--card-final-y) * 0.65
+    );
+
+    width: calc(
+      var(--card-start-width) * 0.35 +
+      var(--card-final-width) * 0.65
+    );
+
+    height: calc(
+      var(--card-start-height) * 0.35 +
+      var(--card-final-height) * 0.65
+    );
+
+    opacity: 1;
+
+    transform:
+      perspective(1400px)
+      translateY(-25px)
+      rotateX(2deg)
+      rotateY(180deg)
+      rotateZ(-1deg)
+      scale(1);
+  }
+
+
+  /* COMING BACK TO FACE US */
+
+  72% {
+    left: var(--card-final-x);
+    top: var(--card-final-y);
+
+    width: var(--card-final-width);
+    height: var(--card-final-height);
+
+    opacity: 1;
+
+    transform:
+      perspective(1400px)
+      translateY(-8px)
+      rotateX(-3deg)
+      rotateY(360deg)
+      rotateZ(0deg)
+      scale(1.025);
+  }
+
+
+  /* LANDING */
+
+  88% {
+    left: var(--card-final-x);
+    top: var(--card-final-y);
+
+    width: var(--card-final-width);
+    height: var(--card-final-height);
+
+    opacity: 1;
+
+    transform:
+      perspective(1400px)
+      translateY(3px)
+      rotateX(1deg)
+      rotateY(360deg)
+      rotateZ(0deg)
+      scale(0.99);
+  }
+
+
+  /* FINAL RESTING POSITION */
+
+  100% {
+    left: var(--card-final-x);
+    top: var(--card-final-y);
+
+    width: var(--card-final-width);
+    height: var(--card-final-height);
+
+    opacity: 1;
+
+    transform:
+      perspective(1400px)
+      translateY(0)
+      rotateX(0deg)
+      rotateY(360deg)
+      rotateZ(0deg)
+      scale(1);
+  }
+}
+
+
+/* =========================================================
+   CLOSE
+   LEVANTAR → GIRAR → ENCOGER → VOLVER
+========================================================= */
+
+.platform-floating-card.is-closing {
+  animation:
+    veraFlashcardClose
+    900ms
+    cubic-bezier(0.22, 0.8, 0.22, 1)
+    forwards;
+
+  pointer-events: none;
+}
+
+
+@keyframes veraFlashcardClose {
+
+  /* START */
+
+  0% {
+    left: var(--card-final-x);
+    top: var(--card-final-y);
+
+    width: var(--card-final-width);
+    height: var(--card-final-height);
+
+    opacity: 1;
+
+    transform:
+      perspective(1400px)
+      translateY(0)
+      rotateX(0deg)
+      rotateY(360deg)
+      rotateZ(0deg)
+      scale(1);
+  }
+
+
+  /* LIFT */
+
+  18% {
+    transform:
+      perspective(1400px)
+      translateY(-25px)
+      rotateX(8deg)
+      rotateY(405deg)
+      rotateZ(2deg)
+      scale(1.02);
+  }
+
+
+  /* SHRINK + MOVE BACK */
+
+  42% {
+    left: calc(
+      var(--card-final-x) * 0.65 +
+      var(--card-start-x) * 0.35
+    );
+
+    top: calc(
+      var(--card-final-y) * 0.65 +
+      var(--card-start-y) * 0.35
+    );
+
+    width: calc(
+      var(--card-final-width) * 0.65 +
+      var(--card-start-width) * 0.35
+    );
+
+    height: calc(
+      var(--card-final-height) * 0.65 +
+      var(--card-start-height) * 0.35
+    );
+
+    transform:
+      perspective(1400px)
+      translateY(-35px)
+      rotateX(10deg)
+      rotateY(450deg)
+      rotateZ(-2deg)
+      scale(1);
+  }
+
+
+  /* FLIP BACK */
+
+  62% {
+    left: calc(
+      var(--card-final-x) * 0.35 +
+      var(--card-start-x) * 0.65
+    );
+
+    top: calc(
+      var(--card-final-y) * 0.35 +
+      var(--card-start-y) * 0.65
+    );
+
+    width: calc(
+      var(--card-final-width) * 0.35 +
+      var(--card-start-width) * 0.65
+    );
+
+    height: calc(
+      var(--card-final-height) * 0.35 +
+      var(--card-start-height) * 0.65
+    );
+
+    transform:
+      perspective(1400px)
+      translateY(-20px)
+      rotateX(-5deg)
+      rotateY(540deg)
+      rotateZ(2deg)
+      scale(1);
+  }
+
+
+  /* ALMOST HOME */
+
+  82% {
+    left: var(--card-start-x);
+    top: var(--card-start-y);
+
+    width: var(--card-start-width);
+    height: var(--card-start-height);
+
+    opacity: 1;
+
+    transform:
+      perspective(1400px)
+      translateY(-8px)
+      rotateX(3deg)
+      rotateY(680deg)
+      rotateZ(0deg)
+      scale(1.08);
+  }
+
+
+  /* BACK ON THE ORIGINAL CARD */
+
+  100% {
+    left: var(--card-start-x);
+    top: var(--card-start-y);
+
+    width: var(--card-start-width);
+    height: var(--card-start-height);
+
+    opacity: 0;
+
+    transform:
+      perspective(1400px)
+      translateY(0)
+      rotateX(0deg)
+      rotateY(720deg)
+      rotateZ(0deg)
+      scale(1);
+  }
+}
+
+
+/* =========================================================
+   CARD CONTENT
+========================================================= */
+
+.platform-floating-card-content {
+  width: 100%;
+  height: 100%;
+
+  overflow-y: auto;
+
+  padding: 80px 50px 60px;
+
+  transform-style: preserve-3d;
+
+  pointer-events: auto;
+  backface-visibility: visible;
+}
+
+
+/* =========================================================
+   BACK BUTTON
+========================================================= */
+
+.floating-back-button {
+  position: absolute;
+
+  top: 28px;
+  left: 32px;
+
+  z-index: 50;
+
+  pointer-events: auto;
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   CARD EDGE
+========================================================= */
+
+.platform-floating-card::before {
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  border-radius: inherit;
+
+  pointer-events: none;
+
+  z-index: 20;
+
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+
+
+/* =========================================================
+   HOME — RESTS BEHIND
+========================================================= */
+
+.platform-home-view {
+  transition:
+    transform 950ms cubic-bezier(0.22, 0.8, 0.22, 1),
+    filter 950ms ease;
+}
+
+
+.platform-home-view.card-is-open {
+  transform: scale(0.965);
+
+  filter:
+    brightness(0.9)
+    saturate(0.92);
+}
+
+
+/* =========================================================
+   NAVBAR — FALLS BACK
+========================================================= */
+
+.platform-nav-behind {
+  opacity: 0.65;
+
+  transition:
+    opacity 500ms ease;
+}.platform-floating-card.floating-violet {
+  background: #6C3BFF;
+}
+
+.platform-floating-card.floating-yellow {
+  background: #FFC83D;
+}
+
+.platform-floating-card.floating-orange {
+  background: #FF6B35;
+}
+
+.platform-floating-card.floating-primary {
+  background: #20C7B5;
+}.platform-floating-card.floating-dark
+.platform-floating-card-content {
+  color: #FFF9F0;
+}
+
+.platform-floating-card.floating-dark
+.platform-floating-card-content h1,
+.platform-floating-card.floating-dark
+.platform-floating-card-content h2,
+.platform-floating-card.floating-dark
+.platform-floating-card-content h3,
+.platform-floating-card.floating-dark
+.platform-floating-card-content p,
+.platform-floating-card.floating-dark
+.platform-floating-card-content span {
+  color: #FFF9F0;
+}
+
+.platform-floating-card.floating-dark
+.floating-back-button {
+  color: #FFF9F0;
+  border-color: rgba(255, 249, 240, 0.6);
+}/* =====================================================
+   HOME — MY JOURNEY ACCESS
+   ===================================================== */
+
+.home-module-card {
+  width: 100%;
+  min-height: 260px;
+  margin-top: 34px;
+  padding: 42px 46px;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 40px;
+
+  border: none;
+  border-radius: 30px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #183B66 0%,
+      #264D7C 55%,
+      #6C3BFF 100%
+    );
+
+  color: #FFF9F0;
+  text-align: left;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 24px 55px rgba(24, 59, 102, 0.18),
+    0 8px 20px rgba(24, 59, 102, 0.10);
+
+  transition:
+    transform 0.45s cubic-bezier(.2,.8,.2,1),
+    box-shadow 0.45s ease;
+}
+
+.home-module-card:hover {
+  transform:
+    translateY(-8px)
+    rotate(-0.6deg);
+
+  box-shadow:
+    0 34px 70px rgba(24, 59, 102, 0.24),
+    0 12px 28px rgba(24, 59, 102, 0.14);
+}
+
+.home-module-number {
+  position: absolute;
+  top: 28px;
+  right: 34px;
+
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+
+  opacity: 0.6;
+}
+
+.home-module-content {
+  max-width: 720px;
+}
+
+.home-module-label {
+  display: block;
+  margin-bottom: 14px;
+
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+
+  opacity: 0.72;
+}
+
+.home-module-content h3 {
+  margin: 0 0 14px;
+
+  font-family: "Playfair Display", serif;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  line-height: 0.98;
+  font-weight: 500;
+}
+
+.home-module-content h3 span {
+  color: #FFC83D;
+}
+
+.home-module-content p {
+  max-width: 620px;
+  margin: 0;
+
+  font-size: 1rem;
+  line-height: 1.7;
+
+  color: rgba(255, 249, 240, 0.82);
+}
+
+.home-module-arrow {
+  flex-shrink: 0;
+
+  width: 58px;
+  height: 58px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid rgba(255, 249, 240, 0.35);
+  border-radius: 50%;
+
+  font-size: 1.25rem;
+
+  transition:
+    transform 0.35s ease,
+    background 0.35s ease;
+}
+
+.home-module-card {
+  width: 100%;
+  min-height: 300px;
+  margin-top: 34px;
+  padding: 42px 46px;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 40px;
+
+  border: none;
+  border-radius: 32px;
+
+  background:
+    radial-gradient(
+      circle at 82% 20%,
+      rgba(255, 200, 61, 0.95) 0,
+      rgba(255, 200, 61, 0.25) 13%,
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 92% 80%,
+      rgba(255, 107, 53, 0.9) 0,
+      rgba(255, 107, 53, 0.25) 16%,
+      transparent 34%
+    ),
+    linear-gradient(
+      125deg,
+      #20C7B5 0%,
+      #6C3BFF 58%,
+      #183B66 100%
+    );
+
+  color: #FFF9F0;
+  text-align: left;
+
+  cursor: pointer;
+  overflow: hidden;
+
+  box-shadow:
+    0 28px 65px rgba(108, 59, 255, 0.20),
+    0 10px 25px rgba(24, 59, 102, 0.12);
+
+  transition:
+    transform 0.45s cubic-bezier(.2,.8,.2,1),
+    box-shadow 0.45s ease;
+}.home-module-card::before {
+  content: "";
+  position: absolute;
+
+  width: 260px;
+  height: 260px;
+
+  right: 90px;
+  top: -95px;
+
+  border: 1px solid rgba(255, 249, 240, 0.25);
+  border-radius: 50%;
+
+  box-shadow:
+    0 0 0 35px rgba(255, 249, 240, 0.035),
+    0 0 0 70px rgba(255, 249, 240, 0.025);
+
+  pointer-events: none;
+}
+
+.home-module-card::after {
+  content: "✦";
+
+  position: absolute;
+
+  right: 155px;
+  top: 62px;
+
+  font-size: 3rem;
+
+  color: #FFF9F0;
+  opacity: 0.45;
+
+  transform: rotate(12deg);
+
+  pointer-events: none;
+}.roadmap-floating-card .platform-section-heading h1 span {
+  display: block;
+  margin-top: 8px;
+  color: #6C3BFF;
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.48em;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.5;
+}.roadmap-step {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.roadmap-content {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }

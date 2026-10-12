@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#183B66">
+  <title>Vera Orbis — Practica idiomas a tu ritmo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --violet: #6C3BFF;
+      --orange: #FF6B35;
+      --yellow: #FFC83D;
+      --turquoise: #20C7B5;
+      --indigo: #183B66;
+      --ivory: #FFF9F0;
+      font-family: "DM Sans", Inter, system-ui, sans-serif;
+      color: var(--indigo);
+      background: var(--ivory);
+      font-synthesis: none;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #FFF9F0 0%, #f4efff 52%, #e9fbf7 100%);
+    }
+
+    button, textarea, select { font: inherit; }
+
+    .app {
+      width: min(1180px, 94%);
+      margin: 0 auto;
+      padding: 28px 0 42px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 26px;
+    }
+
+    .logo {
+      display: block;
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 12px rgba(24,59,102,.14));
+    }
+
+    h1 {
+      margin: 0;
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: clamp(30px, 5vw, 44px);
+    }
+
+    .tagline {
+      margin: 4px 0 0;
+      color: #596b83;
+    }
+
+    h1 {
+      color: var(--indigo);
+      font-size: clamp(28px, 4vw, 40px);
+    }
+
+    .brand-note {
+      margin: 0;
+      color: var(--orange);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .panel {
+      background: linear-gradient(145deg, rgba(255,255,255,.96), rgba(255,249,240,.88));
+      border: 1px solid #e9e3d8;
+      border-radius: 28px;
+      padding: clamp(18px, 3vw, 34px);
+      box-shadow: 0 22px 60px rgba(24,59,102,.1);
+    }
+
+    .intro {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(190px, 300px);
+      align-items: center;
+      gap: 26px;
+      padding: clamp(20px, 4vw, 42px);
+      border-radius: 22px;
+      background: linear-gradient(115deg, var(--indigo) 0%, #274d78 62%, var(--violet) 100%);
+      color: var(--ivory);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .intro-copy { min-width: 0; }
+
+    .intro-avatar {
+      display: block;
+      width: min(100%, 300px);
+      aspect-ratio: 1;
+      justify-self: end;
+      border: 6px solid rgba(255, 200, 61, .9);
+      border-radius: 24px;
+      object-fit: cover;
+      box-shadow: 10px 10px 0 rgba(255, 107, 53, .85);
+    }
+
+    .intro strong {
+      display: block;
+      max-width: 620px;
+      margin-bottom: 12px;
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: clamp(30px, 5vw, 52px);
+      font-weight: 500;
+      line-height: 1.02;
+    }
+
+    .intro p {
+      max-width: 560px;
+      margin: 0;
+      font-size: clamp(16px, 2vw, 20px);
+      line-height: 1.5;
+      color: #e5e9f2;
+    }
+
+    .intro-kicker {
+      margin: 0 0 12px;
+      color: var(--yellow);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .voice-stage {
+      display: grid;
+      grid-template-columns: 104px minmax(0, 1fr);
+      align-items: center;
+      position: relative;
+      gap: 18px;
+      margin: 0 0 24px;
+      padding: 18px;
+      border: 1px solid #e9e3d8;
+      border-radius: 20px;
+      background: linear-gradient(110deg, #fffaf2 0%, #e9fbf7 100%);
+    }
+
+    .voice-stage[hidden] { display: none; }
+
+    .voice-avatar {
+      display: block;
+      width: 104px;
+      height: 104px;
+      border: 4px solid var(--turquoise);
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 0 0 7px rgba(32, 199, 181, .14);
+    }
+
+    .voice-stage[data-state="speaking"] .voice-avatar {
+      animation: vera-speaking 1.8s ease-in-out infinite;
+    }
+
+    .voice-stage::before {
+      display: block;
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      margin: 0;
+      border: 3px solid var(--ivory);
+      border-radius: 50%;
+      background: var(--turquoise);
+      box-shadow: 0 0 0 7px rgba(32, 199, 181, .14);
+      content: "";
+      transform: translate(82px, 37px);
+      z-index: 1;
+    }
+
+    .voice-stage[data-state="connecting"]::before {
+      background: var(--yellow);
+    }
+
+    .voice-stage[data-state="error"]::before {
+      background: var(--orange);
+    }
+
+    .voice-stage[data-state="speaking"]::before {
+      animation: vera-speaking 1.8s ease-in-out infinite;
+    }
+
+    .voice-copy h2 {
+      margin: 0 0 5px;
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: 26px;
+      color: var(--indigo);
+    }
+
+    .voice-state {
+      margin: 0;
+      color: var(--indigo);
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    @keyframes vera-speaking {
+      0%, 100% { transform: translateY(0) rotate(0); }
+      50% { transform: translateY(-4px) rotate(1deg); }
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    select, textarea {
+      width: 100%;
+      border: 1px solid #d9d4e5;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #fff 0%, #faf7ff 100%);
+      color: var(--indigo);
+      padding: 12px;
+      outline-color: #6C3BFF;
+    }
+
+    select {
+      appearance: none;
+      cursor: pointer;
+      background-image:
+        linear-gradient(45deg, transparent 50%, var(--violet) 50%),
+        linear-gradient(135deg, var(--violet) 50%, transparent 50%),
+        linear-gradient(135deg, #fff 0%, #faf7ff 100%);
+      background-position: calc(100% - 17px) 50%, calc(100% - 11px) 50%, 0 0;
+      background-size: 6px 6px, 6px 6px, 100% 100%;
+      background-repeat: no-repeat;
+    }
+
+    select:hover {
+      border-color: var(--turquoise);
+      background-image:
+        linear-gradient(45deg, transparent 50%, var(--orange) 50%),
+        linear-gradient(135deg, var(--orange) 50%, transparent 50%),
+        linear-gradient(135deg, #fff 0%, #e9fbf7 100%);
+    }
+
+    select:focus-visible,
+    textarea:focus-visible,
+    button:focus-visible {
+      outline: 3px solid rgba(255, 200, 61, .9);
+      outline-offset: 2px;
+    }
+
+    #chat {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 220px;
+      max-height: 460px;
+      overflow-y: auto;
+      padding: 18px 0;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(255,255,255,.7), rgba(231,248,244,.55));
+    }
+
+    .message {
+      max-width: 88%;
+      padding: 13px 15px;
+      border-radius: 16px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .message.user {
+      align-self: flex-end;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.22), transparent 42%),
+        linear-gradient(135deg, #6C3BFF 0%, #4f35a8 58%, #b28a46 150%);
+      color: white;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 5px 14px rgba(108,59,255,.14);
+      border-bottom-right-radius: 5px;
+    }
+
+    .message.model {
+      align-self: flex-start;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.8), transparent 46%),
+        linear-gradient(135deg, #f5f3ef 0%, #dfe7e5 54%, #b9d7d0 100%);
+      color: var(--indigo);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 5px 14px rgba(24,59,102,.1);
+      border-bottom-left-radius: 5px;
+    }
+
+    .author {
+      display: block;
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 5px;
+      opacity: .8;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: transform .15s, filter .15s;
+    }
+
+    button:hover:not(:disabled) {
+      filter: brightness(.96);
+      transform: translateY(-1px);
+    }
+
+    button:active:not(:disabled) {
+      transform: translateY(1px);
+      filter: brightness(.9);
+    }
+
+    button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+      filter: grayscale(.25);
+    }
+
+    .primary { background: linear-gradient(135deg, var(--violet), #8a68ff); color: white; }
+    .speak-action { background: linear-gradient(135deg, var(--orange), #e84d2c); color: white; }
+    .call-action { background: linear-gradient(135deg, var(--turquoise), #119e97); color: var(--indigo); }
+    .secondary { background: linear-gradient(135deg, var(--yellow), #e4a928); color: var(--indigo); }
+    .clear { background: linear-gradient(135deg, var(--indigo), #315d8d); color: white; }
+    .teacher-tools {
+      margin-top: 20px;
+      padding: 18px;
+      border: 2px solid var(--indigo);
+      border-radius: 18px;
+      background: linear-gradient(135deg, #fbf9ff, #edf9f6);
+      box-shadow: 0 10px 22px rgba(24,59,102,.12);
+    }
+    .teacher-tools[hidden] { display: none; }
+    .teacher-tools h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+      color: var(--indigo);
+    }
+    .learning-grid {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+    }
+    .learning-item {
+      display: grid;
+      gap: 3px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid #c7d3d3;
+      background: linear-gradient(135deg, #fff, #fffaf2);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.95);
+    }
+    .learning-item dt {
+      color: var(--violet);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .learning-item dd {
+      margin: 0;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    .teacher-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .teacher-actions button {
+      padding: 9px 11px;
+      background: linear-gradient(135deg, #e8e2f7, #e5f8f3);
+      color: #3f2a77;
+      font-size: 13px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+      }
+    }
+
+    #status {
+      min-height: 24px;
+      margin-top: 14px;
+      font-size: 13px;
+      color: #596b83;
+    }
+
+    .footnote {
+      margin: 18px 0 0;
+      text-align: center;
+      color: #65758a;
+      font-size: 12px;
+    }
+
+    @media (max-width: 600px) {
+      .app { padding: 20px 0; }
+      .panel { padding: 15px; }
+      .intro { grid-template-columns: 1fr; }
+      .intro-avatar { width: min(100%, 230px); justify-self: center; }
+      .voice-stage { grid-template-columns: 72px minmax(0, 1fr); }
+      .voice-avatar { width: 72px; height: 72px; }
+      .voice-stage::before { transform: translate(54px, 23px); }
+      .controls { grid-template-columns: 1fr; }
+      .message { max-width: 96%; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <header>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <img class="logo" src="./assets/vera-orbis-logo.png" alt="Vera Orbis">
+        <div>
+          <p class="brand-note">Vera Orbis</p>
+          <h1>Your Speaking Partner</h1>
+          <p class="tagline">Tu compañera para practicar idiomas.</p>
+        </div>
+      </div>
+      <p class="brand-note">Learn it. Live it. Speak it.</p>
+    </header>
+
+    <section class="panel">
+      <div class="intro">
+        <div class="intro-copy">
+          <p class="intro-kicker">Una conversación a la vez</p>
+          <strong>Hola, soy Vera.</strong>
+          <p>Tu compañera para practicar idiomas y ganar confianza al hablar.</p>
+          <p style="margin-top:12px;">Conversemos a tu ritmo. Aquí puedes equivocarte, aprender y volver a intentarlo.</p>
+        </div>
+        <img class="intro-avatar" src="./assets/Vera.png" alt="Vera, your speaking partner">
+      </div>
+
+      <section id="voiceStage" class="voice-stage" data-state="idle" aria-live="polite">
+        <img class="voice-avatar" src="./assets/Vera.png" alt="Vera, your speaking partner">
+        <div class="voice-copy">
+          <h2>Vera está contigo</h2>
+          <p id="voiceState" class="voice-state">Lista para conversar.</p>
+        </div>
+      </section>
+
+      <div class="controls">
+        <label for="language">
+          Idioma de práctica
+          <select id="language">
+            <option value="ingles">English</option>
+            <option value="frances">Français</option>
+            <option value="mandarin">中文 · Mandarin</option>
+          </select>
+        </label>
+
+        <label for="level">
+          Tu nivel
+          <select id="level">
+            <option value="basico">Beginner · A1–A2</option>
+            <option value="intermedio">Intermediate · B1–B2</option>
+            <option value="avanzado">Advanced · C1–C2</option>
+          </select>
+        </label>
+        <label for="mode">
+          Experiencia
+          <select id="mode">
+            <option value="conversacion">Conversation Mode</option>
+            <option value="profesora">Teacher Mode</option>
+          </select>
+        </label>
+        <label for="supportLanguage">
+          Idioma de apoyo
+          <select id="supportLanguage">
+            <option value="espanol">Español</option>
+            <option value="ingles">English</option>
+            <option value="frances">Français</option>
+            <option value="mandarin">中文 · Mandarin</option>
+          </select>
+        </label>
+      </div>
+
+      <section id="teacherTools" class="teacher-tools" aria-labelledby="teacherTitle" hidden>
+        <h2 id="teacherTitle">La clase de Vera</h2>
+        <dl class="learning-grid">
+          <div class="learning-item">
+            <dt>Enfoque de aprendizaje</dt>
+            <dd id="learningFocus">Vera elegirá un enfoque adecuado para tu nivel.</dd>
+          </div>
+          <div class="learning-item">
+            <dt>Ejemplo o traducción</dt>
+            <dd id="learningExample">Pide a Vera una traducción o un ejemplo cuando lo necesites.</dd>
+          </div>
+          <div class="learning-item">
+            <dt>Actividad actual</dt>
+            <dd id="learningActivity">Responde a Vera por voz o texto. Tu respuesta aparecerá aquí.</dd>
+          </div>
+          <div class="learning-item">
+            <dt>Respuesta del estudiante</dt>
+            <dd id="learningResponse">Todavía no hay una respuesta registrada.</dd>
+          </div>
+          <div class="learning-item">
+            <dt>Comentarios</dt>
+            <dd id="learningFeedback">Aquí aparecerán las correcciones, pistas y explicaciones de Vera.</dd>
+          </div>
+        </dl>
+        <div class="teacher-actions" aria-label="Ayuda de Vera">
+          <button type="button" data-teacher-action="explain">Explícamelo</button>
+          <button type="button" data-teacher-action="translate">Mostrar traducción</button>
+          <button type="button" data-teacher-action="hint">Dame una pista</button>
+          <button type="button" data-teacher-action="repeat">Repítelo</button>
+          <button type="button" data-teacher-action="easier">Hazlo más fácil</button>
+          <button type="button" data-teacher-action="understood">Ya lo entendí</button>
+        </div>
+      </section>
+
+      <div id="chat" aria-live="polite">
+        <div class="message model">
+          <span class="author">Vera</span>
+          ¡Hola! Soy Vera, tu compañera para practicar idiomas y ganar confianza al hablar.
+          Elige tu idioma y conversemos. No te preocupes por cometer errores: estoy aquí
+          precisamente para ayudarte a aprender.
+        </div>
+      </div>
+
+      <label for="message">Tu mensaje</label>
+      <textarea
+        id="message"
+        placeholder="Escribe algo... o usa el micrófono."
+      ></textarea>
+
+      <div class="buttons">
+        <button class="primary" id="sendButton">Send</button>
+        <button class="speak-action" id="micButton" type="button">Speak</button>
+        <button class="call-action" id="callButton" type="button">Talk to Vera</button>
+        <button class="secondary" id="speakButton" type="button">Hear Vera</button>
+        <button class="clear" id="clearButton" type="button">Clear Chat</button>
+      </div>
+
+      <div id="status" role="status" aria-live="polite"></div>
+
+    </section>
+
+    <p class="footnote">
+      Vera Orbis · Learn it. Live it. Speak it.
+    </p>
+  </main>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

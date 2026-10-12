@@ -1,4 +1,39 @@
-export function renderClassMaterials(student) {
+export function renderClassMaterials(student, materials = []) {
+
+  if (!materials || materials.length === 0) {
+    return `
+      <section class="class-materials-section">
+
+        <div class="class-materials-header">
+
+          <p class="platform-label">
+            CLASS MATERIALS
+          </p>
+
+          <h2>
+            Your lessons.
+            <span>Your resources.</span>
+          </h2>
+
+          <p>
+            Everything created for your learning journey,
+            organized in one place.
+          </p>
+
+        </div>
+
+        <div class="empty-platform-state">
+          <p>No materials yet.</p>
+
+          <small>
+            Your teacher will add resources for your learning journey.
+          </small>
+        </div>
+
+      </section>
+    `
+  }
+
   return `
     <section class="class-materials-section">
 
@@ -23,93 +58,41 @@ export function renderClassMaterials(student) {
 
       <div class="class-materials-list">
 
+        ${materials.map((material, index) => `
 
-        <article class="class-material-item">
+          <article class="class-material-item reveal">
 
-          <div class="class-material-number">
-            01
-          </div>
+            <div class="class-material-number">
+              ${String(index + 1).padStart(2, '0')}
+            </div>
 
-          <div class="class-material-info">
+            <div class="class-material-info">
 
-            <span>
-              LESSON ${student.lessonsCompleted}
-            </span>
+              <span>
+                ${material.type.toUpperCase()} · ${material.language || student.language}${material.level ? ` · ${material.level}` : ''}
+              </span>
 
-            <h3>
-              ${student.currentModule}
-            </h3>
+              <h3>
+                ${material.title}
+              </h3>
 
-            <p>
-              Personalized material from your latest lesson.
-            </p>
+              <p>
+                ${material.description || 'Learning material'}
+              </p>
 
-          </div>
+            </div>
 
-          <button class="class-material-button">
-            Open ↗
-          </button>
+            <button
+              class="class-material-button"
+              onclick="window.voPlatform.openMaterial('${material.file_path}')"
+              id="btn-open-${material.id}"
+            >
+              Open ↗
+            </button>
 
-        </article>
+          </article>
 
-
-        <article class="class-material-item">
-
-          <div class="class-material-number">
-            02
-          </div>
-
-          <div class="class-material-info">
-
-            <span>
-              LANGUAGE GUIDE
-            </span>
-
-            <h3>
-              ${student.language} resources
-            </h3>
-
-            <p>
-              Useful resources selected for your current level.
-            </p>
-
-          </div>
-
-          <button class="class-material-button">
-            Open ↗
-          </button>
-
-        </article>
-
-
-        <article class="class-material-item">
-
-          <div class="class-material-number">
-            03
-          </div>
-
-          <div class="class-material-info">
-
-            <span>
-              PERSONALIZED
-            </span>
-
-            <h3>
-              Your learning notes
-            </h3>
-
-            <p>
-              Notes, feedback and recommendations from your lessons.
-            </p>
-
-          </div>
-
-          <button class="class-material-button">
-            Open ↗
-          </button>
-
-        </article>
-
+        `).join('')}
 
       </div>
 

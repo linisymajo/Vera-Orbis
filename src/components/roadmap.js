@@ -1,4 +1,68 @@
-export function renderRoadmap(student) {
+export function renderRoadmap(student = {}) {
+  const isGettingStartedDone = Boolean(
+    student.onboardingCompleted ||
+    student.hasCompletedOnboarding ||
+    student.assessmentCompleted ||
+    (student.lessonsCompleted && Number(student.lessonsCompleted) > 0)
+  )
+
+  const progressPercent = typeof student.progress === 'number'
+    ? Math.max(0, Math.min(100, Math.round(student.progress)))
+    : 0
+
+  const isModuleCompleted = isGettingStartedDone && (
+    progressPercent >= 100 ||
+    (student.totalLessons && Number(student.totalLessons) > 0 && Number(student.lessonsCompleted) >= Number(student.totalLessons))
+  )
+
+  // Step 1: Getting Started
+  const step1Class = isGettingStartedDone ? 'roadmap-step completed' : 'roadmap-step current'
+  const step1Marker = isGettingStartedDone ? '✓' : '01'
+  const step1Meta = isGettingStartedDone ? 'COMPLETED' : 'CURRENT'
+  const step1Desc = isGettingStartedDone
+    ? 'We discovered your current level, learning style and personal goals.'
+    : 'Discover your current level, learning style and personal goals to build your personalized path.'
+
+  // Step 2: Current Module
+  let step2Class = 'roadmap-step upcoming'
+  let step2Marker = '02'
+  let step2Meta = 'UPCOMING'
+  let step2Progress = 0
+
+  if (!isGettingStartedDone) {
+    step2Class = 'roadmap-step upcoming'
+    step2Marker = '02'
+    step2Meta = 'UPCOMING'
+    step2Progress = 0
+  } else if (isModuleCompleted) {
+    step2Class = 'roadmap-step completed'
+    step2Marker = '✓'
+    step2Meta = 'COMPLETED'
+    step2Progress = 100
+  } else {
+    step2Class = 'roadmap-step current'
+    step2Marker = '02'
+    step2Meta = 'CURRENT'
+    step2Progress = progressPercent
+  }
+
+  // Step 3: Next Stage
+  let step3Class = 'roadmap-step upcoming'
+  let step3Marker = '03'
+  let step3Meta = 'NEXT'
+
+  if (isModuleCompleted) {
+    step3Class = 'roadmap-step current'
+    step3Marker = '03'
+    step3Meta = 'CURRENT'
+  }
+
+  // Step 4: Destination
+  const isDestinationReached = isModuleCompleted && progressPercent >= 100
+  const step4Class = isDestinationReached ? 'roadmap-step destination completed' : 'roadmap-step destination'
+  const step4Marker = isDestinationReached ? '★' : '→'
+  const step4Meta = isDestinationReached ? 'ACHIEVED' : 'DESTINATION'
+
   return `
     <section class="roadmap-section">
 
@@ -25,19 +89,22 @@ export function renderRoadmap(student) {
       <div class="roadmap-container">
 
 
-        <!-- COMPLETED -->
+        <!-- STEP 01: GETTING STARTED -->
 
-        <article class="roadmap-step completed">
-
+        <button
+          type="button"
+          class="${step1Class}"
+          data-roadmap-step="getting-started"
+        >
           <div class="roadmap-marker">
-            ✓
+            ${step1Marker}
           </div>
 
           <div class="roadmap-content">
 
             <div class="roadmap-meta">
               <span>01</span>
-              <span>COMPLETED</span>
+              <span>${step1Meta}</span>
             </div>
 
             <h3>
@@ -45,32 +112,35 @@ export function renderRoadmap(student) {
             </h3>
 
             <p>
-              We discovered your current level,
-              learning style and personal goals.
+              ${step1Desc}
             </p>
 
           </div>
 
-        </article>
+        </button>
 
 
-        <!-- CURRENT -->
+        <!-- STEP 02: CURRENT MODULE -->
 
-        <article class="roadmap-step current">
+        <button
+          type="button"
+          class="${step2Class}"
+          data-roadmap-step="current"
+        >
 
           <div class="roadmap-marker">
-            02
+            ${step2Marker}
           </div>
 
           <div class="roadmap-content">
 
             <div class="roadmap-meta">
               <span>02</span>
-              <span>CURRENT</span>
+              <span>${step2Meta}</span>
             </div>
 
             <h3>
-              ${student.currentModule}
+              ${student.currentModule || 'Speaking Foundations'}
             </h3>
 
             <p>
@@ -82,13 +152,13 @@ export function renderRoadmap(student) {
 
               <div class="roadmap-progress-top">
                 <span>MODULE PROGRESS</span>
-                <strong>${student.progress}%</strong>
+                <strong>${step2Progress}%</strong>
               </div>
 
               <div class="roadmap-progress-bar">
                 <div
                   class="roadmap-progress-fill"
-                  style="width: ${student.progress}%"
+                  style="width: ${step2Progress}%"
                 ></div>
               </div>
 
@@ -96,22 +166,26 @@ export function renderRoadmap(student) {
 
           </div>
 
-        </article>
+        </button>
 
 
-        <!-- NEXT -->
+        <!-- STEP 03: UPCOMING -->
 
-        <article class="roadmap-step upcoming">
+        <button
+          type="button"
+          class="${step3Class}"
+          data-roadmap-step="next"
+        >
 
           <div class="roadmap-marker">
-            03
+            ${step3Marker}
           </div>
 
           <div class="roadmap-content">
 
             <div class="roadmap-meta">
               <span>03</span>
-              <span>NEXT</span>
+              <span>${step3Meta}</span>
             </div>
 
             <h3>
@@ -125,26 +199,30 @@ export function renderRoadmap(student) {
 
           </div>
 
-        </article>
+        </button>
 
 
-        <!-- DESTINATION -->
+        <!-- STEP 04: DESTINATION -->
 
-        <article class="roadmap-step destination">
+        <button
+          type="button"
+          class="${step4Class}"
+          data-roadmap-step="destination"
+        >
 
           <div class="roadmap-marker">
-            →
+            ${step4Marker}
           </div>
 
           <div class="roadmap-content">
 
             <div class="roadmap-meta">
               <span>04</span>
-              <span>DESTINATION</span>
+              <span>${step4Meta}</span>
             </div>
 
             <h3>
-              ${student.goal}
+              ${student.goal || 'Fluency Destination'}
             </h3>
 
             <p>
@@ -154,7 +232,7 @@ export function renderRoadmap(student) {
 
           </div>
 
-        </article>
+        </button>
 
 
       </div>
