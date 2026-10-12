@@ -30,6 +30,7 @@ create table if not exists public.exercise_assignments (
   available_from timestamptz,
   due_at timestamptz,
   status text not null default 'assigned' check (status in ('assigned', 'completed', 'revoked')),
+  assigned_at timestamptz not null default now(),
   created_at timestamptz not null default now(),
   foreign key (exercise_id, teacher_id) references public.exercises(id, teacher_id) on delete cascade,
   unique (exercise_id, student_id)
@@ -53,9 +54,13 @@ alter table public.exercises enable row level security;
 alter table public.exercise_assignments enable row level security;
 alter table public.exercise_attempts enable row level security;
 
+-- Idempotent RLS Policies
+drop policy if exists "teachers manage own exercises" on public.exercises;
 create policy "teachers manage own exercises" on public.exercises for all to authenticated
   using (teacher_id = (select auth.uid()))
   with check (teacher_id = (select auth.uid()));
+
+drop policy if exists "teachers manage own exercise assignments" on public.exercise_assignments;
 create policy "teachers manage own exercise assignments" on public.exercise_assignments for all to authenticated
   using (teacher_id = (select auth.uid()))
   with check (
@@ -66,6 +71,8 @@ create policy "teachers manage own exercise assignments" on public.exercise_assi
         and e.teacher_id = (select auth.uid())
     )
   );
+
+drop policy if exists "students read assigned published exercises" on public.exercise_assignments;
 create policy "students read assigned published exercises" on public.exercise_assignments for select to authenticated
   using (
     student_id = (select auth.uid())
@@ -75,6 +82,8 @@ create policy "students read assigned published exercises" on public.exercise_as
       where e.id = exercise_assignments.exercise_id and e.status = 'published'
     )
   );
+
+drop policy if exists "students read assigned exercise content" on public.exercises;
 create policy "students read assigned exercise content" on public.exercises for select to authenticated
   using (
     status = 'published'
@@ -85,6 +94,8 @@ create policy "students read assigned exercise content" on public.exercises for 
         and a.status <> 'revoked'
     )
   );
+
+drop policy if exists "students manage own exercise attempts" on public.exercise_attempts;
 create policy "students manage own exercise attempts" on public.exercise_attempts for all to authenticated
   using (student_id = (select auth.uid()))
   with check (
@@ -98,6 +109,8 @@ create policy "students manage own exercise attempts" on public.exercise_attempt
         and e.status = 'published'
     )
   );
+
+drop policy if exists "teachers read own exercise attempts" on public.exercise_attempts;
 create policy "teachers read own exercise attempts" on public.exercise_attempts for select to authenticated
   using (exists (
     select 1
@@ -106,6 +119,7 @@ create policy "teachers read own exercise attempts" on public.exercise_attempts 
       and a.teacher_id = (select auth.uid())
   ));
 
+-- Sanitized Student View: strips answers and explanations so students never see the key
 create or replace view public.student_exercises
 with (security_invoker = false) as
 select
@@ -120,10 +134,14 @@ select
   e.level,
   e.objective,
   e.exercise_type,
-  coalesce((
-    select jsonb_agg(q - 'answer' - 'explanation' order by ordinality)
-    from jsonb_array_elements(e.questions) with ordinality as question(q, ordinality)
-  ), '[]'::jsonb) as questions
+  case
+    when jsonb_typeof(e.questions) = 'array' then
+      coalesce((
+        select jsonb_agg(q - 'answer' - 'explanation' order by ordinality)
+        from jsonb_array_elements(e.questions) with ordinality as question(q, ordinality)
+      ), '[]'::jsonb)
+    else '[]'::jsonb
+  end as questions
 from public.exercise_assignments a
 join public.exercises e on e.id = a.exercise_id
 where a.student_id = (select auth.uid())
@@ -131,5 +149,9 @@ where a.student_id = (select auth.uid())
   and e.status = 'published'
   and (a.available_from is null or a.available_from <= now());
 
+-- Grant permissions to authenticated role
+grant select, insert, update, delete on public.exercises to authenticated;
+grant select, insert, update, delete on public.exercise_assignments to authenticated;
+grant select, insert, update, delete on public.exercise_attempts to authenticated;
 revoke all on public.student_exercises from public;
 grant select on public.student_exercises to authenticated;
