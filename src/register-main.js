@@ -40,16 +40,16 @@ document.querySelector('#app').innerHTML = `
         <div class="login-header">
 
           <p class="login-label">
-            STUDENT PLATFORM
+            PLATAFORMA DE ESTUDIANTES
           </p>
 
           <h2>
-            Start your journey.
+            Comienza tu viaje.
           </h2>
 
           <p>
-            Create your Vera Orbis account
-            to begin your language journey.
+            Crea tu cuenta en Vera Orbis
+            para iniciar tu aprendizaje de idiomas.
           </p>
 
         </div>
@@ -61,39 +61,39 @@ document.querySelector('#app').innerHTML = `
         >
 
           <label for="name">
-            Name
+            Nombre
           </label>
 
           <input
             type="text"
             id="name"
-            placeholder="Your name"
+            placeholder="Tu nombre"
             autocomplete="name"
             required
           >
 
 
           <label for="email">
-            Email
+            Correo electrónico
           </label>
 
           <input
             type="email"
             id="email"
-            placeholder="you@example.com"
+            placeholder="tu@ejemplo.com"
             autocomplete="email"
             required
           >
 
 
           <label for="password">
-            Password
+            Contraseña
           </label>
 
           <input
             type="password"
             id="password"
-            placeholder="Create a password"
+            placeholder="Crea una contraseña"
             autocomplete="new-password"
             minlength="6"
             required
@@ -101,13 +101,13 @@ document.querySelector('#app').innerHTML = `
 
 
           <label for="confirm-password">
-            Confirm password
+            Confirmar contraseña
           </label>
 
           <input
             type="password"
             id="confirm-password"
-            placeholder="Repeat your password"
+            placeholder="Repite tu contraseña"
             autocomplete="new-password"
             minlength="6"
             required
@@ -131,7 +131,7 @@ document.querySelector('#app').innerHTML = `
             class="login-button"
           >
             <span class="button-text">
-              Create account
+              Crear cuenta
             </span>
 
             <span>
@@ -143,9 +143,9 @@ document.querySelector('#app').innerHTML = `
 
 
         <p class="login-note">
-          Already have an account?
+          ¿Ya tienes una cuenta?
           <a href="/login.html">
-            Sign in
+            Iniciar sesión
           </a>
         </p>
 
@@ -194,17 +194,19 @@ registerForm.addEventListener('submit', async (event) => {
 
 
   if (password !== confirmPassword) {
-
     registerError.textContent =
-      'Passwords do not match.'
-
+      'Las contraseñas no coinciden.'
     return
   }
 
+  if (password.length < 6) {
+    registerError.textContent =
+      'La contraseña debe tener al menos 6 caracteres.'
+    return
+  }
 
   registerButton.disabled = true
-  buttonText.textContent = 'Creating account...'
-
+  buttonText.textContent = 'Creando cuenta...'
 
   const { data, error } =
     await supabase.auth.signUp({
@@ -217,24 +219,28 @@ registerForm.addEventListener('submit', async (event) => {
     }
   })
 
-
   if (error) {
-
-    registerError.textContent =
-      error.message || 'Unable to create your account.'
+    let msg = error.message || 'No se pudo crear tu cuenta.'
+    if (msg.toLowerCase().includes('already registered') || msg.toLowerCase().includes('already in use')) {
+      msg = 'Ya existe una cuenta con este correo electrónico.'
+    } else if (msg.toLowerCase().includes('at least 6 characters') || msg.toLowerCase().includes('password should be')) {
+      msg = 'La contraseña debe tener al menos 6 caracteres.'
+    } else if (msg.toLowerCase().includes('valid email') || msg.toLowerCase().includes('invalid format')) {
+      msg = 'Ingresa un correo electrónico válido.'
+    }
+    registerError.textContent = msg
 
     registerButton.disabled = false
-    buttonText.textContent = 'Create account'
+    buttonText.textContent = 'Crear cuenta'
 
     return
   }
-
 
   if (data?.session?.user) {
     try {
       await supabase.from('profiles').upsert({
         id: data.session.user.id,
-        name: name || data.session.user.email?.split('@')[0] || 'Student',
+        name: name || data.session.user.email?.split('@')[0] || 'Estudiante',
         language: 'English',
         level: 'A1',
         level_name: 'Beginner',
@@ -249,7 +255,7 @@ registerForm.addEventListener('submit', async (event) => {
     }
 
     registerSuccess.textContent =
-      'Account created! Directing you to your onboarding...'
+      '¡Cuenta creada! Redirigiéndote a tu bienvenida...'
 
     setTimeout(() => {
       window.location.href = '/onboarding.html'
@@ -258,13 +264,12 @@ registerForm.addEventListener('submit', async (event) => {
     return
   }
 
-
   registerSuccess.innerHTML =
-    'Your account has been created. Please check your email to confirm your account.<br><br><a href="/login.html" style="color: inherit; text-decoration: underline; font-weight: 600;">Go to Sign in ↗</a>'
+    'Tu cuenta ha sido creada. Por favor, revisa tu correo electrónico para confirmarla.<br><br><a href="/login.html" style="color: inherit; text-decoration: underline; font-weight: 600;">Ir a iniciar sesión ↗</a>'
 
   registerForm.reset()
 
   registerButton.disabled = false
-  buttonText.textContent = 'Create account'
+  buttonText.textContent = 'Crear cuenta'
 
 })

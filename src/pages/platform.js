@@ -7,6 +7,7 @@ import { renderExercises } from '../components/exercises.js'
 
 const VO_LOGO = '/logo/Logo%20Vera%20Orbis%20recoloreado.png'
 const VERA_VOICE_AVATAR = '/assets/Vera.png'
+const VERA_VOICE_URL = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_VERA_VOICE_URL) || 'http://localhost:3000/'
 
 export function renderPlatform(
   student,
@@ -728,7 +729,7 @@ export function renderPlatform(
                   <p>Practice your language and learn at your own pace.</p>
                   <a
                     class="vera-voice-launch"
-                    href="http://localhost:3000/"
+                    href="${VERA_VOICE_URL}"
                     data-vera-voice-launch
                     tabindex="-1"
                   >Talk to Vera</a>
@@ -814,6 +815,38 @@ export function renderPlatform(
         </span>
 
       </footer>
+
+      <!-- =====================================================
+           VERA VOICE IN-PAGE MODAL
+      ====================================================== -->
+      <div id="vera-voice-modal" class="vera-voice-modal" hidden aria-hidden="true">
+        <div class="vera-voice-modal-backdrop" data-vera-voice-close></div>
+        <div class="vera-voice-modal-dialog">
+          <div class="vera-voice-modal-header">
+            <div class="vera-voice-modal-brand">
+              <img src="${VERA_VOICE_AVATAR}" alt="Vera" class="vera-modal-avatar">
+              <div>
+                <h3>Vera Voice</h3>
+                <p>Your speaking partner</p>
+              </div>
+            </div>
+            <div class="vera-voice-modal-actions">
+              <a href="${VERA_VOICE_URL}" target="_blank" rel="noopener noreferrer" class="vera-voice-external-link" id="vera-voice-external-link" title="Abrir en ventana completa">
+                Ventana completa ↗
+              </a>
+              <button type="button" class="vera-voice-modal-close" data-vera-voice-close aria-label="Cerrar Vera Voice">✕</button>
+            </div>
+          </div>
+          <div class="vera-voice-frame-wrapper">
+            <iframe
+              id="vera-voice-frame"
+              src="about:blank"
+              allow="microphone; camera"
+              title="Vera Voice Tutor"
+            ></iframe>
+          </div>
+        </div>
+      </div>
 
     </div>
   `

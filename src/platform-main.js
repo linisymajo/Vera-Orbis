@@ -341,96 +341,182 @@ function setupPlatformNavigation() {
       ?.setAttribute('tabindex', isFlipped ? '0' : '-1')
   }
 
-  async function launchVeraVoice(trigger) {
-  const card = trigger.closest('.vera-voice-card')
-  const status = card?.querySelector('.vera-voice-status')
-  const url = VERA_VOICE_URL.endsWith('/')
-    ? VERA_VOICE_URL
-    : `${VERA_VOICE_URL}/`
-
-  const opened = window.open('about:blank', '_blank')
-
-  if (status) status.textContent = 'Connecting to Vera Voice...'
-  trigger.setAttribute('aria-disabled', 'true')
-
-  let timeoutId
-  let messageHandler
-
-  try {
-    if (!opened) {
-      throw new Error('The browser blocked the new tab.')
+  function closeVeraVoiceModal() {
+    const modal = document.querySelector('#vera-voice-modal')
+    const frame = document.querySelector('#vera-voice-frame')
+    if (!modal) return
+    modal.hidden = true
+    modal.setAttribute('aria-hidden', 'true')
+    document.body.classList.remove('modal-open')
+    if (frame) {
+      frame.src = 'about:blank'
     }
+  }
+
+  async function launchVeraVoice(trigger) {
+    const card = trigger?.closest('.vera-voice-card')
+    const status = card?.querySelector('.vera-voice-status')
+    const modal = document.querySelector('#vera-voice-modal')
+    const frame = document.querySelector('#vera-voice-frame')
+    const externalLink = document.querySelector('#vera-voice-external-link')
+    const url = VERA_VOICE_URL.endsWith('/')
+      ? VERA_VOICE_URL
+      : `${VERA_VOICE_URL}/`
+
+    if (externalLink) {
+      externalLink.href = url
+    }
+
+    if (status) status.textContent = 'Conectando con Vera Voice...'
+    trigger?.setAttribute('aria-disabled', 'true')
 
     const veraOrigin = new URL(url).origin
+    let timeoutId
+    let messageHandler
 
-    messageHandler = async (event) => {
-      if (event.origin !== veraOrigin) return
-      if (event.source !== opened) return
-      if (event.data?.type !== 'VERA_AUTH_READY') return
+    // In-page modal experience
+    if (modal && frame) {
+      modal.hidden = false
+      modal.setAttribute('aria-hidden', 'false')
+      document.body.classList.add('modal-open')
 
-      window.removeEventListener('message', messageHandler)
-      clearTimeout(timeoutId)
+      messageHandler = async (event) => {
+        if (event.origin !== veraOrigin) return
+        if (event.source !== frame.contentWindow) return
+        if (event.data?.type !== 'VERA_AUTH_READY') return
 
-      try {
-        const {
-          data: { session },
-          error
-        } = await supabase.auth.getSession()
+        clearTimeout(timeoutId)
 
-        if (error || !session?.access_token) {
-          throw new Error('No active student session was found.')
-        }
+        try {
+          const {
+            data: { session },
+            error
+          } = await supabase.auth.getSession()
 
-        if (opened.closed) return
+          if (error || !session?.access_token) {
+            throw new Error('No active student session was found.')
+          }
 
-        opened.postMessage(
-          {
-            type: 'VERA_AUTH_CONTEXT',
-            accessToken: session.access_token
-          },
-          veraOrigin
-        )
+          frame.contentWindow.postMessage(
+            {
+              type: 'VERA_AUTH_CONTEXT',
+              accessToken: session.access_token
+            },
+            veraOrigin
+          )
 
-        if (status) {
-          status.textContent = 'Student session sent to Vera Voice.'
-        }
-      } catch (error) {
-        console.error('Vera Voice authentication failed.')
-        if (status) {
-          status.textContent = 'Could not connect the student session.'
+          if (status) {
+            status.textContent = 'Sesión conectada con Vera Voice.'
+          }
+        } catch (err) {
+          console.error('Vera Voice auth error:', err)
+          if (status) {
+            status.textContent = 'No se pudo conectar la sesión.'
+          }
         }
       }
+
+      window.addEventListener('message', messageHandler)
+
+      timeoutId = setTimeout(() => {
+        if (status) {
+          status.textContent =
+            'Vera Voice tardó en responder. Verifica que esté iniciada.'
+        }
+      }, 15000)
+
+      frame.src = url
+      trigger?.removeAttribute('aria-disabled')
+      return
     }
 
-    window.addEventListener('message', messageHandler)
+    // Fallback: window popup
+    let opened = null
+    try {
+      opened = window.open('about:blank', '_blank')
+      if (!opened) {
+        throw new Error('The browser blocked the new tab.')
+      }
 
-    timeoutId = setTimeout(() => {
-      window.removeEventListener('message', messageHandler)
+      messageHandler = async (event) => {
+        if (event.origin !== veraOrigin) return
+        if (event.source !== opened) return
+        if (event.data?.type !== 'VERA_AUTH_READY') return
+
+        window.removeEventListener('message', messageHandler)
+        clearTimeout(timeoutId)
+
+        try {
+          const {
+            data: { session },
+            error
+          } = await supabase.auth.getSession()
+
+          if (error || !session?.access_token) {
+            throw new Error('No active student session was found.')
+          }
+
+          if (opened.closed) return
+
+          opened.postMessage(
+            {
+              type: 'VERA_AUTH_CONTEXT',
+              accessToken: session.access_token
+            },
+            veraOrigin
+          )
+
+          if (status) {
+            status.textContent = 'Sesión enviada a Vera Voice.'
+          }
+        } catch (error) {
+          console.error('Vera Voice authentication failed.')
+          if (status) {
+            status.textContent = 'No se pudo conectar la sesión.'
+          }
+        }
+      }
+
+      window.addEventListener('message', messageHandler)
+
+      timeoutId = setTimeout(() => {
+        window.removeEventListener('message', messageHandler)
+        if (status) {
+          status.textContent =
+            'Vera Voice tardó en responder. Verifica que esté iniciada.'
+        }
+      }, 15000)
+
+      opened.location.href = url
+    } catch (error) {
+      console.error('Vera Voice could not be launched.')
+      opened?.close()
 
       if (status) {
         status.textContent =
-          'Vera Voice did not respond. Check that it is running.'
+          'Vera Voice no está disponible. Iníciala localmente e intenta de nuevo.'
       }
-    }, 15000)
-
-    opened.location.href = url
-  } catch (error) {
-    console.error('Vera Voice could not be launched.')
-    opened?.close()
-
-    if (status) {
-      status.textContent =
-        'Vera Voice is not available. Start it locally and try again.'
+    } finally {
+      trigger?.removeAttribute('aria-disabled')
     }
-  } finally {
-    trigger.removeAttribute('aria-disabled')
   }
-}
 
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      closeVeraVoiceModal()
+    }
+  })
 
   document.addEventListener(
     'click',
     (event) => {
+      const veraClose = event.target.closest('[data-vera-voice-close]')
+      if (veraClose) {
+        event.preventDefault()
+        closeVeraVoiceModal()
+        return
+      }
+
       const veraLaunch = event.target.closest('[data-vera-voice-launch]')
 
       if (veraLaunch) {

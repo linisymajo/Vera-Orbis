@@ -2614,6 +2614,145 @@ a {
 }
 
 /* =========================================================
+   VERA VOICE IN-PAGE MODAL
+   ========================================================= */
+
+.vera-voice-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.vera-voice-modal[hidden] {
+  display: none !important;
+}
+
+.vera-voice-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(24, 59, 102, 0.76);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.vera-voice-modal-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(1040px, 96vw);
+  height: min(88vh, 820px);
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 28px 70px rgba(24, 59, 102, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.vera-voice-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #183B66 0%, #274d78 60%, #6C3BFF 100%);
+  color: #FFF9F0;
+  flex-shrink: 0;
+}
+
+.vera-voice-modal-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.vera-modal-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid #20C7B5;
+  object-fit: cover;
+}
+
+.vera-voice-modal-brand h3 {
+  margin: 0;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 20px;
+  color: #FFF9F0;
+}
+
+.vera-voice-modal-brand p {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: rgba(255, 249, 240, 0.75);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.vera-voice-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.vera-voice-external-link {
+  font-size: 12px;
+  font-weight: 600;
+  color: #FFC83D;
+  text-decoration: none;
+  padding: 6px 14px;
+  border: 1px solid rgba(255, 200, 61, 0.35);
+  border-radius: 999px;
+  transition: all 0.2s ease;
+}
+
+.vera-voice-external-link:hover {
+  background: rgba(255, 200, 61, 0.15);
+  color: #ffffff;
+}
+
+.vera-voice-modal-close {
+  appearance: none;
+  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  color: #FFF9F0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  transition: background 0.2s ease;
+}
+
+.vera-voice-modal-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.vera-voice-frame-wrapper {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  background: #FFF9F0;
+  overflow: hidden;
+}
+
+.vera-voice-frame-wrapper iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+/* =========================================================
    LEARNING DETAIL VIEWS
    ========================================================= */
 

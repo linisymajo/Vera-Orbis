@@ -95,7 +95,9 @@ const DEFAULT_SUPPORTED_ORIGINS = [
   "http://localhost:4173",
   "http://127.0.0.1:5173",
   "http://127.0.0.1:5174",
-  "http://127.0.0.1:4173"
+  "http://127.0.0.1:4173",
+  "https://veraorbis.studio",
+  "https://linisymajo.github.io"
 ];
 const configuredOrigins = CORS_ORIGIN.split(",").map((o) => o.trim()).filter(Boolean);
 const allowedOriginsSet = new Set([...DEFAULT_SUPPORTED_ORIGINS, ...configuredOrigins]);
@@ -138,6 +140,26 @@ const idiomaConfig = {
     instrucciones: "Usa el mandarín simplificado como idioma de práctica. Incluye pinyin cuando sea útil y usa el idioma de apoyo solo para aclaraciones puntuales."
   }
 };
+
+function normalizarIdioma(raw) {
+  if (!raw || typeof raw !== "string") return "ingles";
+  const str = raw.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+  if (str.includes("ingl") || str.includes("engl") || str === "en") return "ingles";
+  if (str.includes("franc") || str.includes("french") || str === "fr") return "frances";
+  if (str.includes("mandar") || str.includes("chin") || str === "zh") return "mandarin";
+  if (idiomasPermitidos.includes(str)) return str;
+  return "ingles";
+}
+
+function normalizarNivel(raw) {
+  if (!raw || typeof raw !== "string") return "basico";
+  const str = raw.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+  if (str === "a1" || str === "a2" || str.includes("basic") || str.includes("begin") || str.includes("princip")) return "basico";
+  if (str === "b1" || str === "b2" || str.includes("interm")) return "intermedio";
+  if (str === "c1" || str === "c2" || str.includes("avanz") || str.includes("advanc")) return "avanzado";
+  if (nivelesPermitidos.includes(str)) return str;
+  return "basico";
+}
 
 const instruccionesIdiomaPorNivel = {
   basico: `
@@ -407,11 +429,13 @@ function getErrorMessage(status) {
 
 app.use(helmet({
   crossOriginResourcePolicy: false,
+  frameguard: false,
   contentSecurityPolicy: {
     directives: {
       connectSrc: ["'self'", GEMINI_LIVE_WS_ORIGIN],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"]
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      frameAncestors: ["'self'", ...Array.from(allowedOriginsSet)]
     }
   }
 }));
@@ -457,22 +481,15 @@ app.use("/api", rateLimit({
   }
 
   const { profile } = authResult;
-  const idioma = profile.language;
-  const nivel = profile.level;
-
-  const {
+  let {
+    idioma,
+    nivel,
     modo = "conversacion",
     idiomaApoyo = "espanol"
   } = req.body || {};
 
-  if (
-    !idiomasPermitidos.includes(idioma) ||
-    !nivelesPermitidos.includes(nivel)
-  ) {
-    return res.status(400).json({
-      error: "El idioma o el nivel del perfil no coincide con las opciones configuradas para Vera."
-    });
-  }
+  idioma = normalizarIdioma(idioma || profile.language);
+  nivel = normalizarNivel(nivel || profile.level);
 
   if (!idiomasPermitidos.includes(idioma)) {
     return res.status(400).json({
@@ -571,13 +588,15 @@ app.get("/api/auth/profile", async (req, res) => {
     }
 
     const { profile } = result;
+    const idioma = normalizarIdioma(profile.language);
+    const nivel = normalizarNivel(profile.level);
 
     return res.json({
       id: profile.id,
       name: profile.name,
-      language: profile.language,
-      level: profile.level,
-      levelName: profile.level_name
+      language: idioma,
+      level: nivel,
+      levelName: profile.level_name || nivel
     });
   } catch (error) {
     console.error("Error verificando el perfil:", error.message);
@@ -607,17 +626,8 @@ if (authResult.error) {
 }
 
 const { profile } = authResult;
-const idioma = profile.language;
-const nivel = profile.level;
-
-if (
-  !idiomasPermitidos.includes(idioma) ||
-  !nivelesPermitidos.includes(nivel)
-) {
-  return res.status(400).json({
-    error: "El idioma o el nivel del perfil no coincide con las opciones configuradas para Vera."
-  });
-}
+const idioma = normalizarIdioma(profile.language);
+const nivel = normalizarNivel(profile.level);
 const entradaValidada = {
   ...req.body,
   idioma,

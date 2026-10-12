@@ -39,7 +39,9 @@ const DEFAULT_ALLOWED_PLATFORM_ORIGINS = [
   "http://localhost:4173",
   "http://127.0.0.1:5173",
   "http://127.0.0.1:5174",
-  "http://127.0.0.1:4173"
+  "http://127.0.0.1:4173",
+  "https://veraorbis.studio",
+  "https://linisymajo.github.io"
 ];
 
 const allowedPlatformOrigins = new Set(DEFAULT_ALLOWED_PLATFORM_ORIGINS);
@@ -52,6 +54,12 @@ function isAllowedPlatformOrigin(origin) {
   } catch {
     return false;
   }
+}
+
+function getParentWindow() {
+  if (window.opener) return window.opener;
+  if (window.parent && window.parent !== window) return window.parent;
+  return null;
 }
 
 function getOpenerOrigin() {
@@ -67,13 +75,14 @@ function getOpenerOrigin() {
 }
 
 function sendAuthReadySignal() {
-  if (!window.opener) return;
+  const targetWindow = getParentWindow();
+  if (!targetWindow) return;
   const target = getOpenerOrigin();
   if (target) {
-    window.opener.postMessage({ type: "VERA_AUTH_READY" }, target);
+    targetWindow.postMessage({ type: "VERA_AUTH_READY" }, target);
   } else {
     for (const origin of allowedPlatformOrigins) {
-      window.opener.postMessage({ type: "VERA_AUTH_READY" }, origin);
+      targetWindow.postMessage({ type: "VERA_AUTH_READY" }, origin);
     }
   }
 }
@@ -105,7 +114,8 @@ function applyStudentProfile(profile) {
 
 window.addEventListener("message", async (event) => {
   if (!isAllowedPlatformOrigin(event.origin)) return;
-  if (event.source !== window.opener) return;
+  const parentWindow = getParentWindow();
+  if (event.source !== parentWindow) return;
 
   if (event.data?.type !== "VERA_AUTH_CONTEXT") return;
 

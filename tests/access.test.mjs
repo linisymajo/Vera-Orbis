@@ -427,3 +427,52 @@ test('storage migration 0005 enforces least-privilege private access for student
   assert.match(sql, /\(storage\.foldername\(name\)\)\[1\]\s*=\s*\(select auth\.uid\(\)\)::text/)
   assert.match(sql, /create policy "Teachers can upload materials"/)
 })
+
+test('registration interface is completely in Spanish', () => {
+  const regSource = readFileSync(
+    new URL('../src/register-main.js', import.meta.url),
+    'utf8'
+  )
+  const regHtml = readFileSync(
+    new URL('../register.html', import.meta.url),
+    'utf8'
+  )
+
+  assert.match(regHtml, /<title>Vera Orbis — Crear cuenta<\/title>/)
+  assert.match(regSource, /PLATAFORMA DE ESTUDIANTES/)
+  assert.match(regSource, /Comienza tu viaje\./)
+  assert.match(regSource, /Nombre/)
+  assert.match(regSource, /Correo electrónico/)
+  assert.match(regSource, /Contraseña/)
+  assert.match(regSource, /Confirmar contraseña/)
+  assert.match(regSource, /Crear cuenta/)
+  assert.match(regSource, /Las contraseñas no coinciden\./)
+  assert.match(regSource, /¿Ya tienes una cuenta\?/)
+  assert.match(regSource, /Iniciar sesión/)
+})
+
+test('vera voice is integrated within the platform page with in-page modal and avatar states', () => {
+  const platSource = readFileSync(
+    new URL('../src/pages/platform.js', import.meta.url),
+    'utf8'
+  )
+  const mainSource = readFileSync(
+    new URL('../src/platform-main.js', import.meta.url),
+    'utf8'
+  )
+  const appSource = readFileSync(
+    new URL('../vera-tutor-backend/public/app.js', import.meta.url),
+    'utf8'
+  )
+  const serverSource = readFileSync(
+    new URL('../vera-tutor-backend/server.js', import.meta.url),
+    'utf8'
+  )
+
+  assert.match(platSource, /id="vera-voice-modal"/)
+  assert.match(platSource, /id="vera-voice-frame"/)
+  assert.match(mainSource, /closeVeraVoiceModal/)
+  assert.match(appSource, /getParentWindow/)
+  assert.match(serverSource, /normalizarIdioma/)
+  assert.match(serverSource, /normalizarNivel/)
+})
