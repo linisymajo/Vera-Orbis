@@ -117,6 +117,11 @@ window.addEventListener("message", async (event) => {
   const parentWindow = getParentWindow();
   if (event.source !== parentWindow) return;
 
+  if (event.data?.type === "VERA_PING") {
+    sendAuthReadySignal();
+    return;
+  }
+
   if (event.data?.type !== "VERA_AUTH_CONTEXT") return;
 
   const accessToken = event.data.accessToken;
@@ -166,6 +171,8 @@ fetch(`${API_BASE_URL}/api/config`)
   .catch(() => {})
   .finally(() => {
     sendAuthReadySignal();
+    setTimeout(sendAuthReadySignal, 400);
+    setTimeout(sendAuthReadySignal, 1200);
   });
 let conversationHistory = [];
 let lastAssistantResponse = "";

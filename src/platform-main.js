@@ -367,7 +367,18 @@ function setupPlatformNavigation() {
       ?.setAttribute('tabindex', isFlipped ? '0' : '-1')
   }
 
+  let activeVeraVoiceMessageHandler = null
+  let activeVeraVoiceTimeoutId = null
+
   function closeVeraVoiceModal() {
+    if (activeVeraVoiceTimeoutId) {
+      clearTimeout(activeVeraVoiceTimeoutId)
+      activeVeraVoiceTimeoutId = null
+    }
+    if (activeVeraVoiceMessageHandler) {
+      window.removeEventListener('message', activeVeraVoiceMessageHandler)
+      activeVeraVoiceMessageHandler = null
+    }
     const modal = document.querySelector('#vera-voice-modal')
     const frame = document.querySelector('#vera-voice-frame')
     const notice = document.querySelector('#vera-voice-notice')
@@ -378,6 +389,7 @@ function setupPlatformNavigation() {
     document.body.classList.remove('modal-open')
     if (frame) {
       frame.src = 'about:blank'
+      frame.onload = null
     }
     if (notice) {
       notice.hidden = true
@@ -467,7 +479,10 @@ function setupPlatformNavigation() {
         if (event.source !== frame.contentWindow) return
         if (event.data?.type !== 'VERA_AUTH_READY') return
 
-        clearTimeout(timeoutId)
+        if (activeVeraVoiceTimeoutId) {
+          clearTimeout(activeVeraVoiceTimeoutId)
+          activeVeraVoiceTimeoutId = null
+        }
         if (loader) loader.hidden = true
 
         try {
@@ -499,16 +514,29 @@ function setupPlatformNavigation() {
         }
       }
 
+      if (activeVeraVoiceTimeoutId) {
+        clearTimeout(activeVeraVoiceTimeoutId)
+      }
+      if (activeVeraVoiceMessageHandler) {
+        window.removeEventListener('message', activeVeraVoiceMessageHandler)
+      }
+
+      activeVeraVoiceMessageHandler = messageHandler
       window.addEventListener('message', messageHandler)
 
-      timeoutId = setTimeout(() => {
+      activeVeraVoiceTimeoutId = setTimeout(() => {
         if (loader) loader.hidden = true
         if (status) {
           status.textContent =
             'Vera Voice tardó en responder. Si el servidor backend está despertando, espera unos segundos y reintenta.'
         }
-      }, 20000)
+      }, 25000)
 
+      frame.onload = () => {
+        try {
+          frame.contentWindow?.postMessage({ type: 'VERA_PING' }, veraOrigin)
+        } catch {}
+      }
       frame.src = url
       trigger?.removeAttribute('aria-disabled')
       return
