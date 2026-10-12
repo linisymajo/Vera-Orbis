@@ -40,8 +40,11 @@ const DEFAULT_ALLOWED_PLATFORM_ORIGINS = [
   "http://127.0.0.1:5173",
   "http://127.0.0.1:5174",
   "http://127.0.0.1:4173",
+  "http://127.0.0.1:4174",
   "https://veraorbis.studio",
-  "https://linisymajo.github.io"
+  "https://linisymajo.github.io",
+  "https://vera-orbis.onrender.com",
+  "https://vera-tutor-backend.onrender.com"
 ];
 
 const allowedPlatformOrigins = new Set(DEFAULT_ALLOWED_PLATFORM_ORIGINS);
@@ -50,10 +53,21 @@ function isAllowedPlatformOrigin(origin) {
   if (!origin || typeof origin !== "string") return false;
   try {
     const parsed = new URL(origin);
-    return allowedPlatformOrigins.has(parsed.origin);
+    if (allowedPlatformOrigins.has(parsed.origin)) return true;
+    const host = parsed.hostname;
+    if (
+      host === "localhost" ||
+      host === "127.0.0.1" ||
+      host.endsWith(".onrender.com") ||
+      host.endsWith("veraorbis.studio") ||
+      host.endsWith("github.io")
+    ) {
+      return true;
+    }
   } catch {
     return false;
   }
+  return false;
 }
 
 function getParentWindow() {

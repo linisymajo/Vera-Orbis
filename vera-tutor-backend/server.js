@@ -102,10 +102,31 @@ const DEFAULT_SUPPORTED_ORIGINS = [
   "http://127.0.0.1:5174",
   "http://127.0.0.1:4173",
   "https://veraorbis.studio",
-  "https://linisymajo.github.io"
+  "https://linisymajo.github.io",
+  "https://vera-orbis.onrender.com",
+  "https://vera-tutor-backend.onrender.com"
 ];
 const configuredOrigins = CORS_ORIGIN.split(",").map((o) => o.trim()).filter(Boolean);
 const allowedOriginsSet = new Set([...DEFAULT_SUPPORTED_ORIGINS, ...configuredOrigins]);
+
+function isAllowedOrigin(origin) {
+  if (!origin || origin === "null") return true;
+  if (allowedOriginsSet.has(origin)) return true;
+  try {
+    const parsed = new URL(origin);
+    const host = parsed.hostname;
+    if (
+      host === "localhost" ||
+      host === "127.0.0.1" ||
+      host.endsWith(".onrender.com") ||
+      host.endsWith("veraorbis.studio") ||
+      host.endsWith("github.io")
+    ) {
+      return true;
+    }
+  } catch {}
+  return false;
+}
 const GEMINI_TIMEOUT_MS = 45_000;
 const GEMINI_LIVE_WS_ORIGIN = "wss://generativelanguage.googleapis.com";
 const LIVE_TOKEN_RETRY_DELAY_MS = 750;
@@ -442,19 +463,29 @@ app.use(helmet({
       connectSrc: ["'self'", GEMINI_LIVE_WS_ORIGIN],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      frameAncestors: ["'self'", ...Array.from(allowedOriginsSet)]
+      frameAncestors: [
+        "'self'",
+        "https://veraorbis.studio",
+        "https://*.veraorbis.studio",
+        "https://linisymajo.github.io",
+        "https://vera-orbis.onrender.com",
+        "https://*.onrender.com",
+        "http://localhost:*",
+        "http://127.0.0.1:*"
+      ]
     }
   }
 }));
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOriginsSet.has(origin)) {
+    if (isAllowedOrigin(origin)) {
       callback(null, true);
     } else {
-      callback(new Error("Origen no permitido por CORS"));
+      callback(null, false);
     }
-  }
+  },
+  credentials: true
 }));
 
 app.use(express.json({ limit: "100kb" }));
@@ -712,6 +743,14 @@ const {
       error: getErrorMessage(status)
     });
   }
+});
+
+app.use((err, _req, res, _next) => {
+  console.error("Error no controlado en el servidor:", err);
+  if (res.headersSent) return;
+  res.status(err.status || 500).json({
+    error: err.message || "Error interno del servidor."
+  });
 });
 
 app.listen(PORT, () => {

@@ -482,6 +482,8 @@ test('vera voice is integrated within the platform page with in-page modal and a
   assert.match(serverSource, /"gemini-3\.8-live"/)
   assert.doesNotMatch(serverSource, /"gemini-2\.0-flash-exp"/)
   assert.match(serverSource, /trust proxy/)
+  assert.match(serverSource, /https:\/\/vera-orbis\.onrender\.com/)
+  assert.doesNotMatch(serverSource, /new Error\("Origen no permitido por CORS"\)/)
 })
 
 test('vera voice environment validator correctly detects production https vs localhost mismatch', () => {

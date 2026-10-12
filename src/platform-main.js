@@ -22,6 +22,15 @@ export function getEffectiveVeraVoiceUrl() {
         return custom.trim()
       }
     } catch {}
+    if (
+      window.location?.protocol === 'https:' &&
+      (!VERA_VOICE_URL ||
+        VERA_VOICE_URL.includes('localhost') ||
+        VERA_VOICE_URL.includes('127.0.0.1') ||
+        VERA_VOICE_URL.startsWith('http://'))
+    ) {
+      return 'https://vera-orbis.onrender.com/'
+    }
   }
   return VERA_VOICE_URL
 }

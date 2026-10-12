@@ -9,6 +9,29 @@ const VO_LOGO = '/logo/Logo%20Vera%20Orbis%20recoloreado.png'
 const VERA_VOICE_AVATAR = '/assets/Vera.png'
 const VERA_VOICE_URL = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_VERA_VOICE_URL) || 'http://localhost:3000/'
 
+function getEffectiveVoiceUrl() {
+  if (typeof window !== 'undefined') {
+    try {
+      const custom =
+        window.__VERA_VOICE_URL__ ||
+        window.localStorage?.getItem('VITE_VERA_VOICE_URL')
+      if (custom && typeof custom === 'string' && custom.trim()) {
+        return custom.trim()
+      }
+    } catch {}
+    if (
+      window.location?.protocol === 'https:' &&
+      (!VERA_VOICE_URL ||
+        VERA_VOICE_URL.includes('localhost') ||
+        VERA_VOICE_URL.includes('127.0.0.1') ||
+        VERA_VOICE_URL.startsWith('http://'))
+    ) {
+      return 'https://vera-orbis.onrender.com/'
+    }
+  }
+  return VERA_VOICE_URL
+}
+
 export function renderPlatform(
   student,
   materials = [],
@@ -17,6 +40,7 @@ export function renderPlatform(
   submissions = [],
   exercises = []
 ) {
+  const voiceUrl = getEffectiveVoiceUrl()
   return `
     <div class="platform-page">
 
@@ -729,7 +753,7 @@ export function renderPlatform(
                   <p>Practice your language and learn at your own pace.</p>
                   <a
                     class="vera-voice-launch"
-                    href="${VERA_VOICE_URL}"
+                    href="${voiceUrl}"
                     data-vera-voice-launch
                     tabindex="-1"
                   >Talk to Vera</a>
@@ -831,7 +855,7 @@ export function renderPlatform(
               </div>
             </div>
             <div class="vera-voice-modal-actions">
-              <a href="${VERA_VOICE_URL}" target="_blank" rel="noopener noreferrer" class="vera-voice-external-link" id="vera-voice-external-link" title="Abrir en ventana completa">
+              <a href="${voiceUrl}" target="_blank" rel="noopener noreferrer" class="vera-voice-external-link" id="vera-voice-external-link" title="Abrir en ventana completa">
                 Ventana completa ↗
               </a>
               <button type="button" class="vera-voice-modal-close" data-vera-voice-close aria-label="Cerrar Vera Voice">✕</button>
