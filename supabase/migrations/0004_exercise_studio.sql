@@ -73,27 +73,15 @@ create policy "teachers manage own exercise assignments" on public.exercise_assi
   );
 
 drop policy if exists "students read assigned published exercises" on public.exercise_assignments;
-create policy "students read assigned published exercises" on public.exercise_assignments for select to authenticated
+drop policy if exists "students read own exercise assignments" on public.exercise_assignments;
+create policy "students read own exercise assignments" on public.exercise_assignments for select to authenticated
   using (
     student_id = (select auth.uid())
     and status <> 'revoked'
-    and exists (
-      select 1 from public.exercises e
-      where e.id = exercise_assignments.exercise_id and e.status = 'published'
-    )
   );
 
+-- Ensure students cannot query raw exercises table to bypass sanitized view
 drop policy if exists "students read assigned exercise content" on public.exercises;
-create policy "students read assigned exercise content" on public.exercises for select to authenticated
-  using (
-    status = 'published'
-    and exists (
-      select 1 from public.exercise_assignments a
-      where a.exercise_id = exercises.id
-        and a.student_id = (select auth.uid())
-        and a.status <> 'revoked'
-    )
-  );
 
 drop policy if exists "students manage own exercise attempts" on public.exercise_attempts;
 create policy "students manage own exercise attempts" on public.exercise_attempts for all to authenticated
@@ -102,17 +90,22 @@ create policy "students manage own exercise attempts" on public.exercise_attempt
     student_id = (select auth.uid())
     and exists (
       select 1 from public.exercise_assignments a
-      join public.exercises e on e.id = a.exercise_id
       where a.id = exercise_attempts.assignment_id
         and a.student_id = (select auth.uid())
         and a.status <> 'revoked'
-        and e.status = 'published'
     )
   );
 
 drop policy if exists "teachers read own exercise attempts" on public.exercise_attempts;
-create policy "teachers read own exercise attempts" on public.exercise_attempts for select to authenticated
+drop policy if exists "teachers manage own exercise attempts" on public.exercise_attempts;
+create policy "teachers manage own exercise attempts" on public.exercise_attempts for all to authenticated
   using (exists (
+    select 1
+    from public.exercise_assignments a
+    where a.id = exercise_attempts.assignment_id
+      and a.teacher_id = (select auth.uid())
+  ))
+  with check (exists (
     select 1
     from public.exercise_assignments a
     where a.id = exercise_attempts.assignment_id
