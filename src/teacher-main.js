@@ -2284,15 +2284,42 @@ if (saveAcademicButton) {
       e.preventDefault()
       const filePath = btn.dataset.viewMaterialFile
       if (!filePath) return
+
+      let targetWindow = null
       try {
-        const { data, error } = await supabase.storage.from('materials').createSignedUrl(filePath, 3600)
+        targetWindow = window.open('about:blank', '_blank')
+      } catch {
+        targetWindow = null
+      }
+
+      try {
+        const cleanPath = String(filePath).trim().replace(/^\/+/, '')
+        const { data, error } = await supabase.storage.from('materials').createSignedUrl(cleanPath, 3600)
         if (error || !data?.signedUrl) {
+          if (targetWindow && !targetWindow.closed) {
+            targetWindow.close()
+          }
+          console.error('Error opening material:', error?.message || error)
           alert('Could not open file. Check storage permissions.')
           return
         }
-        window.open(data.signedUrl, '_blank')
+
+        if (targetWindow && !targetWindow.closed) {
+          targetWindow.location.href = data.signedUrl
+        } else {
+          const link = document.createElement('a')
+          link.href = data.signedUrl
+          link.target = '_blank'
+          link.rel = 'noopener noreferrer'
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+        }
       } catch (err) {
-        console.error('Error opening material:', err)
+        if (targetWindow && !targetWindow.closed) {
+          targetWindow.close()
+        }
+        console.error('Error opening material:', err?.message || err)
         alert('Could not open material file.')
       }
     })

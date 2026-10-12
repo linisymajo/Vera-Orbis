@@ -84,7 +84,9 @@ export function renderClassMaterials(student, materials = []) {
 
             <button
               class="class-material-button"
-              onclick="window.voPlatform.openMaterial('${material.file_path}')"
+              type="button"
+              data-material-path="${material.file_path || ''}"
+              onclick="event.stopPropagation(); window.voPlatform?.openMaterial?.(this.dataset.materialPath || '')"
               id="btn-open-${material.id}"
             >
               Open ↗

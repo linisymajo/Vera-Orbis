@@ -341,7 +341,7 @@ test('teacher dashboard includes operational content management for selected stu
   // Material assignment form and signed URL preview
   assert.match(teacherSource, /id="student-material-assign-form"/)
   assert.match(teacherSource, /data-view-material-file/)
-  assert.match(teacherSource, /createSignedUrl\(filePath,\s*3600\)/)
+  assert.match(teacherSource, /createSignedUrl\((?:cleanPath|filePath),\s*3600\)/)
 
   // Feedback form
   assert.match(teacherSource, /id="student-feedback-create-form"/)
@@ -374,3 +374,52 @@ test('registration and onboarding do not hardcode total_lessons to 12', () => {
   assert.match(platSource, /total_lessons:\s*null/)
 })
 
+test('student material opening maintains valid method chaining and popup-blocker defense', () => {
+  const platSource = readFileSync(
+    new URL('../src/platform-main.js', import.meta.url),
+    'utf8'
+  )
+
+  // Ensure no rogue console.log breaks the method chain
+  assert.doesNotMatch(
+    platSource,
+    /\.from\('materials'\)\s*\n\s*console\.log/
+  )
+
+  // Ensure clean chained createSignedUrl call
+  assert.match(
+    platSource,
+    /await\s+supabase\s*\.\s*storage\s*\.\s*from\('materials'\)\s*\.\s*createSignedUrl\(cleanPath,\s*3600\)/
+  )
+
+  // Ensure popup blocker pre-opening and fallback
+  assert.match(platSource, /targetWindow\s*=\s*window\.open\('about:blank',\s*'_blank'\)/)
+  assert.match(platSource, /targetWindow\.location\.href\s*=\s*data\.signedUrl/)
+  assert.match(platSource, /targetWindow\.close\(\)/)
+
+  // Ensure file path sanitization
+  assert.match(platSource, /const cleanPath = filePath\.trim\(\)\.replace\(/)
+})
+
+test('storage migration 0005 enforces least-privilege private access for student materials', () => {
+  const sql = readFileSync(
+    new URL('../supabase/migrations/0005_materials_storage_policy.sql', import.meta.url),
+    'utf8'
+  )
+
+  // Bucket must be private
+  assert.match(sql, /public\s*=\s*false/)
+
+  // RLS must be enabled on storage.objects
+  assert.match(sql, /alter table storage\.objects enable row level security/)
+
+  // Student SELECT policy requires matching public.materials by exact file_path and audience or student_id
+  assert.match(sql, /create policy "Students can read assigned materials"/)
+  assert.match(sql, /m\.file_path\s*=\s*storage\.objects\.name/)
+  assert.match(sql, /m\.student_id\s*=\s*\(select auth\.uid\(\)\)/)
+  assert.match(sql, /m\.audience\s*=\s*'all'/)
+
+  // Teacher policies require teacher's own folder prefix
+  assert.match(sql, /\(storage\.foldername\(name\)\)\[1\]\s*=\s*\(select auth\.uid\(\)\)::text/)
+  assert.match(sql, /create policy "Teachers can upload materials"/)
+})

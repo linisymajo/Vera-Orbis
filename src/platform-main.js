@@ -2122,51 +2122,75 @@ function setupGlobalPlatformFunctions() {
     openMaterial: async (
       filePath
     ) => {
+      let targetWindow = null
 
       try {
-
-        if (!filePath) {
-          throw new Error(
-            'Material file path is missing.'
-          )
+        if (!filePath || typeof filePath !== 'string' || filePath.trim() === '' || filePath === 'undefined' || filePath === 'null') {
+          alert('This material does not have an attached file.')
+          return
         }
 
+        const cleanPath = filePath.trim().replace(/^\/+/, '')
 
-        const {
-          data,
-          error
-        } =
-          await supabase
-            .storage
-            .from('materials')
-            .createSignedUrl(
-              filePath,
-              3600
-            )
+        // Pre-open a blank tab synchronously to satisfy the browser's user-gesture requirement
+        // for popup blockers before performing the asynchronous signed-url request.
+        try {
+          targetWindow = window.open('about:blank', '_blank')
+        } catch {
+          targetWindow = null
+        }
 
+        const { data, error } = await supabase
+          .storage
+          .from('materials')
+          .createSignedUrl(cleanPath, 3600)
 
         if (error) {
-          throw error
+          if (targetWindow && !targetWindow.closed) {
+            targetWindow.close()
+          }
+
+          console.error('Failed to generate signed URL for material:', error.message || error)
+
+          if (error.statusCode === '404' || error.message?.includes('not found') || error.message?.includes('NoSuchKey')) {
+            alert('This material file is not available in storage. Please contact your teacher.')
+          } else if (error.statusCode === '403' || error.message?.includes('security') || error.message?.includes('policy')) {
+            alert('You do not have permission to view this material.')
+          } else {
+            alert('Could not open this material. Please try again.')
+          }
+          return
         }
 
+        if (!data?.signedUrl) {
+          if (targetWindow && !targetWindow.closed) {
+            targetWindow.close()
+          }
+          alert('Could not retrieve a valid link for this material. Please try again.')
+          return
+        }
 
-        window.open(
-          data.signedUrl,
-          '_blank'
-        )
+        if (targetWindow && !targetWindow.closed) {
+          targetWindow.location.href = data.signedUrl
+        } else {
+          // Fallback for browsers that blocked targetWindow pre-opening
+          const link = document.createElement('a')
+          link.href = data.signedUrl
+          link.target = '_blank'
+          link.rel = 'noopener noreferrer'
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+        }
 
       } catch (error) {
-
-        console.error('Unable to open the material.')
-
-        alert(
-          'Could not open this material. Please try again.'
-        )
-
+        if (targetWindow && !targetWindow.closed) {
+          targetWindow.close()
+        }
+        console.error('Unable to open material:', error?.message || 'Unknown error')
+        alert('Could not open this material. Please try again.')
       }
-
     },
-
 
     submitChallenge: async (
       challengeId
@@ -2301,4 +2325,5 @@ function setupGlobalPlatformFunctions() {
 }
 
 
+setupGlobalPlatformFunctions()
 loadPlatform()
