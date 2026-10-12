@@ -2748,6 +2748,155 @@ a {
   display: block;
 }
 
+.vera-voice-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 24px;
+  background: #0D0E12;
+  box-sizing: border-box;
+}
+
+.vera-voice-notice[hidden] {
+  display: none !important;
+}
+
+.vera-voice-notice-card {
+  max-width: 480px;
+  width: 100%;
+  background: #17181F;
+  border: 1px solid rgba(255, 200, 61, 0.25);
+  border-radius: 16px;
+  padding: 32px 28px;
+  text-align: center;
+  color: #F4F1EA;
+  box-sizing: border-box;
+}
+
+.vera-voice-notice-icon {
+  font-size: 36px;
+  margin-bottom: 12px;
+}
+
+.vera-voice-notice-card h4 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #FFF9F0;
+  margin: 0 0 12px;
+}
+
+.vera-voice-notice-card p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #A0A5B5;
+  margin: 0 0 16px;
+}
+
+.vera-voice-notice-setup {
+  text-align: left;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.vera-voice-notice-help {
+  font-size: 13px !important;
+  color: #CBD0E0 !important;
+  margin-bottom: 14px !important;
+}
+
+.vera-voice-notice-help code {
+  color: #FFC83D;
+  background: rgba(255, 200, 61, 0.12);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+.vera-voice-url-form label {
+  display: block;
+  font-size: 12px;
+  color: #8E94A5;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.vera-voice-url-input-group {
+  display: flex;
+  gap: 8px;
+}
+
+.vera-voice-url-input-group input {
+  flex: 1;
+  background: #0D0E12;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #FFF;
+  font-size: 13px;
+  outline: none;
+}
+
+.vera-voice-url-input-group input:focus {
+  border-color: #FFC83D;
+}
+
+.vera-voice-url-input-group button {
+  padding: 8px 16px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.vera-voice-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: #0D0E12;
+  color: #FFF9F0;
+  gap: 16px;
+  box-sizing: border-box;
+  padding: 24px;
+}
+
+.vera-voice-loader[hidden] {
+  display: none !important;
+}
+
+.vera-voice-spinner {
+  width: 44px;
+  height: 44px;
+  border: 3px solid rgba(255, 200, 61, 0.2);
+  border-top-color: #FFC83D;
+  border-radius: 50%;
+  animation: vera-spin 0.8s linear infinite;
+}
+
+@keyframes vera-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.vera-voice-loader p {
+  font-size: 16px;
+  font-weight: 600;
+  color: #FFF9F0;
+  margin: 0;
+}
+
+.vera-voice-loader-sub {
+  font-size: 13px;
+  color: #8E94A5;
+  text-align: center;
+  max-width: 320px;
+}
+
 body.modal-open {
   overflow: hidden;
 }

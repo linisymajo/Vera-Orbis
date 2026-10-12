@@ -87,7 +87,8 @@ async function getAuthenticatedStudent(req) {
   return { user, profile };
 }
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+const GEMINI_LIVE_MODEL = process.env.GEMINI_LIVE_MODEL || "gemini-3.8-live";
 const CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:5173";
 const DEFAULT_SUPPORTED_ORIGINS = [
   "http://localhost:5173",
@@ -426,6 +427,8 @@ function getErrorMessage(status) {
 
   return "No pudimos conectar con Vera en este momento.";
 }
+
+app.set("trust proxy", 1);
 
 app.use(helmet({
   crossOriginResourcePolicy: false,

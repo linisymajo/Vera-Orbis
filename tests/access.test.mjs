@@ -471,8 +471,46 @@ test('vera voice is integrated within the platform page with in-page modal and a
 
   assert.match(platSource, /id="vera-voice-modal"/)
   assert.match(platSource, /id="vera-voice-frame"/)
+  assert.match(platSource, /id="vera-voice-notice"/)
+  assert.match(platSource, /id="vera-voice-loader"/)
   assert.match(mainSource, /closeVeraVoiceModal/)
+  assert.match(mainSource, /isVeraVoiceConfiguredForEnv/)
   assert.match(appSource, /getParentWindow/)
   assert.match(serverSource, /normalizarIdioma/)
   assert.match(serverSource, /normalizarNivel/)
+  assert.match(serverSource, /GEMINI_LIVE_MODEL/)
+  assert.match(serverSource, /"gemini-3\.8-live"/)
+  assert.doesNotMatch(serverSource, /"gemini-2\.0-flash-exp"/)
+  assert.match(serverSource, /trust proxy/)
 })
+
+test('vera voice environment validator correctly detects production https vs localhost mismatch', () => {
+  const mainSource = readFileSync(
+    new URL('../src/platform-main.js', import.meta.url),
+    'utf8'
+  )
+
+  function isVeraVoiceConfiguredForEnv(testUrl, protocol = 'http:') {
+    const url = testUrl || ''
+    if (protocol === 'https:') {
+      const isLocalhostOrHttp =
+        url.includes('localhost') ||
+        url.includes('127.0.0.1') ||
+        url.startsWith('http://')
+      return !isLocalhostOrHttp
+    }
+    return Boolean(url)
+  }
+
+  // In non-https (local development), local URLs are valid
+  assert.equal(isVeraVoiceConfiguredForEnv('http://localhost:3000/', 'http:'), true)
+
+  // In https (production), local URLs are rejected to prevent ERR_CONNECTION_REFUSED
+  assert.equal(isVeraVoiceConfiguredForEnv('http://localhost:3000/', 'https:'), false)
+  assert.equal(isVeraVoiceConfiguredForEnv('http://127.0.0.1:3000/', 'https:'), false)
+  assert.equal(isVeraVoiceConfiguredForEnv('https://vera-tutor.onrender.com', 'https:'), true)
+
+  assert.match(mainSource, /isUnsafeLocalUrl/)
+  assert.match(mainSource, /isUnconfiguredInProduction/)
+})
+

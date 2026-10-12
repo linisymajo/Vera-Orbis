@@ -838,6 +838,37 @@ export function renderPlatform(
             </div>
           </div>
           <div class="vera-voice-frame-wrapper">
+            <div id="vera-voice-notice" class="vera-voice-notice" hidden>
+              <div class="vera-voice-notice-card">
+                <div class="vera-voice-notice-icon">🎙️</div>
+                <h4 id="vera-voice-notice-title">Conexión con Vera Voice</h4>
+                <p id="vera-voice-notice-desc">
+                  Para interactuar por voz en <strong>veraorbis.studio</strong>, el servidor backend (<code>vera-tutor-backend</code>) debe estar desplegado en un servicio público con HTTPS.
+                </p>
+                <div class="vera-voice-notice-setup">
+                  <p class="vera-voice-notice-help">
+                    Configura el secreto <code>VITE_VERA_VOICE_URL</code> en GitHub Actions con la URL HTTPS de tu backend (por ejemplo, en Render o Railway).
+                  </p>
+                  <form id="vera-voice-url-form" class="vera-voice-url-form">
+                    <label for="vera-voice-custom-url">¿Ya desplegaste tu backend? Pruébalo aquí:</label>
+                    <div class="vera-voice-url-input-group">
+                      <input
+                        type="url"
+                        id="vera-voice-custom-url"
+                        placeholder="https://tu-backend.onrender.com"
+                        autocomplete="off"
+                      >
+                      <button type="submit" class="material-button">Conectar</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+            <div id="vera-voice-loader" class="vera-voice-loader" hidden>
+              <div class="vera-voice-spinner"></div>
+              <p>Conectando con Vera...</p>
+              <span class="vera-voice-loader-sub">Si el servidor se está iniciando, esto tomará unos segundos.</span>
+            </div>
             <iframe
               id="vera-voice-frame"
               src="about:blank"

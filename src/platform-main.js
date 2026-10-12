@@ -9,8 +9,34 @@ import { supabase } from './lib/supabase.js'
 import { setupExerciseForms } from './components/exercises.js'
 
 let currentStudent = null
-const VERA_VOICE_URL =
+export const VERA_VOICE_URL =
   import.meta.env.VITE_VERA_VOICE_URL || 'http://localhost:3000/'
+
+export function getEffectiveVeraVoiceUrl() {
+  if (typeof window !== 'undefined') {
+    try {
+      const custom =
+        window.__VERA_VOICE_URL__ ||
+        window.localStorage?.getItem('VITE_VERA_VOICE_URL')
+      if (custom && typeof custom === 'string' && custom.trim()) {
+        return custom.trim()
+      }
+    } catch {}
+  }
+  return VERA_VOICE_URL
+}
+
+export function isVeraVoiceConfiguredForEnv(testUrl) {
+  const url = testUrl || getEffectiveVeraVoiceUrl()
+  if (typeof window !== 'undefined' && window.location?.protocol === 'https:') {
+    const isLocalhostOrHttp =
+      url.includes('localhost') ||
+      url.includes('127.0.0.1') ||
+      url.startsWith('http://')
+    return !isLocalhostOrHttp
+  }
+  return Boolean(url)
+}
 
 let platformData = {
   materials: [],
@@ -344,12 +370,20 @@ function setupPlatformNavigation() {
   function closeVeraVoiceModal() {
     const modal = document.querySelector('#vera-voice-modal')
     const frame = document.querySelector('#vera-voice-frame')
+    const notice = document.querySelector('#vera-voice-notice')
+    const loader = document.querySelector('#vera-voice-loader')
     if (!modal) return
     modal.hidden = true
     modal.setAttribute('aria-hidden', 'true')
     document.body.classList.remove('modal-open')
     if (frame) {
       frame.src = 'about:blank'
+    }
+    if (notice) {
+      notice.hidden = true
+    }
+    if (loader) {
+      loader.hidden = true
     }
   }
 
@@ -358,34 +392,83 @@ function setupPlatformNavigation() {
     const status = card?.querySelector('.vera-voice-status')
     const modal = document.querySelector('#vera-voice-modal')
     const frame = document.querySelector('#vera-voice-frame')
+    const notice = document.querySelector('#vera-voice-notice')
+    const loader = document.querySelector('#vera-voice-loader')
     const externalLink = document.querySelector('#vera-voice-external-link')
-    const url = VERA_VOICE_URL.endsWith('/')
-      ? VERA_VOICE_URL
-      : `${VERA_VOICE_URL}/`
+    const rawUrl = getEffectiveVeraVoiceUrl()
+    const url = rawUrl.endsWith('/')
+      ? rawUrl
+      : `${rawUrl}/`
 
+    const isHttpsEnv =
+      typeof window !== 'undefined' && window.location?.protocol === 'https:'
+    const isUnsafeLocalUrl =
+      url.includes('localhost') ||
+      url.includes('127.0.0.1') ||
+      url.startsWith('http://')
+    const isUnconfiguredInProduction = isHttpsEnv && isUnsafeLocalUrl
+
+    if (modal) {
+      modal.hidden = false
+      modal.setAttribute('aria-hidden', 'false')
+      document.body.classList.add('modal-open')
+    }
+
+    if (isUnconfiguredInProduction) {
+      if (frame) {
+        frame.hidden = true
+        frame.src = 'about:blank'
+      }
+      if (loader) {
+        loader.hidden = true
+      }
+      if (notice) {
+        notice.hidden = false
+      }
+      if (externalLink) {
+        externalLink.style.display = 'none'
+      }
+      if (status) {
+        status.textContent =
+          'Vera Voice requiere configurar VITE_VERA_VOICE_URL con HTTPS en producción.'
+      }
+      trigger?.removeAttribute('aria-disabled')
+      return
+    }
+
+    if (notice) notice.hidden = true
+    if (loader) loader.hidden = false
+    if (frame) frame.hidden = false
     if (externalLink) {
+      externalLink.style.display = ''
       externalLink.href = url
     }
 
     if (status) status.textContent = 'Conectando con Vera Voice...'
     trigger?.setAttribute('aria-disabled', 'true')
 
-    const veraOrigin = new URL(url).origin
+    let veraOrigin
+    try {
+      veraOrigin = new URL(url).origin
+    } catch {
+      if (loader) loader.hidden = true
+      if (status) status.textContent = 'URL de Vera Voice inválida.'
+      trigger?.removeAttribute('aria-disabled')
+      return
+    }
+
     let timeoutId
     let messageHandler
 
     // In-page modal experience
     if (modal && frame) {
-      modal.hidden = false
-      modal.setAttribute('aria-hidden', 'false')
-      document.body.classList.add('modal-open')
-
       messageHandler = async (event) => {
         if (event.origin !== veraOrigin) return
         if (event.source !== frame.contentWindow) return
         if (event.data?.type !== 'VERA_AUTH_READY') return
 
         clearTimeout(timeoutId)
+        if (loader) loader.hidden = true
 
         try {
           const {
@@ -419,11 +502,12 @@ function setupPlatformNavigation() {
       window.addEventListener('message', messageHandler)
 
       timeoutId = setTimeout(() => {
+        if (loader) loader.hidden = true
         if (status) {
           status.textContent =
-            'Vera Voice tardó en responder. Verifica que esté iniciada.'
+            'Vera Voice tardó en responder. Si el servidor backend está despertando, espera unos segundos y reintenta.'
         }
-      }, 15000)
+      }, 20000)
 
       frame.src = url
       trigger?.removeAttribute('aria-disabled')
@@ -507,6 +591,32 @@ function setupPlatformNavigation() {
     }
   })
 
+  document.addEventListener('submit', (event) => {
+    const form = event.target.closest('#vera-voice-url-form')
+    if (form) {
+      event.preventDefault()
+      const input = form.querySelector('#vera-voice-custom-url')
+      const val = input?.value?.trim()
+      if (val) {
+        try {
+          const parsed = new URL(val)
+          const isHttpsEnv =
+            typeof window !== 'undefined' && window.location?.protocol === 'https:'
+          if (parsed.protocol === 'https:' || !isHttpsEnv) {
+            try {
+              window.localStorage?.setItem('VITE_VERA_VOICE_URL', parsed.origin)
+            } catch {}
+            launchVeraVoice(document.querySelector('[data-vera-voice-launch]'))
+          } else {
+            alert('En producción debes ingresar una URL segura con https://')
+          }
+        } catch {
+          alert('Por favor ingresa una URL válida (ejemplo: https://tu-backend.onrender.com)')
+        }
+      }
+    }
+  })
+
   document.addEventListener(
     'click',
     (event) => {
@@ -524,6 +634,23 @@ function setupPlatformNavigation() {
         event.stopPropagation()
         launchVeraVoice(veraLaunch)
         return
+      }
+
+      const veraLink = event.target.closest('[data-vera-voice-link]')
+
+      if (veraLink) {
+        const rawUrl = getEffectiveVeraVoiceUrl()
+        const isHttpsEnv =
+          typeof window !== 'undefined' && window.location?.protocol === 'https:'
+        const isUnsafeLocalUrl =
+          rawUrl.includes('localhost') ||
+          rawUrl.includes('127.0.0.1') ||
+          rawUrl.startsWith('http://')
+        if (isHttpsEnv && isUnsafeLocalUrl) {
+          event.preventDefault()
+          launchVeraVoice(veraLink)
+          return
+        }
       }
 
       const veraCard = event.target.closest('.vera-voice-card')
