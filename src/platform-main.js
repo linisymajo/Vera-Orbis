@@ -56,95 +56,70 @@ let platformData = {
 }
 
 
-/* =========================================================
-   LOAD PLATFORM
-========================================================= */
+const VO_LOGO = '/logo/Logo%20Vera%20Orbis%20recoloreado.png'
 
-async function loadPlatform() {
+function withTimeout(promise, ms = 12000, errorMsg = 'Operation timed out') {
+  let timeoutId
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error(errorMsg)), ms)
+  })
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    clearTimeout(timeoutId)
+  })
+}
 
-  const user = await getCurrentUser()
+export function renderPlatformLoadingScreen(message = 'Verifying your student session...') {
+  const app = document.querySelector('#app')
+  if (!app) return
+  app.innerHTML = `
+    <div class="loading-screen" id="platform-loading-screen">
+      <div class="loading-mark">
+        <img
+          src="${VO_LOGO}"
+          alt="Vera Orbis"
+        >
+      </div>
+      <p>${message}</p>
+    </div>
+  `
+}
 
-  if (!user) {
-    window.location.replace('/login.html')
-    return
-  }
-
-  const { data: teacherRecord } = await supabase
-    .from('teachers')
-    .select('id')
-    .eq('id', user.id)
-    .maybeSingle()
-
-  if (teacherRecord) {
-    window.location.replace('/teacher.html')
-    return
-  }
-
-  let profile = await getStudentProfile()
-
-  if (!profile) {
-    const defaultName =
-      user.user_metadata?.name ||
-      user.email?.split('@')[0] ||
-      'Student'
-
-    const { data: createdProfile } = await supabase
-      .from('profiles')
-      .upsert({
-        id: user.id,
-        name: defaultName,
-        language: 'English',
-        level: 'A1',
-        level_name: 'Beginner',
-        progress: 0,
-        lessons_completed: 0,
-        total_lessons: null,
-        current_module: 'Getting Started',
-        next_step: 'Complete your onboarding'
-      }, { onConflict: 'id' })
-      .select('*')
-      .maybeSingle()
-
-    if (createdProfile) {
-      profile = createdProfile
-    }
-  }
-
-  if (!profile) {
-
-    document.querySelector('#app').innerHTML = `
-      <div style="
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 40px;
-        font-family: sans-serif;
-      ">
-
-        <div style="
-          max-width: 500px;
-          text-align: center;
-        ">
-
-          <h1>
-            Profile not found
-          </h1>
-
-          <p>
-            The user is logged in, but Vera Orbis
-            could not load the student profile.
-          </p>
-
-          <p>
-            Please sign in again or contact your instructor.
-          </p>
-
+export function renderProfileNotFoundScreen() {
+  const app = document.querySelector('#app')
+  if (!app) return
+  app.innerHTML = `
+    <div class="loading-screen" id="platform-profile-screen" style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px;">
+      <div style="max-width: 500px; text-align: center;">
+        <h1 style="font-family: 'Playfair Display', Georgia, serif; font-size: 28px; margin-bottom: 12px; color: var(--vo-navy);">
+          Profile not found
+        </h1>
+        <p style="color: var(--vo-muted); font-size: 14px; margin-bottom: 8px;">
+          The user is logged in, but Vera Orbis could not load the student profile.
+        </p>
+        <p style="color: var(--vo-muted); font-size: 14px; margin-bottom: 24px;">
+          Please sign in again or contact your instructor.
+        </p>
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+          <button
+            type="button"
+            id="unresolved-profile-retry"
+            style="
+              padding: 10px 24px;
+              border-radius: 999px;
+              border: none;
+              background: #6C3BFF;
+              color: #ffffff;
+              cursor: pointer;
+              font: inherit;
+              font-weight: 600;
+            "
+          >
+            Retry ↻
+          </button>
           <button
             type="button"
             id="unresolved-profile-logout"
             style="
-              margin-top: 20px;
               padding: 10px 24px;
               border-radius: 999px;
               border: 1px solid currentColor;
@@ -155,193 +130,352 @@ async function loadPlatform() {
           >
             Sign out ↗
           </button>
-
         </div>
-
       </div>
-    `
+    </div>
+  `
 
-    document
-      .querySelector('#unresolved-profile-logout')
-      ?.addEventListener('click', async () => {
+  document
+    .querySelector('#unresolved-profile-retry')
+    ?.addEventListener('click', () => {
+      renderPlatformLoadingScreen()
+      loadPlatform()
+    })
+
+  document
+    .querySelector('#unresolved-profile-logout')
+    ?.addEventListener('click', async () => {
+      try {
         await supabase.auth.signOut()
+      } catch (err) {
+        console.error('Error signing out:', err)
+      } finally {
         window.location.replace('/login.html')
-      })
+      }
+    })
+}
 
+export function renderPlatformErrorScreen(error) {
+  const app = document.querySelector('#app')
+  if (!app) return
+  const isTimeout = error?.message?.toLowerCase().includes('timed out')
+  const title = isTimeout ? 'La conexión tardó demasiado' : 'No pudimos cargar tu plataforma'
+  const message = isTimeout
+    ? 'El servidor o la red tardaron en responder al verificar tu sesión.'
+    : 'Ocurrió un error inesperado al verificar tu sesión o tus datos.'
+
+  app.innerHTML = `
+    <div class="loading-screen" id="platform-error-screen" style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px;">
+      <div style="max-width: 500px; text-align: center;">
+        <div class="loading-mark" style="margin: 0 auto 24px; animation: none;">
+          <img src="${VO_LOGO}" alt="Vera Orbis">
+        </div>
+        <h1 style="font-family: 'Playfair Display', Georgia, serif; font-size: 26px; margin: 0 0 12px; color: var(--vo-navy);">
+          ${title}
+        </h1>
+        <p style="color: var(--vo-muted); font-size: 14px; margin: 0 0 24px; line-height: 1.5;">
+          ${message} Puedes intentar nuevamente o iniciar sesión otra vez.
+        </p>
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+          <button
+            type="button"
+            id="platform-retry-button"
+            style="
+              padding: 10px 24px;
+              border-radius: 999px;
+              border: none;
+              background: #6C3BFF;
+              color: #ffffff;
+              cursor: pointer;
+              font: inherit;
+              font-weight: 600;
+            "
+          >
+            Reintentar ↻
+          </button>
+          <button
+            type="button"
+            id="platform-error-logout"
+            style="
+              padding: 10px 24px;
+              border-radius: 999px;
+              border: 1px solid currentColor;
+              background: transparent;
+              cursor: pointer;
+              font: inherit;
+            "
+          >
+            Cerrar sesión ↗
+          </button>
+        </div>
+      </div>
+    </div>
+  `
+
+  document
+    .querySelector('#platform-retry-button')
+    ?.addEventListener('click', () => {
+      renderPlatformLoadingScreen()
+      loadPlatform()
+    })
+
+  document
+    .querySelector('#platform-error-logout')
+    ?.addEventListener('click', async () => {
+      try {
+        await supabase.auth.signOut()
+      } catch (err) {
+        console.error('Error signing out:', err)
+      } finally {
+        window.location.replace('/login.html')
+      }
+    })
+}
+
+let isInitializingPlatform = false
+let platformLoaded = false
+
+/* =========================================================
+   LOAD PLATFORM
+========================================================= */
+
+export async function loadPlatform() {
+  if (isInitializingPlatform) {
     return
   }
+  isInitializingPlatform = true
 
-  const urlParams = new URLSearchParams(window.location.search)
-  const bypassOnboarding =
-    urlParams.get('from') === 'onboarding' ||
-    sessionStorage.getItem('vo_onboarding_skipped') === 'true'
+  try {
+    const user = await getCurrentUser()
 
-  let hasCompletedOnboarding = false
-  const { data: onboarding, error: onboardingError } = await supabase
-    .from('onboarding_responses')
-    .select('student_id')
-    .eq('student_id', profile.id)
-    .maybeSingle()
-
-  if (onboarding) {
-    hasCompletedOnboarding = true
-  }
-
-  if (!bypassOnboarding) {
-    if (!onboardingError && !onboarding) {
-      window.location.replace('/onboarding.html')
+    if (!user) {
+      window.location.replace('/login.html')
+      isInitializingPlatform = false
       return
     }
-  }
 
-  const lessonsCompleted = Number(profile.lessons_completed || 0)
-  const totalLessons =
-    profile.total_lessons != null && Number(profile.total_lessons) > 0
-      ? Number(profile.total_lessons)
-      : null
-
-  const progress =
-    totalLessons
-      ? Math.min(100, Math.round((lessonsCompleted / totalLessons) * 100))
-      : Math.min(100, Math.max(0, Number(profile.progress || 0)))
-
-  const student = {
-
-    id: profile.id,
-
-    name: profile.name,
-
-    language: profile.language,
-
-    level: profile.level,
-
-    levelName: profile.level_name,
-
-    progress: progress,
-
-    goal: profile.goal,
-
-    lessonsCompleted:
-      lessonsCompleted,
-
-    totalLessons:
-      totalLessons,
-
-    currentModule:
-      profile.current_module,
-
-    nextStep:
-      profile.next_step,
-
-    onboardingCompleted:
-      Boolean(hasCompletedOnboarding || lessonsCompleted > 0)
-
-  }
-
-
-  currentStudent = student
-
-
-  const [
-    materialsRes,
-    feedbackRes,
-    challengesRes,
-    submissionsRes,
-    exercisesRes
-  ] = await Promise.all([
-
-    supabase
-      .from('materials')
-      .select('*')
-      .or(
-        `student_id.eq.${student.id},audience.eq.all`
-      )
-      .order(
-        'created_at',
-        { ascending: false }
-      ),
-
-    supabase
-      .from('feedback')
-      .select('*')
-      .eq(
-        'student_id',
-        student.id
-      )
-      .order(
-        'created_at',
-        { ascending: false }
-      ),
-
-    supabase
-      .from('weekly_challenges')
-      .select('*')
-      .or(
-        `student_id.eq.${student.id},audience.eq.all`
-      )
-      .eq(
-        'status',
-        'active'
-      )
-      .order(
-        'created_at',
-        { ascending: false }
-      ),
-
-    supabase
-      .from('challenge_submissions')
-      .select('*')
-      .eq(
-        'student_id',
-        student.id
-      ),
-
-    supabase
-      .from('student_exercises')
-      .select('*')
-      .order('due_at', { ascending: true })
-
-  ])
-
-
-
-  platformData = {
-
-    materials:
-      materialsRes.data || [],
-
-    feedback:
-      feedbackRes.data || [],
-
-    challenges:
-      challengesRes.data || [],
-
-    submissions:
-      submissionsRes.data || [],
-
-    exercises:
-      exercisesRes.error ? [] : (exercisesRes.data || [])
-
-  }
-
-
-  document.querySelector('#app').innerHTML =
-    renderPlatform(
-      student,
-      platformData.materials,
-      platformData.feedback,
-      platformData.challenges,
-      platformData.submissions,
-      platformData.exercises
+    const { data: teacherRecord } = await withTimeout(
+      supabase
+        .from('teachers')
+        .select('id')
+        .eq('id', user.id)
+        .maybeSingle(),
+      10000,
+      'Teacher check timed out'
     )
 
+    if (teacherRecord) {
+      isInitializingPlatform = false
+      window.location.replace('/teacher.html')
+      return
+    }
 
-  initializeDynamicPlatform()
+    let profile = await withTimeout(
+      getStudentProfile(user.id),
+      10000,
+      'Profile load timed out'
+    )
 
-  setupGlobalPlatformFunctions()
-  setupExerciseForms(supabase)
+    if (!profile) {
+      const defaultName =
+        user.user_metadata?.name ||
+        user.email?.split('@')[0] ||
+        'Student'
 
-  setupPlatformNavigation()
+      const { data: createdProfile } = await withTimeout(
+        supabase
+          .from('profiles')
+          .upsert({
+            id: user.id,
+            name: defaultName,
+            language: 'English',
+            level: 'A1',
+            level_name: 'Beginner',
+            progress: 0,
+            lessons_completed: 0,
+            total_lessons: null,
+            current_module: 'Getting Started',
+            next_step: 'Complete your onboarding'
+          }, { onConflict: 'id' })
+          .select('*')
+          .maybeSingle(),
+        10000,
+        'Profile creation timed out'
+      )
+
+      if (createdProfile) {
+        profile = createdProfile
+      }
+    }
+
+    if (!profile) {
+      isInitializingPlatform = false
+      renderProfileNotFoundScreen()
+      return
+    }
+
+    const urlParams = new URLSearchParams(window.location.search)
+    const bypassOnboarding =
+      urlParams.get('from') === 'onboarding' ||
+      sessionStorage.getItem('vo_onboarding_skipped') === 'true'
+
+    let hasCompletedOnboarding = false
+    const { data: onboarding, error: onboardingError } = await withTimeout(
+      supabase
+        .from('onboarding_responses')
+        .select('student_id')
+        .eq('student_id', profile.id)
+        .maybeSingle(),
+      10000,
+      'Onboarding check timed out'
+    )
+
+    if (onboarding) {
+      hasCompletedOnboarding = true
+    }
+
+    if (!bypassOnboarding) {
+      if (!onboardingError && !onboarding) {
+        isInitializingPlatform = false
+        window.location.replace('/onboarding.html')
+        return
+      }
+    }
+
+    const lessonsCompleted = Number(profile.lessons_completed || 0)
+    const totalLessons =
+      profile.total_lessons != null && Number(profile.total_lessons) > 0
+        ? Number(profile.total_lessons)
+        : null
+
+    const progress =
+      totalLessons
+        ? Math.min(100, Math.round((lessonsCompleted / totalLessons) * 100))
+        : Math.min(100, Math.max(0, Number(profile.progress || 0)))
+
+    const student = {
+      id: profile.id,
+      name: profile.name,
+      language: profile.language,
+      level: profile.level,
+      levelName: profile.level_name,
+      progress: progress,
+      goal: profile.goal,
+      lessonsCompleted:
+        lessonsCompleted,
+      totalLessons:
+        totalLessons,
+      currentModule:
+        profile.current_module,
+      nextStep:
+        profile.next_step,
+      onboardingCompleted:
+        Boolean(hasCompletedOnboarding || lessonsCompleted > 0)
+    }
+
+    currentStudent = student
+
+    const [
+      materialsRes,
+      feedbackRes,
+      challengesRes,
+      submissionsRes,
+      exercisesRes
+    ] = await withTimeout(
+      Promise.all([
+        supabase
+          .from('materials')
+          .select('*')
+          .or(
+            `student_id.eq.${student.id},audience.eq.all`
+          )
+          .order(
+            'created_at',
+            { ascending: false }
+          ),
+
+        supabase
+          .from('feedback')
+          .select('*')
+          .eq(
+            'student_id',
+            student.id
+          )
+          .order(
+            'created_at',
+            { ascending: false }
+          ),
+
+        supabase
+          .from('weekly_challenges')
+          .select('*')
+          .or(
+            `student_id.eq.${student.id},audience.eq.all`
+          )
+          .eq(
+            'status',
+            'active'
+          )
+          .order(
+            'created_at',
+            { ascending: false }
+          ),
+
+        supabase
+          .from('challenge_submissions')
+          .select('*')
+          .eq(
+            'student_id',
+            student.id
+          ),
+
+        supabase
+          .from('student_exercises')
+          .select('*')
+          .order('due_at', { ascending: true })
+      ]),
+      12000,
+      'Platform data load timed out'
+    )
+
+    platformData = {
+      materials:
+        materialsRes.data || [],
+      feedback:
+        feedbackRes.data || [],
+      challenges:
+        challengesRes.data || [],
+      submissions:
+        submissionsRes.data || [],
+      exercises:
+        exercisesRes.error ? [] : (exercisesRes.data || [])
+    }
+
+    const app = document.querySelector('#app')
+    if (app) {
+      app.innerHTML =
+        renderPlatform(
+          student,
+          platformData.materials,
+          platformData.feedback,
+          platformData.challenges,
+          platformData.submissions,
+          platformData.exercises
+        )
+    }
+
+    initializeDynamicPlatform()
+    setupGlobalPlatformFunctions()
+    setupExerciseForms(supabase)
+    setupPlatformNavigation()
+
+    platformLoaded = true
+  } catch (error) {
+    console.error('Error loading student platform:', error)
+    renderPlatformErrorScreen(error)
+  } finally {
+    isInitializingPlatform = false
+  }
 }
 
 
@@ -495,10 +629,23 @@ function setupPlatformNavigation() {
         if (loader) loader.hidden = true
 
         try {
-          const {
+          let {
             data: { session },
             error
           } = await supabase.auth.getSession()
+
+          if (
+            !session ||
+            !session.access_token ||
+            (session.expires_at && session.expires_at * 1000 < Date.now() + 60000)
+          ) {
+            try {
+              const { data: refreshData } = await supabase.auth.refreshSession()
+              if (refreshData?.session?.access_token) {
+                session = refreshData.session
+              }
+            } catch {}
+          }
 
           if (error || !session?.access_token) {
             throw new Error('No active student session was found.')
@@ -507,7 +654,16 @@ function setupPlatformNavigation() {
           frame.contentWindow.postMessage(
             {
               type: 'VERA_AUTH_CONTEXT',
-              accessToken: session.access_token
+              accessToken: session.access_token,
+              profile: currentStudent
+                ? {
+                    id: currentStudent.id,
+                    name: currentStudent.name,
+                    language: currentStudent.language,
+                    level: currentStudent.level,
+                    levelName: currentStudent.levelName
+                  }
+                : null
             },
             veraOrigin
           )
@@ -541,12 +697,25 @@ function setupPlatformNavigation() {
         }
       }, 25000)
 
-      frame.onload = () => {
+      const pingFrame = () => {
         try {
           frame.contentWindow?.postMessage({ type: 'VERA_PING' }, veraOrigin)
         } catch {}
       }
-      frame.src = url
+
+      frame.onload = () => {
+        pingFrame()
+        setTimeout(pingFrame, 400)
+        setTimeout(pingFrame, 1200)
+      }
+
+      const platformOrigin =
+        typeof window !== 'undefined' ? window.location.origin : ''
+      const urlWithOrigin = platformOrigin
+        ? `${url}${url.includes('?') ? '&' : '?'}platformOrigin=${encodeURIComponent(platformOrigin)}`
+        : url
+
+      frame.src = urlWithOrigin
       trigger?.removeAttribute('aria-disabled')
       return
     }
@@ -568,10 +737,23 @@ function setupPlatformNavigation() {
         clearTimeout(timeoutId)
 
         try {
-          const {
+          let {
             data: { session },
             error
           } = await supabase.auth.getSession()
+
+          if (
+            !session ||
+            !session.access_token ||
+            (session.expires_at && session.expires_at * 1000 < Date.now() + 60000)
+          ) {
+            try {
+              const { data: refreshData } = await supabase.auth.refreshSession()
+              if (refreshData?.session?.access_token) {
+                session = refreshData.session
+              }
+            } catch {}
+          }
 
           if (error || !session?.access_token) {
             throw new Error('No active student session was found.')
@@ -582,7 +764,16 @@ function setupPlatformNavigation() {
           opened.postMessage(
             {
               type: 'VERA_AUTH_CONTEXT',
-              accessToken: session.access_token
+              accessToken: session.access_token,
+              profile: currentStudent
+                ? {
+                    id: currentStudent.id,
+                    name: currentStudent.name,
+                    language: currentStudent.language,
+                    level: currentStudent.level,
+                    levelName: currentStudent.levelName
+                  }
+                : null
             },
             veraOrigin
           )
@@ -2576,4 +2767,15 @@ function setupGlobalPlatformFunctions() {
 
 
 setupGlobalPlatformFunctions()
+
+// Clean auth state change listener to prevent duplicate initialization
+supabase.auth.onAuthStateChange((event) => {
+  if (event === 'SIGNED_OUT') {
+    platformLoaded = false
+    window.location.replace('/login.html')
+  } else if (event === 'SIGNED_IN' && !platformLoaded && !isInitializingPlatform) {
+    loadPlatform()
+  }
+})
+
 loadPlatform()

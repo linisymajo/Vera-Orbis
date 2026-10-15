@@ -516,3 +516,82 @@ test('vera voice environment validator correctly detects production https vs loc
   assert.match(mainSource, /isUnconfiguredInProduction/)
 })
 
+test('email confirmation redirect uses verified production domain and avoids localhost in production', async () => {
+  const { getAuthRedirectUrl, PRODUCTION_DOMAIN } = await import('../src/lib/auth.js')
+  const regSource = readFileSync(
+    new URL('../src/register-main.js', import.meta.url),
+    'utf8'
+  )
+  const cname = readFileSync(
+    new URL('../public/CNAME', import.meta.url),
+    'utf8'
+  ).trim()
+
+  assert.equal(PRODUCTION_DOMAIN, `https://${cname}`)
+  assert.equal(getAuthRedirectUrl('/onboarding.html'), `https://${cname}/onboarding.html`)
+  assert.doesNotMatch(getAuthRedirectUrl('/onboarding.html'), /localhost/)
+  assert.match(regSource, /getAuthRedirectUrl/)
+  assert.match(regSource, /emailRedirectTo/)
+})
+
+test('student platform provides initial loading screen, timeout resilience, and error recovery', () => {
+  const platHtml = readFileSync(
+    new URL('../platform.html', import.meta.url),
+    'utf8'
+  )
+  const platMain = readFileSync(
+    new URL('../src/platform-main.js', import.meta.url),
+    'utf8'
+  )
+  const platCss = readFileSync(
+    new URL('../src/platform.css', import.meta.url),
+    'utf8'
+  )
+
+  // Initial markup has the loading screen with the verification message
+  assert.match(platHtml, /id="platform-loading-screen"/)
+  assert.match(platHtml, /Verifying your student session\.\.\./)
+
+  // platform.css has loading-screen styles
+  assert.match(platCss, /\.loading-screen/)
+  assert.match(platCss, /\.loading-mark/)
+
+  // platform-main.js has timeout wrapper, recovery screens, and auth listener
+  assert.match(platMain, /withTimeout/)
+  assert.match(platMain, /renderPlatformLoadingScreen/)
+  assert.match(platMain, /renderProfileNotFoundScreen/)
+  assert.match(platMain, /renderPlatformErrorScreen/)
+  assert.match(platMain, /isInitializingPlatform/)
+  assert.match(platMain, /onAuthStateChange/)
+})
+
+test('vera voice session verification provides auto-wait, timeout resilience, and retryable error state', () => {
+  const platMain = readFileSync(
+    new URL('../src/platform-main.js', import.meta.url),
+    'utf8'
+  )
+  const appSource = readFileSync(
+    new URL('../vera-tutor-backend/public/app.js', import.meta.url),
+    'utf8'
+  )
+  const serverSource = readFileSync(
+    new URL('../vera-tutor-backend/server.js', import.meta.url),
+    'utf8'
+  )
+
+  // Frontend refreshes near-expired token and passes student profile
+  assert.match(platMain, /refreshSession/)
+  assert.match(platMain, /profile:\s*currentStudent/)
+  assert.match(platMain, /platformOrigin=/)
+
+  // Backend app.js has auth waiting, origin detection, and retry logic without hard lock
+  assert.match(appSource, /waitForStudentAuth/)
+  assert.match(appSource, /knownParentOrigin/)
+  assert.match(appSource, /No se pudo verificar tu sesión\. Haz clic en Talk to Vera para reintentar\./)
+
+  // Server gracefully falls back to authenticated user metadata if profiles query fails
+  assert.match(serverSource, /fallbackName/)
+  assert.doesNotMatch(serverSource, /status\(404\)\.json\({\s*error:\s*"No se encontró el perfil del estudiante\."\s*}\)/)
+})
+
+

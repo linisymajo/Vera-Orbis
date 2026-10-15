@@ -70,22 +70,38 @@ async function getAuthenticatedStudent(req) {
     return { error: "La sesión no es válida o ha caducado.", status: 401 };
   }
 
-  const {
-    data: profile,
-    error: profileError
-  } = await studentClient
-    .from("profiles")
-    .select("id, name, language, level, level_name")
-    .eq("id", user.id)
-    .maybeSingle();
+  let profile = null;
+  try {
+    const {
+      data,
+      error: profileError
+    } = await studentClient
+      .from("profiles")
+      .select("id, name, language, level, level_name")
+      .eq("id", user.id)
+      .maybeSingle();
 
-  if (profileError) {
-    console.error("Error consultando el perfil:", profileError.message);
-    return { error: "No se pudo consultar el perfil.", status: 500 };
+    if (profileError) {
+      console.warn("Advertencia consultando el perfil en profiles:", profileError.message);
+    } else if (data) {
+      profile = data;
+    }
+  } catch (err) {
+    console.warn("Excepción al consultar el perfil:", err.message);
   }
 
   if (!profile) {
-    return { error: "No se encontró el perfil del estudiante.", status: 404 };
+    const fallbackName =
+      user.user_metadata?.name ||
+      user.email?.split("@")[0] ||
+      "Estudiante";
+    profile = {
+      id: user.id,
+      name: fallbackName,
+      language: "ingles",
+      level: "basico",
+      level_name: "Beginner"
+    };
   }
 
   return { user, profile };

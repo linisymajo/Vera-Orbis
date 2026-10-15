@@ -76,7 +76,18 @@ function getParentWindow() {
   return null;
 }
 
+let knownParentOrigin = null;
+try {
+  const queryOrigin = new URLSearchParams(window.location.search).get("platformOrigin");
+  if (queryOrigin && isAllowedPlatformOrigin(queryOrigin)) {
+    knownParentOrigin = new URL(queryOrigin).origin;
+  }
+} catch {}
+
 function getOpenerOrigin() {
+  if (knownParentOrigin && isAllowedPlatformOrigin(knownParentOrigin)) {
+    return knownParentOrigin;
+  }
   if (document.referrer) {
     try {
       const ref = new URL(document.referrer).origin;
@@ -88,17 +99,67 @@ function getOpenerOrigin() {
   return null;
 }
 
-function sendAuthReadySignal() {
+function sendAuthReadySignal(targetOrigin = null) {
   const targetWindow = getParentWindow();
   if (!targetWindow) return;
-  const target = getOpenerOrigin();
-  if (target) {
+  const target = targetOrigin || getOpenerOrigin();
+  if (target && isAllowedPlatformOrigin(target)) {
     targetWindow.postMessage({ type: "VERA_AUTH_READY" }, target);
   } else {
     for (const origin of allowedPlatformOrigins) {
-      targetWindow.postMessage({ type: "VERA_AUTH_READY" }, origin);
+      try {
+        targetWindow.postMessage({ type: "VERA_AUTH_READY" }, origin);
+      } catch {}
     }
   }
+}
+
+let authWaitResolvers = [];
+
+function waitForStudentAuth(timeoutMs = 7000) {
+  if (hasAuthenticatedStudent()) {
+    return Promise.resolve(true);
+  }
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => {
+      authWaitResolvers = authWaitResolvers.filter((r) => r !== onAuth);
+      resolve(hasAuthenticatedStudent());
+    }, timeoutMs);
+
+    function onAuth(success) {
+      clearTimeout(timer);
+      resolve(success);
+    }
+    authWaitResolvers.push(onAuth);
+  });
+}
+
+function notifyAuthWaiters(success) {
+  const waiters = authWaitResolvers.slice();
+  authWaitResolvers = [];
+  for (const resolve of waiters) {
+    try {
+      resolve(success);
+    } catch {}
+  }
+}
+
+function normalizarIdiomaClient(raw) {
+  if (!raw || typeof raw !== "string") return "ingles";
+  const str = raw.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+  if (str.includes("ingl") || str.includes("engl") || str === "en") return "ingles";
+  if (str.includes("franc") || str.includes("french") || str === "fr") return "frances";
+  if (str.includes("mandar") || str.includes("chin") || str === "zh") return "mandarin";
+  return "ingles";
+}
+
+function normalizarNivelClient(raw) {
+  if (!raw || typeof raw !== "string") return "basico";
+  const str = raw.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+  if (str === "a1" || str === "a2" || str.includes("basic") || str.includes("begin") || str.includes("princip")) return "basico";
+  if (str === "b1" || str === "b2" || str.includes("interm")) return "intermedio";
+  if (str === "c1" || str === "c2" || str.includes("avanz") || str.includes("advanc")) return "avanzado";
+  return "basico";
 }
 
 function hasAuthenticatedStudent() {
@@ -124,6 +185,14 @@ function applyStudentProfile(profile) {
 
   languageSelect.disabled = true;
   levelSelect.disabled = true;
+
+  if (
+    statusElement.textContent === "Verificando tu sesión de estudiante..." ||
+    statusElement.textContent === "Verificando sesión..."
+  ) {
+    setStatus("Sesión verificada. Lista para conversar cuando tú quieras.");
+    setVoiceState("idle", "Lista para conversar.");
+  }
 }
 
 window.addEventListener("message", async (event) => {
@@ -131,8 +200,14 @@ window.addEventListener("message", async (event) => {
   const parentWindow = getParentWindow();
   if (event.source !== parentWindow) return;
 
+  if (event.origin) {
+    try {
+      knownParentOrigin = new URL(event.origin).origin;
+    } catch {}
+  }
+
   if (event.data?.type === "VERA_PING") {
-    sendAuthReadySignal();
+    sendAuthReadySignal(event.origin);
     return;
   }
 
@@ -140,7 +215,23 @@ window.addEventListener("message", async (event) => {
 
   const accessToken = event.data.accessToken;
 
-  if (typeof accessToken !== "string" || !accessToken.trim()) return;
+  if (typeof accessToken !== "string" || !accessToken.trim()) {
+    notifyAuthWaiters(false);
+    return;
+  }
+
+  const passedProfile = event.data.profile;
+  if (passedProfile && typeof passedProfile === "object") {
+    studentAccessToken = accessToken;
+    applyStudentProfile({
+      id: passedProfile.id || "student",
+      name: passedProfile.name || "Estudiante",
+      language: normalizarIdiomaClient(passedProfile.language),
+      level: normalizarNivelClient(passedProfile.level),
+      levelName: passedProfile.levelName || "Beginner"
+    });
+    notifyAuthWaiters(true);
+  }
 
   try {
     const response = await fetch(`${API_BASE_URL}/api/auth/profile`, {
@@ -152,17 +243,24 @@ window.addEventListener("message", async (event) => {
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-      throw new Error(data.error || "No se pudo verificar la sesión.");
+      if (!studentAuthReady) {
+        throw new Error(data.error || "No se pudo verificar la sesión.");
+      }
+      return;
     }
 
     studentAccessToken = accessToken;
     applyStudentProfile(data);
+    notifyAuthWaiters(true);
 
     console.log("Perfil del estudiante verificado.");
   } catch (error) {
-    studentAccessToken = null;
-    studentProfile = null;
-    studentAuthReady = false;
+    if (!studentAuthReady) {
+      studentAccessToken = null;
+      studentProfile = null;
+      studentAuthReady = false;
+      notifyAuthWaiters(false);
+    }
 
     console.error("Error de autenticación de Vera Voice:", error.message);
   }
@@ -588,11 +686,25 @@ function sendLiveTeacherAction(action) {
 
 async function startLiveCall() {
   if (liveSession) return;
-    if (!hasAuthenticatedStudent()) {
+  if (!hasAuthenticatedStudent()) {
+    sendAuthReadySignal();
+    callButton.disabled = true;
+    callButton.textContent = "Verificando sesión...";
     setStatus("Verificando tu sesión de estudiante...");
-    return;
+    setVoiceState("connecting", "Verificando sesión...");
+
+    const verified = await waitForStudentAuth(7000);
+    if (!verified || !hasAuthenticatedStudent()) {
+      callButton.disabled = false;
+      callButton.textContent = "Talk to Vera";
+      setStatus("No se pudo verificar tu sesión. Haz clic en Talk to Vera para reintentar.");
+      setVoiceState("error", "Sesión no verificada. Haz clic para reintentar.");
+      return;
+    }
   }
   if (!navigator.mediaDevices?.getUserMedia || !window.WebSocket) {
+    callButton.disabled = false;
+    callButton.textContent = "Talk to Vera";
     setStatus("Las llamadas necesitan micrófono y compatibilidad con WebSocket.");
     return;
   }

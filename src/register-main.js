@@ -1,5 +1,6 @@
 import './login.css'
 import { supabase } from './lib/supabase.js'
+import { getAuthRedirectUrl } from './lib/auth.js'
 
 document.querySelector('#app').innerHTML = `
   <main class="login-page">
@@ -208,11 +209,14 @@ registerForm.addEventListener('submit', async (event) => {
   registerButton.disabled = true
   buttonText.textContent = 'Creando cuenta...'
 
+  const emailRedirectTo = getAuthRedirectUrl('/onboarding.html')
+
   const { data, error } =
     await supabase.auth.signUp({
     email,
     password,
     options: {
+      emailRedirectTo,
       data: {
         name
       }
