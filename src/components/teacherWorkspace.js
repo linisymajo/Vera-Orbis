@@ -93,11 +93,12 @@ async function loadOverview(panel) {
 }
 
 async function loadAcademic(panel) {
-  const [materials, challenges, plans, courses] = await Promise.all([
+  const [materials, challenges, plans, courses, studentsRes] = await Promise.all([
     supabase.from('materials').select('id, title, type, language, level, student_id, audience, file_path, created_at').order('created_at', { ascending: false }).limit(30),
     supabase.from('weekly_challenges').select('id, title, status, student_id, end_date, created_at').order('created_at', { ascending: false }).limit(20),
     supabase.from('profiles').select('id, name, current_module, next_step, goal').not('next_step', 'is', null).limit(20),
-    supabase.from('courses').select('id, name, language, level, status').order('created_at', { ascending: false }).limit(20)
+    supabase.from('courses').select('id, name, language, level, status').order('created_at', { ascending: false }).limit(20),
+    supabase.from('profiles').select('id, name').order('name')
   ])
 
   if (materials.error || challenges.error || plans.error) {
@@ -106,15 +107,17 @@ async function loadAcademic(panel) {
   }
 
   const coursesList = courses.error ? [] : (courses.data || [])
+  const students = studentsRes.error ? [] : (studentsRes.data || [])
+  const studentMap = new Map(students.map(s => [s.id, s.name]))
 
   panel.innerHTML = `
     <div class="teacher-action-grid">
-      ${materialForm()}
-      ${challengeForm()}
+      ${materialForm(students)}
+      ${challengeForm(students)}
       ${courseForm()}
     </div>
     <div class="teacher-workspace-columns">
-      ${materialsCard(materials.data)}
+      ${materialsCard(materials.data, studentMap)}
       ${listCard('Challenges', challenges.data, (item) => `${item.title || 'Untitled'} · ${item.status || 'draft'}`)}
     </div>
     ${listCard('Courses', coursesList, (item) => `${item.name} · ${item.language}${item.level ? ` · ${item.level}` : ''} · ${item.status}`)}
@@ -192,7 +195,7 @@ async function loadAcademic(panel) {
   })
 }
 
-function materialsCard(items = []) {
+function materialsCard(items = [], studentMap = new Map()) {
   return `<article class="teacher-list-card" id="teacher-materials-card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
       <h3 style="margin:0;">Materials (${items?.length || 0})</h3>
@@ -206,9 +209,11 @@ function materialsCard(items = []) {
                 <strong>${escapeHtml(item.title || 'Untitled')}</strong>
                 <span class="teacher-badge ${item.audience === 'all' ? 'badge-global' : 'badge-individual'}">${item.audience === 'all' ? 'Global' : 'Individual'}</span>
                 <span class="teacher-badge badge-draft">${escapeHtml((item.type || 'resource').toUpperCase())}</span>
+                ${item.language ? `<span class="teacher-badge badge-global">${escapeHtml(item.language)}</span>` : ''}
+                ${item.level ? `<span class="teacher-badge badge-draft">${escapeHtml(item.level)}</span>` : ''}
               </div>
               <small style="color:var(--vo-muted);display:block;margin-top:2px;">
-                ${item.audience === 'all' ? 'Shared with all students' : 'Assigned to individual student'}
+                ${item.audience === 'all' ? 'Shared with all students' : `Assigned to: ${escapeHtml(studentMap.get(item.student_id) || item.student_id || 'Individual student')}`}
                 ${item.description ? ` · ${escapeHtml(item.description)}` : ''}
               </small>
             </div>
@@ -318,24 +323,38 @@ async function saveExercise(event) {
   }, 'Exercise draft saved.')
 }
 
-function materialForm() {
+function materialForm(students = []) {
   return `<form class="teacher-form-card" id="teacher-material-form">
     <div><p class="teacher-label">MATERIALS</p><h3>Create a resource</h3></div>
-    <label>Title<input name="title" required maxlength="160"></label>
-    <label>Type<select name="type"><option value="class">Class</option><option value="practice">Practice</option><option value="vocabulary">Vocabulary</option><option value="resource">Resource</option></select></label>
-    <label>Student UUID or leave blank for all<input name="student_id"></label>
-    <label>Description<textarea name="description" rows="3"></textarea></label>
+    <label>Title<input name="title" required maxlength="160" placeholder="e.g. Conversation Guide Unit 1"></label>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <label>Language<input name="language" placeholder="e.g. English"></label>
+      <label>Level<input name="level" placeholder="e.g. B1"></label>
+    </div>
+    <label>Type<select name="type"><option value="class">Class</option><option value="practice">Practice</option><option value="vocabulary">Vocabulary</option><option value="resource" selected>Resource</option></select></label>
+    <label>Student (or leave blank for all)
+      <input name="student_id" placeholder="Select student or leave blank for Global" list="academic-students-list">
+      <datalist id="academic-students-list">
+        ${students.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)}</option>`).join('')}
+      </datalist>
+    </label>
+    <label>Description<textarea name="description" rows="3" placeholder="Brief description or instructions..."></textarea></label>
     <label>Private file (PDF, image, audio or video; 10 MB max)<input name="file" type="file" accept=".pdf,image/*,audio/*,video/*"></label>
     <button class="teacher-primary-button" type="submit">Save material</button><p class="teacher-form-status" data-form-status></p>
   </form>`
 }
 
-function challengeForm() {
+function challengeForm(students = []) {
   return `<form class="teacher-form-card" id="teacher-challenge-form">
     <div><p class="teacher-label">ACTIVITIES</p><h3>Create a challenge</h3></div>
-    <label>Title<input name="title" required maxlength="160"></label>
-    <label>Student UUID or leave blank for all<input name="student_id"></label>
-    <label>Instructions<textarea name="instructions" rows="3"></textarea></label>
+    <label>Title<input name="title" required maxlength="160" placeholder="e.g. 5-Minute Speech Challenge"></label>
+    <label>Student (or leave blank for all)
+      <input name="student_id" placeholder="Select student or leave blank for Global" list="academic-challenge-students-list">
+      <datalist id="academic-challenge-students-list">
+        ${students.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)}</option>`).join('')}
+      </datalist>
+    </label>
+    <label>Instructions<textarea name="instructions" rows="3" placeholder="Challenge instructions..."></textarea></label>
     <label>Due date<input type="date" name="end_date"></label>
     <button class="teacher-primary-button" type="submit">Publish challenge</button><p class="teacher-form-status" data-form-status></p>
   </form>`
@@ -376,7 +395,7 @@ async function saveAcademicRecord(event, table, panel) {
   }
 
   let payload = table === 'materials'
-    ? { teacher_id: user.id, title: data.title.trim(), type: data.type, student_id: data.student_id.trim() || null, audience: data.student_id.trim() ? 'student' : 'all', description: data.description.trim() || null }
+    ? { teacher_id: user.id, title: data.title.trim(), type: data.type, student_id: data.student_id.trim() || null, audience: data.student_id.trim() ? 'student' : 'all', description: data.description.trim() || null, language: data.language?.trim() || null, level: data.level?.trim() || null }
     : { title: data.title.trim(), student_id: data.student_id.trim() || null, audience: data.student_id.trim() ? 'student' : 'all', instructions: data.instructions.trim() || null, end_date: data.end_date || null, status: 'active' }
 
   status.textContent = 'Saving...'
@@ -608,7 +627,17 @@ async function loadFinance(panel) {
             ${students.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)}</option>`).join('')}
           </datalist>
         </label>
-        <label>Assignment UUID<input name="assignment_id"></label>
+        <label>Assignment UUID (optional)
+          <input name="assignment_id" placeholder="Select assignment or leave blank" list="finance-assignments-list">
+          <datalist id="finance-assignments-list">
+            ${(assignmentsRes.data || []).map(a => {
+              const studentName = studentMap.get(a.student_id) || a.student_id
+              const pkg = packagesList.find(p => p.id === a.package_id)
+              const pkgName = pkg ? pkg.name : a.package_id
+              return `<option value="${escapeHtml(a.assignment_id)}">${escapeHtml(studentName)} — ${escapeHtml(pkgName)} (${escapeHtml(a.status)})</option>`
+            }).join('')}
+          </datalist>
+        </label>
         <label>Amount<input name="amount" type="number" min="0.01" step="0.01" required placeholder="e.g. 150000"></label>
         <label>Method<select name="method"><option value="bank_transfer">Bank transfer</option><option value="nequi">Nequi</option><option value="daviplata">Daviplata</option><option value="cash">Cash</option></select></label>
         <label>Status<select name="status"><option value="received">Received</option><option value="partial">Partial</option><option value="pending">Pending</option><option value="refunded">Refunded</option><option value="cancelled">Cancelled</option></select></label>

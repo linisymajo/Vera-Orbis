@@ -299,6 +299,12 @@ export function returnToTeacherDashboard(scrollToStudents = false) {
   const mainContainer = document.querySelector('#teacher-main-container')
   if (!mainContainer) return
 
+  if (typeof window !== 'undefined' && window.location?.hash?.startsWith('#student-')) {
+    try {
+      history.pushState(null, '', '#dashboard')
+    } catch {}
+  }
+
   mainContainer.innerHTML = renderMainDashboardContent()
   setupTeacherWorkspace()
   loadStudents()
@@ -391,6 +397,29 @@ function renderTeacherDashboard(user) {
 
   setupTeacherWorkspace()
   loadStudents()
+
+  if (typeof window !== 'undefined') {
+    const handleHashChange = () => {
+      const hash = window.location.hash || ''
+      const match = hash.match(/^#student-(.+)$/)
+      if (match) {
+        openStudentProfile(match[1])
+      } else if (hash === '' || hash === '#' || hash === '#dashboard') {
+        const isProfileOpen = Boolean(document.querySelector('.student-profile-view'))
+        if (isProfileOpen) {
+          returnToTeacherDashboard(false)
+        }
+      }
+    }
+
+    window.removeEventListener('hashchange', window._teacherHashHandler)
+    window._teacherHashHandler = handleHashChange
+    window.addEventListener('hashchange', handleHashChange)
+
+    if (window.location.hash && window.location.hash.startsWith('#student-')) {
+      handleHashChange()
+    }
+  }
 
   document
     .querySelector('#teacher-logout-button')
@@ -717,6 +746,12 @@ async function openStudentProfile(studentId) {
     document.querySelector('#teacher-main-container')
 
   if (!mainContainer) return
+
+  if (typeof window !== 'undefined' && window.location && window.location.hash !== `#student-${studentId}`) {
+    try {
+      history.pushState(null, '', `#student-${studentId}`)
+    } catch {}
+  }
 
   mainContainer.innerHTML = `
     <div class="teacher-loading teacher-profile-loading">
