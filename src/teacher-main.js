@@ -466,8 +466,8 @@ async function loadStudents() {
       lessons_completed,
       total_lessons,
       current_module,
-      next_step,
-      interface_language
+      next_step
+    
     `)
     .order('name')
 
@@ -792,8 +792,8 @@ async function openStudentProfile(studentId) {
         lessons_completed,
         total_lessons,
         current_module,
-        next_step,
-        interface_language
+        next_step
+        
       `)
       .eq('id', studentId)
       .maybeSingle(),
