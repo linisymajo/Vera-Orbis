@@ -939,3 +939,22 @@ test('calendar, finance, leads, and culture modules provide complete CRUD and in
   assert.match(workspace, /data-delete-culture-id/)
 })
 
+test('migration 0008 provides defensive column backfills and hardened teacher RLS', () => {
+  const sql = readFileSync(
+    new URL('../supabase/migrations/0008_teacher_management_security_patch.sql', import.meta.url),
+    'utf8'
+  )
+
+  // Defensive column backfilling
+  assert.match(sql, /alter table public\.materials add column if not exists language text/)
+  assert.match(sql, /alter table public\.materials add column if not exists level text/)
+  assert.match(sql, /alter table public\.materials add column if not exists audience text/)
+
+  // Hardened RLS requiring verified teacher
+  assert.match(sql, /exists \(select 1 from public\.teachers where id = \(select auth\.uid\(\)\)\)/)
+  assert.match(sql, /create policy "teachers manage own materials" on public\.materials/)
+  assert.match(sql, /drop view if exists public\.student_payment_summary/)
+  assert.match(sql, /grant select on public\.student_payment_summary to authenticated/)
+})
+
+
