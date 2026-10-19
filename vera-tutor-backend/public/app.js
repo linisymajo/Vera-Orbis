@@ -171,9 +171,171 @@ function hasAuthenticatedStudent() {
   );
 }
 
+const VERA_VOICE_I18N = {
+  es: {
+    tagline: "Tu compañera para practicar idiomas.",
+    introKicker: "Una conversación a la vez",
+    introTitle: "Hola, soy Vera.",
+    introP1: "Tu compañera para practicar idiomas y ganar confianza al hablar.",
+    introP2: "Conversemos a tu ritmo. Aquí puedes equivocarte, aprender y volver a intentarlo.",
+    stageTitle: "Vera está contigo",
+    stageIdle: "Lista para conversar.",
+    labelLang: "Idioma de práctica",
+    labelLevel: "Tu nivel",
+    labelMode: "Experiencia",
+    labelSupport: "Idioma de apoyo",
+    labelMessage: "Tu mensaje",
+    placeholderMessage: "Escribe algo... o usa el micrófono.",
+    btnSend: "Enviar",
+    btnMic: "Hablar",
+    btnCall: "Llamar a Vera",
+    btnSpeak: "Escuchar a Vera",
+    btnClear: "Limpiar chat",
+    verifiedStatus: "Sesión verificada. Lista para conversar cuando tú quieras.",
+    verifyingStatus: "Verificando tu sesión de estudiante...",
+    greeting: "¡Hola! Soy Vera, tu compañera para practicar idiomas y ganar confianza al hablar. Elige tu idioma y conversemos. No te preocupes por cometer errores: estoy aquí precisamente para ayudarte a aprender."
+  },
+  en: {
+    tagline: "Your speaking partner for language practice.",
+    introKicker: "One conversation at a time",
+    introTitle: "Hello, I'm Vera.",
+    introP1: "Your partner to practice languages and build speaking confidence.",
+    introP2: "Let's talk at your own pace. Here you can make mistakes, learn, and try again.",
+    stageTitle: "Vera is with you",
+    stageIdle: "Ready to converse.",
+    labelLang: "Practice Language",
+    labelLevel: "Your Level",
+    labelMode: "Experience",
+    labelSupport: "Support Language",
+    labelMessage: "Your message",
+    placeholderMessage: "Type a message... or use the microphone.",
+    btnSend: "Send",
+    btnMic: "Speak",
+    btnCall: "Talk to Vera",
+    btnSpeak: "Hear Vera",
+    btnClear: "Clear Chat",
+    verifiedStatus: "Session verified. Ready to chat whenever you want.",
+    verifyingStatus: "Verifying your student session...",
+    greeting: "Hello! I'm Vera, your partner to practice languages and build speaking confidence. Let's practice together at your own pace!"
+  },
+  fr: {
+    tagline: "Votre partenaire pour pratiquer les langues.",
+    introKicker: "Une conversation à la fois",
+    introTitle: "Bonjour, je suis Vera.",
+    introP1: "Votre partenaire pour pratiquer et prendre confiance à l'oral.",
+    introP2: "Conversons à votre rythme. Ici, vous pouvez vous tromper, apprendre et réessayer.",
+    stageTitle: "Vera est avec vous",
+    stageIdle: "Prête à converser.",
+    labelLang: "Langue de pratique",
+    labelLevel: "Votre niveau",
+    labelMode: "Expérience",
+    labelSupport: "Langue de support",
+    labelMessage: "Votre message",
+    placeholderMessage: "Écrivez un message... ou utilisez le micro.",
+    btnSend: "Envoyer",
+    btnMic: "Parler",
+    btnCall: "Parler à Vera",
+    btnSpeak: "Écouter Vera",
+    btnClear: "Effacer le chat",
+    verifiedStatus: "Session vérifiée. Prête à discuter à tout moment.",
+    verifyingStatus: "Vérification de votre session...",
+    greeting: "Bonjour ! Je suis Vera, votre partenaire pour pratiquer et progresser à l'oral en toute confiance. Pratiquons à votre rythme !"
+  },
+  zh: {
+    tagline: "您的个性化语言练习口语伙伴。",
+    introKicker: "一次对话，一次蜕变",
+    introTitle: "你好，我是 Vera。",
+    introP1: "陪伴您在真实互动中建立开口自信的专属口语伙伴。",
+    introP2: "按您自己的节奏自由交流。在这里您可以大胆尝试、随时修正与进步。",
+    stageTitle: "Vera 陪伴在侧",
+    stageIdle: "随时准备对话。",
+    labelLang: "练习语言",
+    labelLevel: "当前级别",
+    labelMode: "练习模式",
+    labelSupport: "辅助语言",
+    labelMessage: "输入消息",
+    placeholderMessage: "输入消息... 或使用麦克风说话。",
+    btnSend: "发送",
+    btnMic: "按住说话",
+    btnCall: "与Vera通话",
+    btnSpeak: "收听Vera",
+    btnClear: "清空记录",
+    verifiedStatus: "学员会话已验证。已就绪，随时开启对话。",
+    verifyingStatus: "正在验证学员会话...",
+    greeting: "你好！我是 Vera，很高兴陪伴你练习口语并重塑开口自信。在这里，大胆表达，我们一起按你的节奏共同进步！"
+  }
+};
+
+function applyVeraVoiceInterfaceLanguage(rawLang) {
+  let lang = "es";
+  if (rawLang) {
+    const l = String(rawLang).toLowerCase();
+    if (l.startsWith("en")) lang = "en";
+    else if (l.startsWith("fr")) lang = "fr";
+    else if (l.startsWith("zh")) lang = "zh";
+  }
+  const dict = VERA_VOICE_I18N[lang] || VERA_VOICE_I18N.es;
+
+  const tagline = document.querySelector(".tagline");
+  if (tagline) tagline.textContent = dict.tagline;
+
+  const introKicker = document.querySelector(".intro-kicker");
+  if (introKicker) introKicker.textContent = dict.introKicker;
+  const introTitle = document.querySelector(".intro strong");
+  if (introTitle) introTitle.textContent = dict.introTitle;
+  const introPs = document.querySelectorAll(".intro-copy p");
+  if (introPs.length >= 2) introPs[1].textContent = dict.introP1;
+  if (introPs.length >= 3) introPs[2].textContent = dict.introP2;
+
+  const stageH2 = document.querySelector(".voice-copy h2");
+  if (stageH2) stageH2.textContent = dict.stageTitle;
+  if (voiceState) voiceState.textContent = dict.stageIdle;
+
+  const langLabel = document.querySelector('label[for="language"]');
+  if (langLabel && langLabel.childNodes[0]) langLabel.childNodes[0].nodeValue = dict.labelLang + " ";
+  const levelLabel = document.querySelector('label[for="level"]');
+  if (levelLabel && levelLabel.childNodes[0]) levelLabel.childNodes[0].nodeValue = dict.labelLevel + " ";
+  const modeLabel = document.querySelector('label[for="mode"]');
+  if (modeLabel && modeLabel.childNodes[0]) modeLabel.childNodes[0].nodeValue = dict.labelMode + " ";
+  const supportLabel = document.querySelector('label[for="supportLanguage"]');
+  if (supportLabel && supportLabel.childNodes[0]) supportLabel.childNodes[0].nodeValue = dict.labelSupport + " ";
+  const messageLabel = document.querySelector('label[for="message"]');
+  if (messageLabel) messageLabel.textContent = dict.labelMessage;
+  if (messageInput) messageInput.placeholder = dict.placeholderMessage;
+
+  if (sendButton) sendButton.textContent = dict.btnSend;
+  if (micButton) micButton.textContent = dict.btnMic;
+  if (callButton && (!liveSession || liveSession.socket?.readyState !== WebSocket.OPEN)) {
+    callButton.textContent = dict.btnCall;
+  }
+  if (speakButton) speakButton.textContent = dict.btnSpeak;
+  if (clearButton) clearButton.textContent = dict.btnClear;
+
+  if (supportLanguageSelect) {
+    const map = { es: "espanol", en: "ingles", fr: "frances", zh: "mandarin" };
+    if (map[lang]) supportLanguageSelect.value = map[lang];
+  }
+
+  const firstMsg = document.querySelector("#chat .message.model");
+  if (firstMsg && (!conversationHistory || conversationHistory.length === 0)) {
+    firstMsg.innerHTML = `<span class="author">Vera</span>${dict.greeting}`;
+  }
+}
+
+try {
+  const initialUiLang = new URLSearchParams(window.location.search).get("uiLang");
+  if (initialUiLang) {
+    applyVeraVoiceInterfaceLanguage(initialUiLang);
+  }
+} catch {}
+
 function applyStudentProfile(profile) {
   studentProfile = profile;
   studentAuthReady = true;
+
+  if (profile.interfaceLanguage) {
+    applyVeraVoiceInterfaceLanguage(profile.interfaceLanguage);
+  }
 
   if (languageSelect.querySelector(`option[value="${profile.language}"]`)) {
     languageSelect.value = profile.language;
@@ -186,12 +348,15 @@ function applyStudentProfile(profile) {
   languageSelect.disabled = true;
   levelSelect.disabled = true;
 
+  const currentUi = profile.interfaceLanguage || new URLSearchParams(window.location.search).get("uiLang") || "es";
+  const dict = VERA_VOICE_I18N[currentUi] || VERA_VOICE_I18N.es;
+
   if (
     statusElement.textContent === "Verificando tu sesión de estudiante..." ||
     statusElement.textContent === "Verificando sesión..."
   ) {
-    setStatus("Sesión verificada. Lista para conversar cuando tú quieras.");
-    setVoiceState("idle", "Lista para conversar.");
+    setStatus(dict.verifiedStatus);
+    setVoiceState("idle", dict.stageIdle);
   }
 }
 
@@ -228,7 +393,8 @@ window.addEventListener("message", async (event) => {
       name: passedProfile.name || "Estudiante",
       language: normalizarIdiomaClient(passedProfile.language),
       level: normalizarNivelClient(passedProfile.level),
-      levelName: passedProfile.levelName || "Beginner"
+      levelName: passedProfile.levelName || "Beginner",
+      interfaceLanguage: passedProfile.interfaceLanguage || "es"
     });
     notifyAuthWaiters(true);
   }

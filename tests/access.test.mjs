@@ -595,3 +595,347 @@ test('vera voice session verification provides auto-wait, timeout resilience, an
 })
 
 
+
+test('migration 0006 safely adds interface_language to student profiles', () => {
+  const sql = readFileSync(
+    new URL('../supabase/migrations/0006_interface_language.sql', import.meta.url),
+    'utf8'
+  )
+
+  assert.match(sql, /alter table public\.profiles/)
+  assert.match(sql, /add column if not exists interface_language text default 'es'/)
+})
+
+test('onboarding form, questions, validation, errors, and completion screen are completely in Spanish', () => {
+  const onboardingSource = readFileSync(
+    new URL('../src/onboarding-main.js', import.meta.url),
+    'utf8'
+  )
+  const onboardingHtml = readFileSync(
+    new URL('../onboarding.html', import.meta.url),
+    'utf8'
+  )
+
+  // Document language & title
+  assert.match(onboardingHtml, /<html lang="es">/)
+  assert.match(onboardingHtml, /<title>Vera Orbis — Tu viaje<\/title>/)
+
+  // All 7 steps in Spanish
+  assert.match(onboardingSource, /label:\s*'SOBRE TI'/)
+  assert.match(onboardingSource, /label:\s*'TUS METAS'/)
+  assert.match(onboardingSource, /label:\s*'QUÉ QUIERES HACER'/)
+  assert.match(onboardingSource, /label:\s*'TU EXPERIENCIA'/)
+  assert.match(onboardingSource, /label:\s*'TUS RETOS'/)
+  assert.match(onboardingSource, /label:\s*'TUS PREFERENCIAS'/)
+  assert.match(onboardingSource, /label:\s*'TU VISIÓN'/)
+
+  // Spanish buttons and validations
+  assert.match(onboardingSource, /← Volver/)
+  assert.match(onboardingSource, /Continuar <span>↗<\/span>/)
+  assert.match(onboardingSource, /Finalizar mi viaje <span>↗<\/span>/)
+  assert.match(onboardingSource, /Guardando\.\.\./)
+  assert.match(onboardingSource, /Omitir por ahora →/)
+  assert.match(onboardingSource, /TU VIAJE EN VERA ORBIS/)
+  assert.match(onboardingSource, /No pudimos guardar tus respuestas\. Por favor, intenta de nuevo\./)
+
+  // Spanish completion screen
+  assert.match(onboardingSource, /Tu viaje<br>\s*está <em>siendo preparado\.<\/em>/)
+  assert.match(onboardingSource, /Tus respuestas han sido guardadas\./)
+  assert.match(onboardingSource, /Tu profesor revisará tus metas/)
+  assert.match(onboardingSource, /Elige el idioma de tu plataforma/)
+  assert.match(onboardingSource, /Ingresar a mi plataforma/)
+})
+
+test('action buttons strictly adhere to the student target language across English, French, and Mandarin', async () => {
+  const { getTargetActionLabels } = await import('../src/lib/i18n.js')
+  const { renderPlatform } = await import('../src/pages/platform.js')
+
+  // 1. English target student with Spanish interface
+  const enLabels = getTargetActionLabels('English')
+  assert.equal(enLabels.journey, 'My Learning Journey')
+  assert.equal(enLabels.challenges, 'My Challenges')
+  assert.equal(enLabels.materials, 'Class Materials')
+  assert.equal(enLabels.talkToVera, 'Talk to Vera')
+
+  const studentEn = {
+    id: 's-en',
+    name: 'Carlos Diaz',
+    language: 'English',
+    level: 'B1',
+    levelName: 'Intermediate',
+    interfaceLanguage: 'es',
+    lessonsCompleted: 2,
+    totalLessons: 10,
+    progress: 20,
+    goal: 'Business presentations',
+    nextStep: 'Practice speech'
+  }
+  const htmlEn = renderPlatform(studentEn)
+  assert.match(htmlEn, /My Learning Journey/)
+  assert.match(htmlEn, /My Challenges/)
+  assert.match(htmlEn, /Class Materials/)
+  assert.match(htmlEn, />Talk to Vera<\/a>/)
+
+  // 2. French target student with Spanish interface
+  const frLabels = getTargetActionLabels('French')
+  assert.equal(frLabels.journey, 'Mon parcours')
+  assert.equal(frLabels.challenges, 'Mes défis')
+  assert.equal(frLabels.materials, 'Supports de cours')
+  assert.equal(frLabels.talkToVera, 'Parler à Vera')
+
+  const studentFr = {
+    id: 's-fr',
+    name: 'Camila Gomez',
+    language: 'French',
+    level: 'A2',
+    levelName: 'Elementary',
+    interfaceLanguage: 'es',
+    lessonsCompleted: 1,
+    totalLessons: 10,
+    progress: 10,
+    goal: 'Voyage en France',
+    nextStep: 'Prononciation'
+  }
+  const htmlFr = renderPlatform(studentFr)
+  assert.match(htmlFr, /Mon parcours/)
+  assert.match(htmlFr, /Mes défis/)
+  assert.match(htmlFr, /Supports de cours/)
+  assert.match(htmlFr, />Parler à Vera<\/a>/)
+
+  // 3. Mandarin target student with English interface
+  const zhLabels = getTargetActionLabels('Mandarin')
+  assert.equal(zhLabels.journey, '我的学习旅程')
+  assert.equal(zhLabels.challenges, '我的挑战')
+  assert.equal(zhLabels.materials, '课程资料')
+  assert.equal(zhLabels.talkToVera, '与Vera对话')
+
+  const studentZh = {
+    id: 's-zh',
+    name: 'David Lee',
+    language: 'Mandarin',
+    level: 'A1',
+    levelName: 'Beginner',
+    interfaceLanguage: 'en',
+    lessonsCompleted: 0,
+    totalLessons: 8,
+    progress: 0,
+    goal: 'Daily conversation',
+    nextStep: 'Pinyin fundamentals'
+  }
+  const htmlZh = renderPlatform(studentZh)
+  assert.match(htmlZh, /我的学习旅程/)
+  assert.match(htmlZh, /我的挑战/)
+  assert.match(htmlZh, /课程资料/)
+  assert.match(htmlZh, />与Vera对话<\/a>/)
+})
+
+test('interface language is strictly separated from learning target language and does not modify learning data', () => {
+  const platMainSource = readFileSync(
+    new URL('../src/platform-main.js', import.meta.url),
+    'utf8'
+  )
+
+  // Verify switchInterfaceLanguage function exists and updates only interfaceLanguage
+  assert.match(platMainSource, /export async function switchInterfaceLanguage/)
+  assert.match(platMainSource, /currentStudent\.interfaceLanguage = norm/)
+  assert.match(platMainSource, /update\(\{\s*interface_language:\s*norm\s*\}\)/)
+  // Ensure it never overwrites target language or progress
+  assert.doesNotMatch(platMainSource, /currentStudent\.language = /)
+  assert.doesNotMatch(platMainSource, /currentStudent\.progress = /)
+  assert.doesNotMatch(platMainSource, /currentStudent\.level = /)
+})
+
+test('platform renders localized instructions, messages, and navigation according to chosen interface language', async () => {
+  const { renderPlatform } = await import('../src/pages/platform.js')
+
+  // Spanish interface
+  const studentEs = {
+    id: 's-es',
+    name: 'Maria Torres',
+    language: 'English',
+    interfaceLanguage: 'es',
+    lessonsCompleted: 3,
+    totalLessons: 12,
+    progress: 25,
+    goal: 'Fluency',
+    nextStep: 'Review module 1'
+  }
+  const htmlEs = renderPlatform(studentEs)
+  assert.match(htmlEs, /Bienvenido de nuevo,/)
+  assert.match(htmlEs, /Tu viaje lingüístico continúa aquí/)
+  assert.match(htmlEs, /01 — PASAPORTE LINGÜÍSTICO/)
+  assert.match(htmlEs, /Tu idioma\./)
+  assert.match(htmlEs, /Tu identidad\./)
+  assert.match(htmlEs, /Continuar mi viaje ↗/)
+  assert.match(htmlEs, /3 de 12/)
+
+  // French interface
+  const studentFrUi = {
+    id: 's-frui',
+    name: 'Jean Luc',
+    language: 'English',
+    interfaceLanguage: 'fr',
+    lessonsCompleted: 4,
+    totalLessons: 12,
+    progress: 33,
+    goal: 'Business',
+    nextStep: 'Module 2'
+  }
+  const htmlFrUi = renderPlatform(studentFrUi)
+  assert.match(htmlFrUi, /Bienvenue à nouveau,/)
+  assert.match(htmlFrUi, /01 — PASSEPORT LINGUISTIQUE/)
+  assert.match(htmlFrUi, /Continuer mon parcours ↗/)
+
+  // Chinese interface
+  const studentZhUi = {
+    id: 's-zhui',
+    name: 'Li Wei',
+    language: 'English',
+    interfaceLanguage: 'zh',
+    lessonsCompleted: 5,
+    totalLessons: 10,
+    progress: 50,
+    goal: 'Travel',
+    nextStep: 'Module 3'
+  }
+  const htmlZhUi = renderPlatform(studentZhUi)
+  assert.match(htmlZhUi, /欢迎回来，/)
+  assert.match(htmlZhUi, /01 — 语言护照/)
+  assert.match(htmlZhUi, /继续我的旅程 ↗/)
+})
+
+test('migration 0007 enforces teacher management RLS and protects sensitive data from students', () => {
+  const sql = readFileSync(
+    new URL('../supabase/migrations/0007_teacher_management_enhancements.sql', import.meta.url),
+    'utf8'
+  )
+
+  // Materials RLS
+  assert.match(sql, /create table if not exists public\.materials/)
+  assert.match(sql, /alter table public\.materials enable row level security/)
+  assert.match(sql, /create policy "teachers manage own materials" on public\.materials/)
+  assert.match(sql, /create policy "students read assigned materials" on public\.materials/)
+  assert.match(sql, /m\.audience = 'all'|audience = 'all'/)
+
+  // Classes & participants RLS
+  assert.match(sql, /create table if not exists public\.classes/)
+  assert.match(sql, /create policy "teachers manage own classes" on public\.classes/)
+  assert.match(sql, /create policy "students read their classes" on public\.classes/)
+  assert.match(sql, /create policy "teachers manage own class participants" on public\.class_participants/)
+
+  // Packages RLS
+  assert.match(sql, /create policy "teachers manage own packages" on public\.packages/)
+  assert.match(sql, /create policy "students read their package assignments" on public\.student_packages/)
+
+  // Payments isolation & summary view
+  assert.match(sql, /create policy "teachers manage own payments" on public\.payments/)
+  assert.doesNotMatch(sql, /students read their payments.*on public\.payments/)
+  assert.match(sql, /create or replace view public\.student_payment_summary/)
+  assert.match(sql, /grant select on public\.student_payment_summary to authenticated/)
+
+  // Leads & Culture isolation
+  assert.match(sql, /create policy "teachers manage own leads" on public\.leads/)
+  assert.doesNotMatch(sql, /students.*read.*on public\.leads/)
+  assert.match(sql, /create policy "teachers manage own culture resources" on public\.culture_resources/)
+  assert.match(sql, /create policy "students read published culture resources" on public\.culture_resources/)
+})
+
+test('teacher materials management supports safe deletion and global vs individual audience display', () => {
+  const teacherMain = readFileSync(
+    new URL('../src/teacher-main.js', import.meta.url),
+    'utf8'
+  )
+  const workspace = readFileSync(
+    new URL('../src/components/teacherWorkspace.js', import.meta.url),
+    'utf8'
+  )
+
+  // Deletion attributes & handlers in student profile
+  assert.match(teacherMain, /data-delete-material-id/)
+  assert.match(teacherMain, /\.from\('materials'\)\.delete\(\)\.eq\('id',\s*materialId\)/)
+  assert.match(teacherMain, /supabase\.storage\.from\('materials'\)\.remove/)
+  assert.match(teacherMain, /count === 0/)
+
+  // Global & Individual audience badges in student profile
+  assert.match(teacherMain, /badge-global/)
+  assert.match(teacherMain, /badge-individual/)
+
+  // Materials management card & deletion in teacher workspace
+  assert.match(workspace, /materialsCard/)
+  assert.match(workspace, /data-delete-material-id/)
+  assert.match(workspace, /\.from\('materials'\)\.delete\(\)\.eq\('id',\s*materialId\)/)
+  assert.match(workspace, /data-view-material-file/)
+})
+
+test('teacher navigation provides dedicated returnToTeacherDashboard restoring complete view hierarchy', () => {
+  const teacherMain = readFileSync(
+    new URL('../src/teacher-main.js', import.meta.url),
+    'utf8'
+  )
+
+  // Topbar back-to-dashboard button
+  assert.match(teacherMain, /id="back-to-dashboard"/)
+  assert.match(teacherMain, /← Volver al panel \(Teacher Dashboard\)/)
+
+  // Exported returnToTeacherDashboard restoring full main container
+  assert.match(teacherMain, /export function returnToTeacherDashboard/)
+  assert.match(teacherMain, /renderMainDashboardContent\(\)/)
+  assert.match(teacherMain, /setupTeacherWorkspace\(\)/)
+  assert.match(teacherMain, /loadStudents\(\)/)
+
+  // showStudentsView cleanly delegates to returnToTeacherDashboard without destroying layout
+  assert.match(teacherMain, /function showStudentsView\(\)\s*\{\s*returnToTeacherDashboard\(true\)/)
+})
+
+test('teacher dossier and academic management reflects student interface language and academic updates', () => {
+  const teacherMain = readFileSync(
+    new URL('../src/teacher-main.js', import.meta.url),
+    'utf8'
+  )
+
+  // interface_language selected in loadStudents and openStudentProfile
+  assert.match(teacherMain, /interface_language[\s\S]*\.from\('profiles'\)/)
+  assert.match(teacherMain, /UI:\s*\$\{\(profile\.interface_language/)
+
+  // Academic edit form includes interface language selector
+  assert.match(teacherMain, /id="academic-interface-language"/)
+  assert.match(teacherMain, /interface_language:\s*interfaceLanguage/)
+  assert.match(teacherMain, /profile\.interface_language\s*=\s*interfaceLanguage/)
+  assert.match(teacherMain, /cachedStudent[\s\S]*interface_language:\s*interfaceLanguage/)
+})
+
+test('calendar, finance, leads, and culture modules provide complete CRUD and interactive pipeline controls', () => {
+  const workspace = readFileSync(
+    new URL('../src/components/teacherWorkspace.js', import.meta.url),
+    'utf8'
+  )
+
+  // Calendar
+  assert.match(workspace, /id="teacher-class-form"/)
+  assert.match(workspace, /data-class-filter/)
+  assert.match(workspace, /data-update-class-status/)
+  assert.match(workspace, /data-delete-class-id/)
+
+  // Finance
+  assert.match(workspace, /id="teacher-payment-form"/)
+  assert.match(workspace, /id="teacher-expense-form"/)
+  assert.match(workspace, /id="teacher-package-form"/)
+  assert.match(workspace, /id="teacher-assignment-form"/)
+  assert.match(workspace, /formatMoney/)
+  assert.match(workspace, /data-delete-payment-id/)
+  assert.match(workspace, /data-delete-expense-id/)
+  assert.match(workspace, /data-delete-package-id/)
+
+  // Leads
+  assert.match(workspace, /id="teacher-lead-form"/)
+  assert.match(workspace, /data-lead-filter/)
+  assert.match(workspace, /data-lead-stage-select/)
+  assert.match(workspace, /data-delete-lead-id/)
+
+  // Culture
+  assert.match(workspace, /id="teacher-culture-form"/)
+  assert.match(workspace, /data-culture-filter/)
+  assert.match(workspace, /data-toggle-culture-status/)
+  assert.match(workspace, /data-delete-culture-id/)
+})
+

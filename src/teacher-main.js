@@ -104,6 +104,219 @@ function showAccessDenied(title, message) {
    MAIN DASHBOARD
    ========================================================= */
 
+function renderMainDashboardContent() {
+  return `
+    <section class="teacher-welcome">
+
+      <div>
+
+        <p class="teacher-label">
+          VERA ORBIS · TEACHER ACCESS
+        </p>
+
+        <h1>
+          Your students.
+          <span>Your journey.</span>
+        </h1>
+
+        <p>
+          Manage your students, learning materials
+          and progress from one place.
+        </p>
+
+      </div>
+
+
+      <div class="teacher-welcome-orbit">
+
+        <div class="teacher-orbit-ring ring-one"></div>
+
+        <div class="teacher-orbit-ring ring-two"></div>
+
+        <div class="teacher-orbit-center">
+
+          <img
+            src="${LOGO}"
+            alt="Vera Orbis"
+          >
+
+        </div>
+
+      </div>
+
+    </section>
+
+    ${renderTeacherWorkspace()}
+
+
+    <section class="teacher-section" id="teacher-students-section">
+
+      <div class="teacher-section-heading">
+
+        <div>
+
+          <p class="teacher-label">
+            STUDENTS
+          </p>
+
+          <h2>
+            Your students.
+          </h2>
+
+        </div>
+
+        <div class="teacher-search-wrapper">
+
+          <input
+            type="search"
+            id="student-search-input"
+            class="teacher-search-input"
+            placeholder="Search students by name, language or level..."
+            autocomplete="off"
+          >
+
+        </div>
+
+      </div>
+
+
+      <div
+        id="teacher-students"
+        class="teacher-students"
+      >
+
+        <div class="teacher-loading">
+          Loading students...
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <section class="teacher-section teacher-tools">
+
+      <div class="teacher-section-heading">
+
+        <div>
+
+          <p class="teacher-label">
+            TOOLS
+          </p>
+
+          <h2>
+            Manage Vera Orbis.
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <div class="teacher-tools-grid">
+
+        <article class="teacher-tool-card">
+
+          <span class="teacher-tool-icon">
+            +
+          </span>
+
+          <div>
+
+            <span>
+              STUDENTS
+            </span>
+
+            <h3>
+              Add and manage students
+            </h3>
+
+            <p>
+              Organize your student profiles and learning journeys.
+            </p>
+
+          </div>
+
+        </article>
+
+
+        <article class="teacher-tool-card">
+
+          <span class="teacher-tool-icon">
+            PDF
+          </span>
+
+          <div>
+
+            <span>
+              MATERIALS
+            </span>
+
+            <h3>
+              Upload class materials
+            </h3>
+
+            <p>
+              Give each student personalized resources.
+            </p>
+
+          </div>
+
+        </article>
+
+
+        <article class="teacher-tool-card">
+
+          <span class="teacher-tool-icon">
+            %
+          </span>
+
+          <div>
+
+            <span>
+              PROGRESS
+            </span>
+
+            <h3>
+              Update student progress
+            </h3>
+
+            <p>
+              Keep each student's journey up to date.
+            </p>
+
+          </div>
+
+        </article>
+
+      </div>
+
+    </section>
+  `
+}
+
+export function returnToTeacherDashboard(scrollToStudents = false) {
+  const mainContainer = document.querySelector('#teacher-main-container')
+  if (!mainContainer) return
+
+  mainContainer.innerHTML = renderMainDashboardContent()
+  setupTeacherWorkspace()
+  loadStudents()
+
+  if (scrollToStudents) {
+    const studentsEl = document.querySelector('#teacher-students-section')
+    if (studentsEl) {
+      studentsEl.scrollIntoView({ behavior: 'smooth' })
+      return
+    }
+  }
+
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  })
+}
+
 function renderTeacherDashboard(user) {
   const app = document.querySelector('#app')
 
@@ -157,194 +370,7 @@ function renderTeacherDashboard(user) {
         class="teacher-content"
         id="teacher-main-container"
       >
-
-        <section class="teacher-welcome">
-
-          <div>
-
-            <p class="teacher-label">
-              VERA ORBIS · TEACHER ACCESS
-            </p>
-
-            <h1>
-              Your students.
-              <span>Your journey.</span>
-            </h1>
-
-            <p>
-              Manage your students, learning materials
-              and progress from one place.
-            </p>
-
-          </div>
-
-
-          <div class="teacher-welcome-orbit">
-
-            <div class="teacher-orbit-ring ring-one"></div>
-
-            <div class="teacher-orbit-ring ring-two"></div>
-
-            <div class="teacher-orbit-center">
-
-              <img
-                src="${LOGO}"
-                alt="Vera Orbis"
-              >
-
-            </div>
-
-          </div>
-
-        </section>
-
-        ${renderTeacherWorkspace()}
-
-
-        <section class="teacher-section">
-
-          <div class="teacher-section-heading">
-
-            <div>
-
-              <p class="teacher-label">
-                STUDENTS
-              </p>
-
-              <h2>
-                Your students.
-              </h2>
-
-            </div>
-
-            <div class="teacher-search-wrapper">
-
-              <input
-                type="search"
-                id="student-search-input"
-                class="teacher-search-input"
-                placeholder="Search students by name, language or level..."
-                autocomplete="off"
-              >
-
-            </div>
-
-          </div>
-
-
-          <div
-            id="teacher-students"
-            class="teacher-students"
-          >
-
-            <div class="teacher-loading">
-              Loading students...
-            </div>
-
-          </div>
-
-        </section>
-
-
-        <section class="teacher-section teacher-tools">
-
-          <div class="teacher-section-heading">
-
-            <div>
-
-              <p class="teacher-label">
-                TOOLS
-              </p>
-
-              <h2>
-                Manage Vera Orbis.
-              </h2>
-
-            </div>
-
-          </div>
-
-
-          <div class="teacher-tools-grid">
-
-            <article class="teacher-tool-card">
-
-              <span class="teacher-tool-icon">
-                +
-              </span>
-
-              <div>
-
-                <span>
-                  STUDENTS
-                </span>
-
-                <h3>
-                  Add and manage students
-                </h3>
-
-                <p>
-                  Organize your student profiles and learning journeys.
-                </p>
-
-              </div>
-
-            </article>
-
-
-            <article class="teacher-tool-card">
-
-              <span class="teacher-tool-icon">
-                PDF
-              </span>
-
-              <div>
-
-                <span>
-                  MATERIALS
-                </span>
-
-                <h3>
-                  Upload class materials
-                </h3>
-
-                <p>
-                  Give each student personalized resources.
-                </p>
-
-              </div>
-
-            </article>
-
-
-            <article class="teacher-tool-card">
-
-              <span class="teacher-tool-icon">
-                %
-              </span>
-
-              <div>
-
-                <span>
-                  PROGRESS
-                </span>
-
-                <h3>
-                  Update student progress
-                </h3>
-
-                <p>
-                  Keep each student's journey up to date.
-                </p>
-
-              </div>
-
-            </article>
-
-          </div>
-
-        </section>
-
+        ${renderMainDashboardContent()}
       </main>
 
 
@@ -411,7 +437,8 @@ async function loadStudents() {
       lessons_completed,
       total_lessons,
       current_module,
-      next_step
+      next_step,
+      interface_language
     `)
     .order('name')
 
@@ -677,59 +704,7 @@ function attachStudentCardEvents() {
    ========================================================= */
 
 function showStudentsView() {
-  const mainContainer =
-    document.querySelector('#teacher-main-container')
-
-  if (!mainContainer) return
-
-  mainContainer.innerHTML = `
-    <section class="teacher-section teacher-students-view">
-
-      <div class="teacher-section-heading">
-
-        <div>
-
-          <p class="teacher-label">
-            STUDENTS
-          </p>
-
-          <h2>
-            Your students.
-          </h2>
-
-        </div>
-
-        <div class="teacher-search-wrapper">
-
-          <input
-            type="search"
-            id="student-search-input"
-            class="teacher-search-input"
-            placeholder="Search students by name, language or level..."
-            autocomplete="off"
-          >
-
-        </div>
-
-      </div>
-
-
-      <div
-        id="teacher-students"
-        class="teacher-students"
-      ></div>
-
-    </section>
-  `
-
-  renderStudentsList(allStudentsCache)
-
-  setupStudentSearch()
-
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth'
-  })
+  returnToTeacherDashboard(true)
 }
 
 
@@ -782,7 +757,8 @@ async function openStudentProfile(studentId) {
         lessons_completed,
         total_lessons,
         current_module,
-        next_step
+        next_step,
+        interface_language
       `)
       .eq('id', studentId)
       .maybeSingle(),
@@ -934,9 +910,12 @@ function renderStudentMaterialsSection(profile, materials = []) {
           ${materials.length ? `
             <ul style="margin:0;">
               ${materials.map(m => `
-                <li style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 0;">
+                <li style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid var(--vo-border);">
                   <div>
-                    <strong>${escapeHtml(m.title)}</strong>
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                      <strong>${escapeHtml(m.title)}</strong>
+                      <span class="teacher-badge ${m.audience === 'all' ? 'badge-global' : 'badge-individual'}">${m.audience === 'all' ? 'Global' : 'Individual'}</span>
+                    </div>
                     <span style="font-size:12px;color:rgba(24,59,102,0.65);display:block;margin-top:2px;">
                       ${escapeHtml((m.type || 'resource').toUpperCase())} · ${m.audience === 'all' ? 'Shared with all students' : 'Assigned directly to this student'}
                       ${m.description ? ` · ${escapeHtml(m.description)}` : ''}
@@ -944,6 +923,7 @@ function renderStudentMaterialsSection(profile, materials = []) {
                   </div>
                   <div class="teacher-inline-actions">
                     ${m.file_path ? `<button type="button" class="teacher-secondary-button" data-view-material-file="${escapeHtml(m.file_path)}" style="padding:6px 14px;font-size:12px;">Open file ↗</button>` : ''}
+                    <button type="button" class="teacher-danger-button teacher-delete-material-btn" data-delete-material-id="${escapeHtml(m.id)}" data-material-filepath="${escapeHtml(m.file_path || '')}" data-material-title="${escapeHtml(m.title)}" style="padding:6px 12px;font-size:12px;">Eliminar</button>
                   </div>
                 </li>
               `).join('')}
@@ -1129,14 +1109,22 @@ function renderStudentProfile(
   mainContainer.innerHTML = `
     <section class="student-profile-view">
 
-      <div class="student-profile-topbar">
+      <div class="student-profile-topbar" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:20px;">
+
+        <button
+          type="button"
+          id="back-to-dashboard"
+          class="teacher-secondary-button"
+        >
+          ← Volver al panel (Teacher Dashboard)
+        </button>
 
         <button
           type="button"
           id="back-to-students"
           class="teacher-secondary-button"
         >
-          ← Back to Students
+          Ver lista de estudiantes
         </button>
 
       </div>
@@ -1195,6 +1183,9 @@ function renderStudentProfile(
                   `
                   : ''
               }
+
+              <span>·</span>
+              <span class="teacher-badge badge-global" title="Idioma de interfaz seleccionado">UI: ${(profile.interface_language || 'es').toUpperCase()}</span>
 
             </p>
 
@@ -1381,6 +1372,11 @@ function renderStudentProfile(
                   profile.goal
                 )}
 
+                ${renderJourneyItem(
+                  'Interface language',
+                  (profile.interface_language || 'es').toUpperCase()
+                )}
+
               </div>
 
             </div>
@@ -1501,6 +1497,24 @@ function renderStudentProfile(
                     )}"
                     placeholder="e.g. Speaking Foundations"
                   >
+
+                </label>
+
+
+                <label class="teacher-form-field">
+
+                  <span class="teacher-label">
+                    INTERFACE LANGUAGE
+                  </span>
+
+                  <select
+                    id="academic-interface-language"
+                  >
+                    <option value="es"${(profile.interface_language || 'es') === 'es' ? ' selected' : ''}>Español (es)</option>
+                    <option value="en"${profile.interface_language === 'en' ? ' selected' : ''}>English (en)</option>
+                    <option value="fr"${profile.interface_language === 'fr' ? ' selected' : ''}>Français (fr)</option>
+                    <option value="zh"${profile.interface_language === 'zh' ? ' selected' : ''}>简体中文 (zh)</option>
+                  </select>
 
                 </label>
 
@@ -2108,6 +2122,11 @@ if (saveAcademicButton) {
             '#academic-goal'
           )?.value.trim() || null
 
+        const interfaceLanguage =
+          document.querySelector(
+            '#academic-interface-language'
+          )?.value || 'es'
+
         saveAcademicButton.disabled = true
         saveAcademicButton.textContent = 'Saving...'
 
@@ -2126,7 +2145,9 @@ if (saveAcademicButton) {
               current_module:
                 currentModule,
               next_step:
-                nextStep
+                nextStep,
+              interface_language:
+                interfaceLanguage
             })
             .eq(
               'id',
@@ -2181,6 +2202,9 @@ if (saveAcademicButton) {
         profile.next_step =
           nextStep
 
+        profile.interface_language =
+          interfaceLanguage
+
         if (academicStatus) {
 
           academicStatus.textContent =
@@ -2218,7 +2242,9 @@ if (saveAcademicButton) {
               current_module:
                 currentModule,
               next_step:
-                nextStep
+                nextStep,
+              interface_language:
+                interfaceLanguage
             }
           )
         }
@@ -2321,6 +2347,52 @@ if (saveAcademicButton) {
         }
         console.error('Error opening material:', err?.message || err)
         alert('Could not open material file.')
+      }
+    })
+  })
+
+  /* Material delete buttons */
+  document.querySelectorAll('.teacher-delete-material-btn').forEach((btn) => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault()
+      const materialId = btn.dataset.deleteMaterialId
+      if (!materialId) return
+      const filePath = btn.dataset.materialFilepath
+      const title = btn.dataset.materialTitle || 'este material'
+
+      const confirmed = window.confirm(`¿Estás seguro de que deseas eliminar el material "${title}"?\nEsta acción no se puede deshacer.`)
+      if (!confirmed) return
+
+      btn.disabled = true
+      const originalText = btn.textContent
+      btn.textContent = 'Eliminando...'
+
+      try {
+        if (filePath) {
+          const cleanPath = String(filePath).trim().replace(/^\/+/, '')
+          const { count, error: countErr } = await supabase
+            .from('materials')
+            .select('id', { count: 'exact', head: true })
+            .eq('file_path', cleanPath)
+            .neq('id', materialId)
+
+          if (!countErr && (count === 0 || count == null)) {
+            const { error: storageErr } = await supabase.storage.from('materials').remove([cleanPath])
+            if (storageErr) {
+              console.warn('Storage file deletion warning:', storageErr.message || storageErr)
+            }
+          }
+        }
+
+        const { error: deleteErr } = await supabase.from('materials').delete().eq('id', materialId)
+        if (deleteErr) throw deleteErr
+
+        openStudentProfile(profile.id)
+      } catch (err) {
+        console.error('Delete material error:', err)
+        alert(`No se pudo eliminar el material: ${err.message || 'Error desconocido'}`)
+        btn.disabled = false
+        btn.textContent = originalText
       }
     })
   })
@@ -2607,6 +2679,18 @@ if (saveAcademicButton) {
    ========================================================= */
 
 function attachStudentProfileEvents(studentId) {
+  const backToDashboard =
+    document.querySelector(
+      '#back-to-dashboard'
+    )
+
+  if (backToDashboard) {
+    backToDashboard.addEventListener(
+      'click',
+      () => returnToTeacherDashboard(false)
+    )
+  }
+
   const backButton =
     document.querySelector(
       '#back-to-students'

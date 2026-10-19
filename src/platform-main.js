@@ -7,6 +7,7 @@ import {
 } from './pages/platform.js'
 import { supabase } from './lib/supabase.js'
 import { setupExerciseForms } from './components/exercises.js'
+import { normalizeInterfaceLanguage, t } from './lib/i18n.js'
 
 let currentStudent = null
 export const VERA_VOICE_URL =
@@ -353,6 +354,14 @@ export async function loadPlatform() {
         ? Math.min(100, Math.round((lessonsCompleted / totalLessons) * 100))
         : Math.min(100, Math.max(0, Number(profile.progress || 0)))
 
+    const savedUiLang =
+      profile.interface_language ||
+      (typeof window !== 'undefined'
+        ? (window.sessionStorage?.getItem('vo_interface_language') ||
+           window.localStorage?.getItem('vo_interface_language'))
+        : null) ||
+      'es'
+
     const student = {
       id: profile.id,
       name: profile.name,
@@ -370,7 +379,8 @@ export async function loadPlatform() {
       nextStep:
         profile.next_step,
       onboardingCompleted:
-        Boolean(hasCompletedOnboarding || lessonsCompleted > 0)
+        Boolean(hasCompletedOnboarding || lessonsCompleted > 0),
+      interfaceLanguage: normalizeInterfaceLanguage(savedUiLang)
     }
 
     currentStudent = student
@@ -478,6 +488,44 @@ export async function loadPlatform() {
   }
 }
 
+
+/* =========================================================
+   SWITCH INTERFACE LANGUAGE (Requirement 3 & 4)
+========================================================= */
+export async function switchInterfaceLanguage(newLang) {
+  if (!currentStudent) return
+  const norm = normalizeInterfaceLanguage(newLang)
+  if (currentStudent.interfaceLanguage === norm) return
+
+  // Requirement 4: ONLY change interface language, NEVER change target language, progress, level, materials, etc.
+  currentStudent.interfaceLanguage = norm
+  try {
+    localStorage.setItem('vo_interface_language', norm)
+  } catch {}
+
+  try {
+    await supabase
+      .from('profiles')
+      .update({ interface_language: norm })
+      .eq('id', currentStudent.id)
+  } catch (err) {
+    console.warn('Could not persist interface_language to Supabase:', err)
+  }
+
+  const app = document.querySelector('#app')
+  if (app) {
+    app.innerHTML = renderPlatform(
+      currentStudent,
+      platformData.materials,
+      platformData.feedback,
+      platformData.challenges,
+      platformData.submissions,
+      platformData.exercises
+    )
+    setupExerciseForms(supabase)
+    setupGlobalPlatformFunctions()
+  }
+}
 
 /* =========================================================
    PLATFORM NAVIGATION
@@ -661,7 +709,8 @@ function setupPlatformNavigation() {
                     name: currentStudent.name,
                     language: currentStudent.language,
                     level: currentStudent.level,
-                    levelName: currentStudent.levelName
+                    levelName: currentStudent.levelName,
+                    interfaceLanguage: currentStudent.interfaceLanguage || 'es'
                   }
                 : null
             },
@@ -711,8 +760,16 @@ function setupPlatformNavigation() {
 
       const platformOrigin =
         typeof window !== 'undefined' ? window.location.origin : ''
-      const urlWithOrigin = platformOrigin
-        ? `${url}${url.includes('?') ? '&' : '?'}platformOrigin=${encodeURIComponent(platformOrigin)}`
+      const uiLang = currentStudent?.interfaceLanguage || 'es'
+      const queryParts = []
+      if (platformOrigin) {
+        queryParts.push(`platformOrigin=${encodeURIComponent(platformOrigin)}`)
+      }
+      if (uiLang) {
+        queryParts.push(`uiLang=${encodeURIComponent(uiLang)}`)
+      }
+      const urlWithOrigin = queryParts.length
+        ? `${url}${url.includes('?') ? '&' : '?'}${queryParts.join('&')}`
         : url
 
       frame.src = urlWithOrigin
@@ -771,7 +828,8 @@ function setupPlatformNavigation() {
                     name: currentStudent.name,
                     language: currentStudent.language,
                     level: currentStudent.level,
-                    levelName: currentStudent.levelName
+                    levelName: currentStudent.levelName,
+                    interfaceLanguage: currentStudent.interfaceLanguage || 'es'
                   }
                 : null
             },
@@ -848,6 +906,40 @@ function setupPlatformNavigation() {
   document.addEventListener(
     'click',
     (event) => {
+      const langOption = event.target.closest('[data-set-interface-lang]')
+      if (langOption) {
+        event.preventDefault()
+        event.stopPropagation()
+        const newLang = langOption.dataset.setInterfaceLang
+        const menu = document.querySelector('#interface-lang-menu')
+        const toggle = document.querySelector('#interface-lang-toggle')
+        if (menu) menu.hidden = true
+        toggle?.setAttribute('aria-expanded', 'false')
+        if (currentStudent && newLang) {
+          switchInterfaceLanguage(newLang)
+        }
+        return
+      }
+
+      const langToggle = event.target.closest('#interface-lang-toggle')
+      if (langToggle) {
+        event.preventDefault()
+        event.stopPropagation()
+        const menu = document.querySelector('#interface-lang-menu')
+        if (menu) {
+          const isExpanded = langToggle.getAttribute('aria-expanded') === 'true'
+          langToggle.setAttribute('aria-expanded', String(!isExpanded))
+          menu.hidden = isExpanded
+        }
+        return
+      }
+
+      const openLangMenu = document.querySelector('#interface-lang-menu')
+      if (openLangMenu && !openLangMenu.hidden && !event.target.closest('#interface-lang-dropdown')) {
+        openLangMenu.hidden = true
+        document.querySelector('#interface-lang-toggle')?.setAttribute('aria-expanded', 'false')
+      }
+
       const veraClose = event.target.closest('[data-vera-voice-close]')
       if (veraClose) {
         event.preventDefault()

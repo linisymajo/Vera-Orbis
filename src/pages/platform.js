@@ -4,6 +4,13 @@ import { renderClassMaterials } from '../components/classMaterials.js'
 import { renderFeedback } from '../components/feedback.js'
 import { renderChallenges } from '../components/challenges.js'
 import { renderExercises } from '../components/exercises.js'
+import {
+  SUPPORTED_INTERFACE_LANGUAGES,
+  DEFAULT_INTERFACE_LANGUAGE,
+  normalizeInterfaceLanguage,
+  getTargetActionLabels,
+  t
+} from '../lib/i18n.js'
 
 const VO_LOGO = '/logo/Logo%20Vera%20Orbis%20recoloreado.png'
 const VERA_VOICE_AVATAR = '/assets/Vera.png'
@@ -41,6 +48,17 @@ export function renderPlatform(
   exercises = []
 ) {
   const voiceUrl = getEffectiveVoiceUrl()
+  const uiLang = normalizeInterfaceLanguage(
+    student?.interfaceLanguage ||
+    student?.interface_language ||
+    (typeof window !== 'undefined' ? window.localStorage?.getItem('vo_interface_language') : null) ||
+    (typeof window === 'undefined' ? 'en' : 'es')
+  )
+  const actionLabels = getTargetActionLabels(student?.language)
+  const currentLangObj =
+    SUPPORTED_INTERFACE_LANGUAGES.find((l) => l.code === uiLang) ||
+    SUPPORTED_INTERFACE_LANGUAGES[0]
+
   return `
     <div class="platform-page">
 
@@ -64,50 +82,85 @@ export function renderPlatform(
             class="active"
             data-platform-view="home"
           >
-            Home
+            ${t('home', uiLang)}
           </a>
 
           <a
             href="#journey"
             data-platform-view="journey"
           >
-            My Journey
+            ${actionLabels.journey}
           </a>
 
           <a
-  href="#materials"
-  class="platform-nav-card"
-  data-platform-view="materials"
->
-  My Materials
-</a>
+            href="#materials"
+            class="platform-nav-card"
+            data-platform-view="materials"
+          >
+            ${actionLabels.materials}
+          </a>
 
           <a
             href="#feedback"
             data-platform-view="feedback"
           >
-            Feedback
+            ${t('feedback', uiLang)}
           </a>
 
           <a
             href="#challenges"
             data-platform-view="challenges"
           >
-            Challenges
+            ${actionLabels.challenges}
           </a>
 
           <a
             href="#progress"
             data-platform-view="progress"
           >
-            Progress
+            ${t('progress', uiLang)}
           </a>
-          <a href="#exercises" data-platform-view="exercises">Exercises</a>
+
+          <a href="#exercises" data-platform-view="exercises">
+            ${t('exercises', uiLang)}
+          </a>
 
         </nav>
 
 
         <div class="student-profile-actions">
+
+          <!-- INTERFACE LANGUAGE SWITCHER -->
+          <div class="interface-lang-selector" id="interface-lang-dropdown">
+            <button
+              type="button"
+              class="interface-lang-btn"
+              id="interface-lang-toggle"
+              aria-label="${t('interfaceLangSelect', uiLang)}"
+              title="${t('interfaceLangSelect', uiLang)}"
+              aria-expanded="false"
+              aria-haspopup="true"
+            >
+              <span class="lang-flag">${currentLangObj.flag}</span>
+              <span class="lang-code">${uiLang.toUpperCase()}</span>
+              <span class="lang-arrow">▾</span>
+            </button>
+            <div class="interface-lang-menu" id="interface-lang-menu" hidden>
+              ${SUPPORTED_INTERFACE_LANGUAGES.map((item) => `
+                <button
+                  type="button"
+                  class="interface-lang-option ${item.code === uiLang ? 'is-active' : ''}"
+                  data-set-interface-lang="${item.code}"
+                  role="menuitem"
+                >
+                  <span class="lang-flag">${item.flag}</span>
+                  <span>${item.label}</span>
+                  ${item.code === uiLang ? '<span class="lang-check">✓</span>' : ''}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+
           <div
             class="student-profile"
             tabindex="0"
@@ -130,10 +183,10 @@ export function renderPlatform(
             type="button"
             id="student-logout-button"
             class="platform-logout-btn"
-            aria-label="Cerrar sesión"
-            title="Cerrar sesión"
+            aria-label="${t('signOut', uiLang)}"
+            title="${t('signOut', uiLang)}"
           >
-            Sign out ↗
+            ${t('signOut', uiLang)}
           </button>
         </div>
 
@@ -158,17 +211,16 @@ export function renderPlatform(
             <div>
 
               <p class="platform-label">
-                YOUR VERA ORBIS JOURNEY
+                ${t('journeyEyebrow', uiLang)}
               </p>
 
               <h1>
-                Welcome Back,
+                ${t('welcomeBack', uiLang)}
                 <span>${student.name}.</span>
               </h1>
 
               <p class="platform-intro">
-                Your language journey continues here.
-                Explore your progress, materials and next steps.
+                ${t('welcomeIntro', uiLang)}
               </p>
 
             </div>
@@ -206,17 +258,16 @@ export function renderPlatform(
             <div class="platform-section-heading passport-heading">
 
               <p class="platform-label">
-                01 — LANGUAGE PASSPORT
+                ${t('passportKicker', uiLang)}
               </p>
 
               <h2>
-                Your language.
-                <span>Your identity.</span>
+                ${t('passportTitle', uiLang)}
+                <span>${t('passportTitleSpan', uiLang)}</span>
               </h2>
 
               <p class="passport-section-intro">
-                A digital passport that follows your progress
-                throughout your Vera Orbis journey.
+                ${t('passportIntro', uiLang)}
               </p>
 
             </div>
@@ -246,71 +297,18 @@ export function renderPlatform(
 
                     </div>
 
-                    <div>
-
-                      <strong>
-                        VERA ORBIS
-                      </strong>
-
-                      <small>
-                        LANGUAGE PASSPORT
-                      </small>
-
-                    </div>
-
-                  </div>
-
-
-                  <div class="passport-number">
-
-                    <span>
-                      PASSPORT NO.
-                    </span>
-
-                    <strong>
-                      VO-${student.id.slice(0, 8).toUpperCase()}
-                    </strong>
-
-                  </div>
-
-                </div>
-
-
-                <div class="passport-body">
-
-                  <div class="passport-identity">
-
-                    <div class="passport-seal">
-
-                      <div class="passport-seal-ring">
-
-                        <img
-                          src="${VO_LOGO}"
-                          alt="Vera Orbis"
-                        >
-
-                        <small>
-                          LANGUAGE<br>
-                          PASSPORT
-                        </small>
-
-                      </div>
-
-                    </div>
-
-
                     <div class="passport-stamps">
 
                       <span class="passport-stamp stamp-turquoise">
-                        LEARN
+                        ${t('learnIt', uiLang)}
                       </span>
 
                       <span class="passport-stamp stamp-purple">
-                        LIVE
+                        ${t('liveIt', uiLang)}
                       </span>
 
                       <span class="passport-stamp stamp-yellow">
-                        SPEAK
+                        ${t('speakIt', uiLang)}
                       </span>
 
                     </div>
@@ -323,7 +321,7 @@ export function renderPlatform(
                     <div class="passport-field passport-name">
 
                       <span>
-                        STUDENT
+                        ${t('studentLabel', uiLang)}
                       </span>
 
                       <strong>
@@ -338,7 +336,7 @@ export function renderPlatform(
                       <div class="passport-field">
 
                         <span>
-                          LANGUAGE
+                          ${t('languageLabel', uiLang)}
                         </span>
 
                         <strong>
@@ -351,7 +349,7 @@ export function renderPlatform(
                       <div class="passport-field">
 
                         <span>
-                          LEVEL
+                          ${t('levelLabel', uiLang)}
                         </span>
 
                         <strong>
@@ -368,7 +366,7 @@ export function renderPlatform(
                       <div class="passport-field">
 
                         <span>
-                          DESTINATION
+                          ${t('destinationLabel', uiLang)}
                         </span>
 
                         <strong>
@@ -381,15 +379,15 @@ export function renderPlatform(
                       <div class="passport-field">
 
                         <span>
-                          JOURNEY
+                          ${t('journeyLabel', uiLang)}
                         </span>
 
                         <strong>
-                          ${student.totalLessons ? `${student.lessonsCompleted} of ${student.totalLessons}` : `${student.lessonsCompleted} completed`}
+                          ${student.totalLessons ? `${student.lessonsCompleted} ${t('of', uiLang)} ${student.totalLessons}` : `${student.lessonsCompleted} ${t('completed', uiLang)}`}
                         </strong>
 
                         <small>
-                          ${student.totalLessons ? 'LESSONS' : 'TOTAL PENDING'}
+                          ${student.totalLessons ? t('lessonsLabel', uiLang) : t('totalPending', uiLang)}
                         </small>
 
                       </div>
@@ -404,7 +402,7 @@ export function renderPlatform(
                         <div>
 
                           <span>
-                            JOURNEY PROGRESS
+                            ${t('journeyProgress', uiLang)}
                           </span>
 
                           <strong>
@@ -414,7 +412,7 @@ export function renderPlatform(
                         </div>
 
                         <span class="journey-status">
-                          IN PROGRESS
+                          ${t('inProgress', uiLang)}
                         </span>
 
                       </div>
@@ -433,15 +431,15 @@ export function renderPlatform(
                       <div class="passport-progress-labels">
 
                         <span>
-                          BEGINNING
+                          ${t('beginning', uiLang)}
                         </span>
 
                         <span>
-                          YOUR JOURNEY
+                          ${t('yourJourney', uiLang)}
                         </span>
 
                         <span>
-                          DESTINATION
+                          ${t('destination', uiLang)}
                         </span>
 
                       </div>
@@ -457,11 +455,11 @@ export function renderPlatform(
 
                   <div class="passport-motto">
 
-                    <span>LEARN IT</span>
+                    <span>${t('learnIt', uiLang)}</span>
                     <i></i>
-                    <span>LIVE IT</span>
+                    <span>${t('liveIt', uiLang)}</span>
                     <i></i>
-                    <span>SPEAK IT</span>
+                    <span>${t('speakIt', uiLang)}</span>
 
                   </div>
 
@@ -470,7 +468,7 @@ export function renderPlatform(
 
                     <span class="status-dot"></span>
 
-                    ACTIVE JOURNEY
+                    ${t('activeJourney', uiLang)}
 
                   </div>
 
@@ -505,46 +503,44 @@ export function renderPlatform(
 
 
           <!-- MY JOURNEY ACCESS -->
-<section class="home-preview-section">
-  <div class="platform-section-heading">
-    <p class="platform-label">02 — MY JOURNEY</p>
-    <h2>Your journey. <span>Your next step.</span></h2>
-    <p>
-      Follow your learning path, explore your roadmap
-      and discover what comes next.
-    </p>
-  </div>
+          <section class="home-preview-section">
+            <div class="platform-section-heading">
+              <p class="platform-label">${t('journeyKicker', uiLang)}</p>
+              <h2>${t('journeyHeading', uiLang)} <span>${t('journeyHeadingSpan', uiLang)}</span></h2>
+              <p>
+                ${t('journeyCardDesc', uiLang)}
+              </p>
+            </div>
 
-  <button
-    type="button"
-    class="home-module-card home-journey-card"
-    data-platform-view="journey"
-  >
-    <span class="home-module-number">
-      02
-    </span>
+            <button
+              type="button"
+              class="home-module-card home-journey-card"
+              data-platform-view="journey"
+            >
+              <span class="home-module-number">
+                02
+              </span>
 
-    <div class="home-module-content">
-      <span class="home-module-label">
-        MY JOURNEY
-      </span>
+              <div class="home-module-content">
+                <span class="home-module-label">
+                  ${actionLabels.journey}
+                </span>
 
-      <h3>
-  Your journey.
-  <span>Your world.</span>
-</h3>
+                <h3>
+                  ${t('journeyHeading', uiLang)}
+                  <span>${t('journeyHeadingSpan', uiLang)}</span>
+                </h3>
 
-      <p>
-        Explore your roadmap, your lessons
-        and everything ahead in your language journey.
-      </p>
-    </div>
+                <p>
+                  ${t('journeyCardInnerDesc', uiLang)}
+                </p>
+              </div>
 
-    <span class="home-module-arrow">
-      ↗
-    </span>
-  </button>
-</section>
+              <span class="home-module-arrow">
+                ↗
+              </span>
+            </button>
+          </section>
 
 
           <!-- MATERIALS PREVIEW -->
@@ -559,17 +555,16 @@ export function renderPlatform(
             <div class="platform-section-heading">
 
               <p class="platform-label">
-                04 — KEEP LEARNING
+                ${t('learningAccessKicker', uiLang)}
               </p>
 
               <h2>
-                Your learning.
-                <span>Your space.</span>
+                ${t('learningAccessHeading', uiLang)}
+                <span>${t('learningAccessHeadingSpan', uiLang)}</span>
               </h2>
 
               <p>
-                Continue your journey through personalized feedback,
-                weekly challenges and your learning resources.
+                ${t('learningAccessDesc', uiLang)}
               </p>
 
             </div>
@@ -581,7 +576,6 @@ export function renderPlatform(
                 type="button"
                 class="learning-access-card learning-access-feedback"
                 data-platform-view="feedback"
-                onclick="console.log('¡¡FEEDBACK FUE CLICKEADO!!')"
               >
 
                 <span class="learning-access-number">
@@ -591,17 +585,15 @@ export function renderPlatform(
                 <div>
 
                   <span class="learning-access-label">
-                    FEEDBACK
+                    ${t('feedback', uiLang)}
                   </span>
 
                   <h3>
-                    Your teacher's
-                    <span>feedback.</span>
+                    ${t('feedbackCardTitle', uiLang)}
                   </h3>
 
                   <p>
-                    See personalized observations,
-                    recommendations and feedback from your lessons.
+                    ${t('feedbackCardDesc', uiLang)}
                   </p>
 
                 </div>
@@ -626,17 +618,15 @@ export function renderPlatform(
                 <div>
 
                   <span class="learning-access-label">
-                    CHALLENGES
+                    ${actionLabels.challenges}
                   </span>
 
                   <h3>
-                    Put it into
-                    <span>practice.</span>
+                    ${t('challengesCardTitle', uiLang)}
                   </h3>
 
                   <p>
-                    Complete personalized challenges
-                    and apply what you learn beyond class.
+                    ${t('challengesCardDesc', uiLang)}
                   </p>
 
                 </div>
@@ -654,74 +644,70 @@ export function renderPlatform(
 
           <!-- MY PROGRESS ACCESS -->
 
-<section class="home-progress-preview">
+          <section class="home-progress-preview">
 
-  <div class="platform-section-heading">
+            <div class="platform-section-heading">
 
-    <p class="platform-label">
-      05 — MY PROGRESS
-    </p>
+              <p class="platform-label">
+                ${t('progressKicker', uiLang)}
+              </p>
 
-    <h2>
-      See how far
-      <span>you've come.</span>
-    </h2>
+              <h2>
+                ${t('progressHeading', uiLang)}
+              </h2>
 
-    <p>
-      Track your lessons, celebrate what you've completed
-      and see what comes next.
-    </p>
+              <p>
+                ${t('progressDesc', uiLang)}
+              </p>
 
-  </div>
+            </div>
 
 
-  <button
-    type="button"
-    class="home-module-card home-progress-card"
-    data-platform-view="progress"
-  >
+            <button
+              type="button"
+              class="home-module-card home-progress-card"
+              data-platform-view="progress"
+            >
 
-    <span class="home-module-number">
-      05
-    </span>
-
-
-    <div class="home-module-content">
-
-      <span class="home-module-label">
-        MY PROGRESS
-      </span>
-
-      <h3>
-        Every lesson.
-        <span>Every step.</span>
-      </h3>
-
-      <p>
-        See what you've completed, what remains
-        and where your learning journey is taking you next.
-      </p>
-
-    </div>
+              <span class="home-module-number">
+                05
+              </span>
 
 
-    <span class="home-module-arrow">
-      ↗
-    </span>
+              <div class="home-module-content">
 
-  </button>
+                <span class="home-module-label">
+                  ${t('progressKicker', uiLang)}
+                </span>
 
-</section>
+                <h3>
+                  ${t('progressCardTitle', uiLang)}
+                </h3>
+
+                <p>
+                  ${t('progressCardDesc', uiLang)}
+                </p>
+
+              </div>
 
 
-          <!-- NEXT STEP -->
+              <span class="home-module-arrow">
+                ↗
+              </span>
+
+            </button>
+
+          </section>
+
+
+          <!-- NEXT STEP / VERA VOICE -->
 
           <section class="vera-voice-access" aria-labelledby="vera-voice-title">
             <div class="platform-section-heading">
-              <p class="platform-label">06 — VERA VOICE</p>
-              <h2>Meet Vera.<br><span>Your speaking partner.</span></h2>
+              <p class="platform-label">${t('veraVoiceKicker', uiLang)}</p>
+              <h2>${t('veraVoiceTitle', uiLang)}</h2>
               <p>
-                Practice, build confidence and speak another language at your own pace.
+                ${t('veraVoiceDesc', uiLang)}
               </p>
             </div>
 
@@ -730,33 +716,33 @@ export function renderPlatform(
               tabindex="0"
               role="button"
               aria-pressed="false"
-              aria-label="Meet Vera. Press Enter to see how to start practising."
+              aria-label="${t('veraVoiceMeetVera', uiLang)}. ${t('veraVoiceFlipHint', uiLang)}."
             >
               <div class="vera-voice-card-face vera-voice-card-front" aria-hidden="false">
                 <div class="vera-voice-card-copy">
                   <span class="vera-voice-card-label">VERA VOICE</span>
-                  <h3 id="vera-voice-title">Meet Vera</h3>
-                  <p>Your Speaking Partner</p>
-                  <span class="vera-voice-flip-hint">Tap or press Enter to discover more</span>
+                  <h3 id="vera-voice-title">${t('veraVoiceMeetVera', uiLang)}</h3>
+                  <p>${t('veraVoicePartner', uiLang)}</p>
+                  <span class="vera-voice-flip-hint">${t('veraVoiceFlipHint', uiLang)}</span>
                 </div>
                 <img
                   src="${VERA_VOICE_AVATAR}"
-                  alt="Vera, your speaking partner"
+                  alt="Vera, ${t('veraVoicePartner', uiLang)}"
                   class="vera-voice-avatar"
                 >
               </div>
 
               <div class="vera-voice-card-face vera-voice-card-back" aria-hidden="true">
                 <div>
-                  <span class="vera-voice-card-label">READY TO PRACTICE?</span>
-                  <h3>Start a conversation with Vera.</h3>
-                  <p>Practice your language and learn at your own pace.</p>
+                  <span class="vera-voice-card-label">${t('veraVoiceReady', uiLang)}</span>
+                  <h3>${t('veraVoiceStartConvo', uiLang)}</h3>
+                  <p>${t('veraVoicePracticePace', uiLang)}</p>
                   <a
                     class="vera-voice-launch"
                     href="${voiceUrl}"
                     data-vera-voice-launch
                     tabindex="-1"
-                  >Talk to Vera</a>
+                  >${actionLabels.talkToVera}</a>
                   <p class="vera-voice-status" role="status" aria-live="polite"></p>
                 </div>
               </div>
@@ -766,12 +752,11 @@ export function renderPlatform(
           <section class="next-step">
 
             <p class="platform-label">
-              YOUR NEXT STEP
+              ${t('nextStepLabel', uiLang)}
             </p>
 
             <h2>
-              Keep moving
-              <span>forward.</span>
+              ${t('nextStepHeading', uiLang)}
             </h2>
 
             <button
@@ -779,7 +764,7 @@ export function renderPlatform(
               class="next-step-button"
               data-platform-view="journey"
             >
-              Continue your journey ↗
+              ${t('continueJourney', uiLang)}
             </button>
 
           </section>
@@ -800,13 +785,13 @@ export function renderPlatform(
           <div class="platform-internal-header">
 
             <button
-  type="button"
-  class="platform-back-button"
-  id="platform-back-button"
-  data-platform-view="home"
->
-  ← Back to Home
-</button>
+              type="button"
+              class="platform-back-button"
+              id="platform-back-button"
+              data-platform-view="home"
+            >
+              ${t('backToHome', uiLang)}
+            </button>
 
             <span
               class="platform-internal-kicker"
@@ -851,7 +836,7 @@ export function renderPlatform(
               <img src="${VERA_VOICE_AVATAR}" alt="Vera" class="vera-modal-avatar">
               <div>
                 <h3>Vera Voice</h3>
-                <p>Your speaking partner</p>
+                <p>${t('veraVoicePartner', uiLang)}</p>
               </div>
             </div>
             <div class="vera-voice-modal-actions">
@@ -918,9 +903,16 @@ export function renderPlatformView(
   materials = [],
   feedback = [],
   challenges = [],
-  submissions = []
-  ,exercises = []
+  submissions = [],
+  exercises = []
 ) {
+  const uiLang = normalizeInterfaceLanguage(
+    student?.interfaceLanguage ||
+    student?.interface_language ||
+    (typeof window !== 'undefined' ? window.localStorage?.getItem('vo_interface_language') : null) ||
+    (typeof window === 'undefined' ? 'en' : 'es')
+  )
+  const actionLabels = getTargetActionLabels(student?.language)
 
   switch (view) {
 
@@ -932,17 +924,16 @@ export function renderPlatformView(
           <div class="platform-section-heading">
 
             <p class="platform-label">
-              02 — MY JOURNEY
+              ${t('journeyKicker', uiLang)}
             </p>
 
             <h2>
-              Your progress.
-              <span>Keep moving forward.</span>
+              ${t('journeyHeading', uiLang)}
+              <span>${t('journeyHeadingSpan', uiLang)}</span>
             </h2>
 
             <p>
-              Follow your language journey and see where
-              you're heading next.
+              ${t('journeyCardDesc', uiLang)}
             </p>
 
           </div>
@@ -952,18 +943,15 @@ export function renderPlatformView(
         </section>
       `
 
-
-
     case 'materials':
 
-  return `
-    <section class="platform-detail-section">
+      return `
+        <section class="platform-detail-section">
 
-      ${renderMaterials(student, materials)}
+          ${renderMaterials(student, materials)}
 
-    </section>
+        </section>
       `
-
 
     case 'feedback':
 
@@ -974,7 +962,6 @@ export function renderPlatformView(
 
         </section>
       `
-
 
     case 'challenges':
 
@@ -989,7 +976,6 @@ export function renderPlatformView(
         </section>
       `
 
-
     case 'progress':
 
       return `
@@ -998,17 +984,15 @@ export function renderPlatformView(
           <div class="platform-section-heading">
 
             <p class="platform-label">
-              05 — MY PROGRESS
+              ${t('progressKicker', uiLang)}
             </p>
 
             <h1>
-              See how far
-              <span>you've come.</span>
+              ${t('progressHeading', uiLang)}
             </h1>
 
             <p>
-              Your progress, lessons completed
-              and your next step.
+              ${t('progressDesc', uiLang)}
             </p>
 
           </div>
@@ -1021,11 +1005,11 @@ export function renderPlatformView(
               <div class="passport-header">
 
                 <span>
-                  LESSONS
+                  ${t('lessonsLabel', uiLang)}
                 </span>
 
                 <span>
-                  ${student.totalLessons ? `${student.lessonsCompleted} of ${student.totalLessons}` : `${student.lessonsCompleted} completed`}
+                  ${student.totalLessons ? `${student.lessonsCompleted} ${t('of', uiLang)} ${student.totalLessons}` : `${student.lessonsCompleted} ${t('completed', uiLang)}`}
                 </span>
 
               </div>
@@ -1040,15 +1024,15 @@ export function renderPlatformView(
                 <div>
 
                   <p class="passport-small-label">
-                    COMPLETED LESSONS
+                    ${t('completed', uiLang).toUpperCase()} ${t('lessonsLabel', uiLang)}
                   </p>
 
                   <h3>
-                    Keep going.
+                    ${t('nextStepHeading', uiLang)}
                   </h3>
 
                   <p class="passport-level">
-                    ${student.totalLessons ? `${Math.max(0, student.totalLessons - student.lessonsCompleted)} LESSONS REMAINING` : 'TOTAL LESSONS PENDING CONFIGURATION'}
+                    ${student.totalLessons ? `${Math.max(0, student.totalLessons - student.lessonsCompleted)} ${t('remaining', uiLang)}` : t('lessonsPendingConfig', uiLang)}
                   </p>
 
                 </div>
@@ -1058,9 +1042,9 @@ export function renderPlatformView(
 
               <div class="passport-footer">
 
-                <span>LEARN IT</span>
-                <span>LIVE IT</span>
-                <span>SPEAK IT</span>
+                <span>${t('learnIt', uiLang)}</span>
+                <span>${t('liveIt', uiLang)}</span>
+                <span>${t('speakIt', uiLang)}</span>
 
               </div>
 
@@ -1072,7 +1056,7 @@ export function renderPlatformView(
               <div class="progress-top">
 
                 <span>
-                  CURRENT PROGRESS
+                  ${t('currentProgress', uiLang)}
                 </span>
 
                 <strong>
@@ -1093,7 +1077,7 @@ export function renderPlatformView(
 
 
               <p>
-                Your next step: ${student.nextStep}.
+                ${t('nextStepIs', uiLang)} ${student.nextStep}.
               </p>
 
             </div>
@@ -1106,9 +1090,7 @@ export function renderPlatformView(
     case 'exercises':
       return renderExercises(exercises)
 
-
     default:
-
       return ''
   }
 }

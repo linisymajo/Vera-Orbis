@@ -2301,3 +2301,138 @@ a {
   color: #d9383a;
   font-weight: 600;
 }
+
+.teacher-danger-button {
+  background: transparent;
+  color: #d9383a;
+  border: 1px solid rgba(217, 56, 58, 0.4);
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.teacher-danger-button:hover:not(:disabled) {
+  background: #d9383a;
+  color: #ffffff;
+  border-color: #d9383a;
+}
+
+.teacher-danger-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.teacher-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.badge-global {
+  background: rgba(108, 59, 255, 0.12);
+  color: var(--vo-purple);
+}
+
+.badge-individual {
+  background: rgba(32, 199, 181, 0.15);
+  color: #127267;
+}
+
+.badge-scheduled {
+  background: rgba(255, 200, 61, 0.2);
+  color: #8c6700;
+}
+
+.badge-completed {
+  background: rgba(32, 199, 181, 0.2);
+  color: #0b6156;
+}
+
+.badge-cancelled {
+  background: rgba(217, 56, 58, 0.12);
+  color: #d9383a;
+}
+
+.badge-published {
+  background: rgba(32, 199, 181, 0.18);
+  color: #0b6156;
+}
+
+.badge-draft {
+  background: rgba(105, 115, 134, 0.15);
+  color: var(--vo-muted);
+}
+
+.badge-received {
+  background: rgba(32, 199, 181, 0.2);
+  color: #0b6156;
+}
+
+.badge-pending {
+  background: rgba(255, 107, 53, 0.15);
+  color: var(--vo-coral);
+}
+
+.badge-new {
+  background: rgba(108, 59, 255, 0.15);
+  color: var(--vo-purple);
+}
+
+.badge-contacted, .badge-assessment, .badge-offer {
+  background: rgba(32, 199, 181, 0.15);
+  color: #127267;
+}
+
+.teacher-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.teacher-filter-btn {
+  background: var(--vo-white);
+  border: 1px solid var(--vo-border);
+  color: var(--vo-muted);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.teacher-filter-btn.is-active,
+.teacher-filter-btn:hover {
+  background: var(--vo-navy);
+  color: var(--vo-white);
+  border-color: var(--vo-navy);
+}
+
+.teacher-item-card {
+  background: var(--vo-white);
+  border: 1px solid var(--vo-border);
+  border-radius: 16px;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.teacher-item-card:hover {
+  box-shadow: 0 4px 16px rgba(24, 59, 102, 0.06);
+}

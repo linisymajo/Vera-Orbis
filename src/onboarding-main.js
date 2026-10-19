@@ -1,59 +1,63 @@
 import './onboarding.css'
 import { supabase } from './lib/supabase.js'
+import {
+  SUPPORTED_INTERFACE_LANGUAGES,
+  DEFAULT_INTERFACE_LANGUAGE,
+  normalizeInterfaceLanguage
+} from './lib/i18n.js'
 
-const VO_LOGO =
-  '/logo/Logo%20Vera%20Orbis%20recoloreado.png'
+const VO_LOGO = '/logo/Logo%20Vera%20Orbis%20recoloreado.png'
 
 const steps = [
   {
     number: '01',
-    label: 'ABOUT YOU',
-    title: 'Let’s start with you.',
+    label: 'SOBRE TI',
+    title: 'Comencemos contigo.',
     subtitle:
-      'A little context helps us make your Vera Orbis journey truly yours.',
+      'Un poco de contexto nos ayuda a hacer que tu experiencia en Vera Orbis sea verdaderamente tuya.',
     fields: [
       {
         id: 'about_you',
         type: 'textarea',
-        label: 'Tell us a little about yourself.',
+        label: 'Cuéntanos un poco sobre ti.',
         placeholder:
-          'Tell us about your occupation, studies, interests, or anything relevant to your language journey...'
+          'Cuéntanos sobre tu ocupación, estudios, intereses o cualquier aspecto relevante para tu aprendizaje del idioma...'
       }
     ]
   },
 
   {
     number: '02',
-    label: 'YOUR GOALS',
-    title: 'What do you want to achieve?',
+    label: 'TUS METAS',
+    title: '¿Qué quieres lograr?',
     subtitle:
-      'There is no right answer. Choose what matters most to you right now.',
+      'No hay respuestas correctas. Elige lo que más te importe en este momento.',
     fields: [
       {
         id: 'learning_goals',
         type: 'textarea',
         label:
-          'What would you most like to achieve with your language?',
+          '¿Qué es lo que más te gustaría lograr con el idioma?',
         placeholder:
-          'Tell us what you would like to be able to do...'
+          'Cuéntanos qué te gustaría ser capaz de hacer...'
       },
 
       {
         id: 'most_important',
         type: 'multi',
         label:
-          'What feels most important right now?',
+          '¿Qué sientes que es más importante en este momento?',
         options: [
-          'Speaking confidently',
-          'Understanding others',
-          'Pronunciation',
-          'Vocabulary',
-          'Grammar',
-          'Writing',
-          'Listening',
-          'Fluency',
-          'Professional communication',
-          'Academic communication'
+          'Hablar con confianza',
+          'Entender a los demás',
+          'Pronunciación',
+          'Vocabulario',
+          'Gramática',
+          'Escritura',
+          'Comprensión auditiva',
+          'Fluidez',
+          'Comunicación profesional',
+          'Comunicación académica'
         ]
       }
     ]
@@ -61,130 +65,130 @@ const steps = [
 
   {
     number: '03',
-    label: 'WHAT YOU WANT TO DO',
-    title: 'Where will your language take you?',
+    label: 'QUÉ QUIERES HACER',
+    title: '¿A dónde te llevará tu idioma?',
     subtitle:
-      'Choose everything that sounds relevant to your life and aspirations.',
+      'Elige todo lo que resulte relevante para tu vida y tus aspiraciones.',
     fields: [
       {
         id: 'real_life_needs',
         type: 'multicategories',
-        label: 'Select your focus areas & goals:',
+        label: 'Selecciona tus áreas de enfoque y metas:',
         categories: [
           {
-            title: 'Executive & Professional',
+            title: 'Ejecutivo y Profesional',
             options: [
-              'Meetings',
-              'Presentations',
-              'Leadership',
+              'Reuniones',
+              'Presentaciones',
+              'Liderazgo',
               'Networking',
-              'Job interviews',
-              'Business trips',
-              'Professional emails',
-              'Client communication',
-              'Workplace conversations',
-              'Career development'
+              'Entrevistas de trabajo',
+              'Viajes de negocios',
+              'Correos profesionales',
+              'Comunicación con clientes',
+              'Conversaciones en el trabajo',
+              'Desarrollo profesional'
             ]
           },
           {
-            title: 'Presentations & Public Speaking',
+            title: 'Presentaciones y Hablar en Público',
             options: [
-              'Presenting ideas',
+              'Presentar ideas',
               'Storytelling',
-              'Speaking to groups',
-              'Answering questions',
-              'Handling Q&A',
-              'Speaking with confidence',
-              'Organizing presentations',
-              'Persuading an audience'
+              'Hablar ante grupos',
+              'Responder preguntas',
+              'Manejar sesiones de preguntas y respuestas',
+              'Hablar con seguridad',
+              'Estructurar presentaciones',
+              'Persuadir a una audiencia'
             ]
           },
           {
-            title: 'Travel & Real Life',
+            title: 'Viajes y Vida Cotidiana',
             options: [
-              'Airports',
-              'Hotels',
-              'Restaurants',
-              'Shopping',
-              'Asking for directions',
-              'Transportation',
-              'Everyday conversations',
-              'Making reservations',
-              'Dealing with unexpected situations'
+              'Aeropuertos',
+              'Hoteles',
+              'Restaurantes',
+              'Compras',
+              'Pedir indicaciones',
+              'Transporte',
+              'Conversaciones cotidianas',
+              'Hacer reservas',
+              'Resolver imprevistos'
             ]
           },
           {
-            title: 'Academic',
+            title: 'Académico',
             options: [
-              'University',
-              'Study abroad',
-              'Academic presentations',
-              'Exams',
-              'Research',
-              'Academic writing',
-              'Class participation',
-              'Reading academic texts'
+              'Universidad',
+              'Estudios en el extranjero',
+              'Presentaciones académicas',
+              'Exámenes',
+              'Investigación',
+              'Escritura académica',
+              'Participación en clase',
+              'Lectura de textos académicos'
             ]
           },
           {
-            title: 'Conversation & Fluency',
+            title: 'Conversación y Fluidez',
             options: [
-              'Speaking naturally',
-              'Speaking spontaneously',
-              'Speaking without translating',
-              'Building confidence',
-              'Talking with native speakers',
-              'Keeping conversations going',
-              'Expressing opinions',
-              'Telling stories'
+              'Hablar con naturalidad',
+              'Hablar con espontaneidad',
+              'Hablar sin traducir mentalmente',
+              'Ganar seguridad al hablar',
+              'Conversar con hablantes nativos',
+              'Mantener el hilo de una conversación',
+              'Expresar opiniones',
+              'Contar anécdotas e historias'
             ]
           },
           {
-            title: 'Pronunciation & Listening',
+            title: 'Pronunciación y Escucha',
             options: [
-              'Pronunciation',
-              'Accent',
-              'Intonation',
-              'Rhythm',
-              'Listening comprehension',
-              'Understanding native speakers',
-              'Understanding different accents'
+              'Pronunciación',
+              'Acento',
+              'Entonación',
+              'Ritmo',
+              'Comprensión auditiva',
+              'Entender a hablantes nativos',
+              'Entender diferentes acentos'
             ]
           },
           {
-            title: 'Reading & Writing',
+            title: 'Lectura y Escritura',
             options: [
-              'Reading',
-              'Writing',
-              'Social media',
-              'Professional writing',
-              'Creative writing',
-              'Messages & chats',
-              'Emails'
+              'Lectura',
+              'Escritura',
+              'Redes sociales',
+              'Redacción profesional',
+              'Escritura creativa',
+              'Mensajes y chats',
+              'Correos electrónicos'
             ]
           },
           {
-            title: 'Culture & Entertainment',
+            title: 'Cultura y Entretenimiento',
             options: [
-              'Movies',
-              'Music',
+              'Películas',
+              'Música',
               'Podcasts',
               'YouTube',
-              'Books',
+              'Libros',
               'Series',
-              'Travel culture',
-              'Cultural understanding'
+              'Cultura de viajes',
+              'Comprensión cultural'
             ]
           },
           {
-            title: 'Personal Growth',
+            title: 'Crecimiento Personal',
             options: [
-              'Confidence',
-              'Independence',
-              'Cross-cultural connection',
-              'Personal development',
-              'Meeting new people',
-              'Expressing myself'
+              'Confianza',
+              'Independencia',
+              'Conexión intercultural',
+              'Desarrollo personal',
+              'Conocer nuevas personas',
+              'Expresarme libremente'
             ]
           }
         ]
@@ -194,88 +198,88 @@ const steps = [
         id: 'preferred_topics',
         type: 'textarea',
         label:
-          'Are there specific situations, topics, or something else you want to work on?',
+          '¿Hay situaciones específicas, temas o algo más en lo que quieras trabajar?',
         placeholder:
-          'For example: meetings, travel, specific hobbies, interviews...'
+          'Por ejemplo: reuniones, viajes, pasatiempos específicos, entrevistas...'
       }
     ]
   },
 
   {
     number: '04',
-    label: 'YOUR EXPERIENCE',
-    title: 'Tell us about your journey so far.',
+    label: 'TU EXPERIENCIA',
+    title: 'Cuéntanos sobre tu camino hasta ahora.',
     subtitle:
-      'Understanding your experience helps us know where to begin.',
+      'Conocer tu experiencia previa nos ayuda a saber por dónde empezar.',
     fields: [
       {
         id: 'previous_experience',
         type: 'textarea',
         label:
-          'Have you studied this language before?',
+          '¿Has estudiado este idioma antes?',
         placeholder:
-          'What did you study, for how long, and how did it go?'
+          '¿Qué estudiaste, durante cuánto tiempo y cómo te fue?'
       },
 
       {
         id: 'experience_positive',
         type: 'textarea',
         label:
-          'What did you enjoy about previous learning experiences?',
+          '¿Qué disfrutaste de tus experiencias de aprendizaje anteriores?',
         placeholder:
-          'Tell us what worked for you...'
+          'Cuéntanos qué te funcionó bien...'
       },
 
       {
         id: 'experience_negative',
         type: 'textarea',
         label:
-          'What did not work for you?',
+          '¿Qué no te funcionó?',
         placeholder:
-          'Anything you found frustrating, difficult, or ineffective...'
+          'Cualquier cosa que te haya parecido frustrante, difícil o poco efectiva...'
       }
     ]
   },
 
   {
     number: '05',
-    label: 'YOUR CHALLENGES',
-    title: 'What gets in your way?',
+    label: 'TUS RETOS',
+    title: '¿Qué se interpone en tu camino?',
     subtitle:
-      'Knowing your challenges helps us design around them.',
+      'Conocer tus desafíos nos permite diseñar tus clases a partir de ellos.',
     fields: [
       {
         id: 'difficulties',
         type: 'textarea',
         label:
-          'What do you find difficult when learning or using the language?',
+          '¿Qué encuentras difícil al aprender o utilizar el idioma?',
         placeholder:
-          'For example: speaking, translating in your head, listening...'
+          'Por ejemplo: hablar, traducir mentalmente, comprender al escuchar...'
       },
 
       {
         id: 'challenge_context',
         type: 'multi',
         label:
-          'Where do these difficulties usually appear or which areas need support?',
+          '¿Dónde se presentan normalmente estas dificultades o qué áreas necesitan apoyo?',
         options: [
-          'Speaking',
-          'Listening',
-          'Vocabulary',
-          'Pronunciation',
-          'Grammar',
-          'Reading',
-          'Writing',
-          'Real-life communication',
-          'Professional communication',
-          'Presentations',
-          'In class',
-          'At work',
-          'At university',
-          'While travelling',
-          'When talking to native speakers',
-          'During presentations',
-          'Online'
+          'Hablar',
+          'Escuchar',
+          'Vocabulario',
+          'Pronunciación',
+          'Gramática',
+          'Lectura',
+          'Escritura',
+          'Comunicación en la vida real',
+          'Comunicación profesional',
+          'Presentaciones',
+          'En clase',
+          'En el trabajo',
+          'En la universidad',
+          'Al viajar',
+          'Al hablar con hablantes nativos',
+          'Durante exposiciones',
+          'En línea'
         ]
       }
     ]
@@ -283,27 +287,27 @@ const steps = [
 
   {
     number: '06',
-    label: 'YOUR PREFERENCES',
-    title: 'How do you like to learn?',
+    label: 'TUS PREFERENCIAS',
+    title: '¿Cómo te gusta aprender?',
     subtitle:
-      'Your learning style matters. There is no single way to learn a language.',
+      'Tu estilo de aprendizaje importa. No existe una única forma de aprender un idioma.',
     fields: [
       {
         id: 'learning_preferences',
         type: 'multi',
         label:
-          'What would you like more of in your lessons?',
+          '¿Qué te gustaría ver más en tus lecciones?',
         options: [
-          'Conversation-focused',
-          'Practical & real-life',
-          'Structured',
-          'Creative & interactive',
+          'Enfoque conversacional',
+          'Práctico y para la vida real',
+          'Estructurado',
+          'Creativo e interactivo',
           'Visual',
-          'Audio',
-          'Writing',
-          'Speaking',
-          'Games & challenges',
-          'Cultural learning'
+          'Auditivo',
+          'Escritura',
+          'Expresión oral',
+          'Juegos y retos',
+          'Aprendizaje cultural'
         ]
       },
 
@@ -311,36 +315,36 @@ const steps = [
         id: 'lesson_preferences',
         type: 'textarea',
         label:
-          'Is there anything else that would make learning feel engaging for you?',
+          '¿Hay algo más que haría que tus lecciones sean más motivadoras para ti?',
         placeholder:
-          'Tell us what would make learning feel engaging for you...'
+          'Cuéntanos qué haría que tu aprendizaje sea más estimulante...'
       }
     ]
   },
 
   {
     number: '07',
-    label: 'YOUR VISION',
-    title: 'Imagine yourself six months from now.',
+    label: 'TU VISIÓN',
+    title: 'Imagínate dentro de seis meses.',
     subtitle:
-      'This is where your journey starts becoming a destination.',
+      'Aquí es donde tu camino comienza a convertirse en un destino.',
     fields: [
       {
         id: 'vision',
         type: 'textarea',
         label:
-          'What would you love to be able to do six months from now?',
+          '¿Qué te encantaría ser capaz de hacer dentro de seis meses?',
         placeholder:
-          'Imagine yourself using the language confidently...'
+          'Imagínate comunicándote en el idioma con total seguridad...'
       },
 
       {
         id: 'motivation',
         type: 'textarea',
         label:
-          'Why does learning this language matter to you?',
+          '¿Por qué es importante para ti aprender este idioma?',
         placeholder:
-          'Tell us what motivates you...'
+          'Cuéntanos qué te motiva...'
       }
     ]
   }
@@ -349,6 +353,7 @@ const steps = [
 let currentStep = 0
 let student = null
 let existingOnboarding = null
+let selectedInterfaceLanguage = DEFAULT_INTERFACE_LANGUAGE
 
 const app = document.querySelector('#app')
 
@@ -364,7 +369,7 @@ async function getCurrentStudent() {
   } = await supabase.auth.getUser()
 
   if (error || !user) {
-    console.error('Unable to read the onboarding session.')
+    console.error('No se pudo leer la sesión de onboarding.')
     return null
   }
 
@@ -381,7 +386,7 @@ async function getCurrentStudent() {
     const defaultName =
       user.user_metadata?.name ||
       user.email?.split('@')[0] ||
-      'Student'
+      'Estudiante'
 
     const { data: createdProfile } = await supabase
       .from('profiles')
@@ -395,7 +400,8 @@ async function getCurrentStudent() {
         lessons_completed: 0,
         total_lessons: null,
         current_module: 'Getting Started',
-        next_step: 'Complete your onboarding'
+        next_step: 'Completa tu onboarding',
+        interface_language: 'es'
       }, { onConflict: 'id' })
       .select('*')
       .maybeSingle()
@@ -403,8 +409,18 @@ async function getCurrentStudent() {
     if (createdProfile) {
       profile = createdProfile
     } else {
-      console.error('Unable to load or create the onboarding profile.')
+      console.error('No se pudo cargar o crear el perfil de onboarding.')
       return null
+    }
+  }
+
+  // Load existing interface language preference if saved
+  if (profile.interface_language) {
+    selectedInterfaceLanguage = normalizeInterfaceLanguage(profile.interface_language)
+  } else {
+    const cached = localStorage.getItem('vo_interface_language')
+    if (cached) {
+      selectedInterfaceLanguage = normalizeInterfaceLanguage(cached)
     }
   }
 
@@ -430,7 +446,7 @@ async function getExistingOnboarding(studentId) {
     .maybeSingle()
 
   if (error) {
-    console.error('Unable to load onboarding responses.')
+    console.error('No se pudieron cargar las respuestas de onboarding.')
     return null
   }
 
@@ -482,8 +498,6 @@ function determineStartingStep() {
   })
 
   if (firstIncompleteStep === -1) {
-    // Everything is complete.
-    // Start from the beginning so the student can review/edit.
     currentStep = 0
   } else {
     currentStep = firstIncompleteStep
@@ -507,13 +521,13 @@ function renderShell() {
 
         <div class="onboarding-progress-info">
           <span id="step-counter">01 / 07</span>
-          <span id="step-label">ABOUT YOU</span>
+          <span id="step-label">SOBRE TI</span>
           <a
             href="/platform.html?from=onboarding"
             class="onboarding-skip-link"
             title="Ir a mi plataforma"
           >
-            Skip for now →
+            Omitir por ahora →
           </a>
         </div>
 
@@ -531,7 +545,7 @@ function renderShell() {
         <div class="onboarding-intro">
 
           <p class="onboarding-eyebrow">
-            YOUR VERA ORBIS JOURNEY
+            TU VIAJE EN VERA ORBIS
           </p>
 
           <div id="step-content"></div>
@@ -545,7 +559,7 @@ function renderShell() {
             id="back-button"
             class="secondary-button"
           >
-            ← Back
+            ← Volver
           </button>
 
           <button
@@ -553,7 +567,7 @@ function renderShell() {
             id="next-button"
             class="primary-button"
           >
-            Continue <span>↗</span>
+            Continuar <span>↗</span>
           </button>
 
         </div>
@@ -561,7 +575,7 @@ function renderShell() {
       </section>
 
       <footer class="onboarding-footer">
-        <span>LEARN IT · LIVE IT · SPEAK IT</span>
+        <span>APRENDE · VIVE · HABLA</span>
         <span>VERA ORBIS</span>
       </footer>
 
@@ -622,8 +636,8 @@ function renderStep() {
 
   nextButton.innerHTML =
     currentStep === steps.length - 1
-      ? `Complete my journey <span>↗</span>`
-      : `Continue <span>↗</span>`
+      ? `Finalizar mi viaje <span>↗</span>`
+      : `Continuar <span>↗</span>`
 }
 
 
@@ -753,7 +767,6 @@ function loadExistingValues() {
 
     if (!value) return
 
-
     if (field.type === 'textarea') {
 
       const element =
@@ -764,7 +777,6 @@ function loadExistingValues() {
       }
 
     }
-
 
     if (
       field.type === 'multi' ||
@@ -838,7 +850,6 @@ function collectStepValues() {
 
     }
 
-
     if (
       field.type === 'multi' ||
       field.type === 'multicategories'
@@ -870,7 +881,7 @@ async function saveCurrentStep() {
 
   if (!student?.profile?.id) {
     throw new Error(
-      'Student profile not available.'
+      'Perfil de estudiante no disponible.'
     )
   }
 
@@ -881,14 +892,9 @@ async function saveCurrentStep() {
     ...values
   }
 
-  /*
-   * Remove Supabase-generated fields
-   * before constructing the payload.
-   */
   delete currentData.id
   delete currentData.created_at
   delete currentData.updated_at
-
 
   const payload = {
     student_id: student.profile.id,
@@ -936,7 +942,6 @@ async function saveCurrentStep() {
       currentData.vision || null
   }
 
-
   const {
     data,
     error
@@ -951,36 +956,22 @@ async function saveCurrentStep() {
     .select()
     .single()
 
-
   if (error) {
-
-    console.error('Unable to save onboarding responses.')
-
+    console.error('No se pudieron guardar las respuestas de onboarding.')
     throw error
   }
 
-
-  /*
-   * IMPORTANT:
-   * Use the response returned by Supabase
-   * as our local source of truth.
-   */
   if (data) {
-
     existingOnboarding = {
       ...existingOnboarding,
       ...data
     }
-
   } else {
-
     existingOnboarding = {
       ...existingOnboarding,
       ...currentData
     }
-
   }
-
 }
 
 
@@ -997,21 +988,15 @@ async function nextStep() {
     return
   }
 
-
   const originalText =
     nextButton.innerHTML
 
-  /*
-   * Prevent double-clicks while saving.
-   */
   nextButton.disabled = true
-  nextButton.innerHTML = 'Saving...'
-
+  nextButton.innerHTML = 'Guardando...'
 
   try {
 
     await saveCurrentStep()
-
 
     if (currentStep < steps.length - 1) {
 
@@ -1032,15 +1017,12 @@ async function nextStep() {
 
   } catch (error) {
 
-    console.error('Unable to save the onboarding step.')
+    console.error('No se pudo guardar el paso de onboarding.', error)
 
     alert(
-      'We could not save your responses. Please try again.'
+      'No pudimos guardar tus respuestas. Por favor, intenta de nuevo.'
     )
 
-    /*
-     * Re-enable the button if saving failed.
-     */
     nextButton.innerHTML =
       originalText
 
@@ -1075,6 +1057,40 @@ function previousStep() {
    COMPLETION SCREEN
 ========================================================= */
 
+async function selectInterfaceLanguage(langCode) {
+  selectedInterfaceLanguage = normalizeInterfaceLanguage(langCode)
+  localStorage.setItem('vo_interface_language', selectedInterfaceLanguage)
+
+  // Update UI selection
+  document.querySelectorAll('.lang-choice-btn').forEach((btn) => {
+    if (btn.dataset.lang === selectedInterfaceLanguage) {
+      btn.classList.add('selected')
+      btn.setAttribute('aria-pressed', 'true')
+    } else {
+      btn.classList.remove('selected')
+      btn.setAttribute('aria-pressed', 'false')
+    }
+  })
+
+  // Persist preference to Supabase profile
+  if (student?.profile?.id) {
+    try {
+      await supabase
+        .from('profiles')
+        .update({ interface_language: selectedInterfaceLanguage })
+        .eq('id', student.profile.id)
+    } catch (e) {
+      console.warn('Note: profiles.interface_language update deferred:', e)
+    }
+
+    try {
+      await supabase.auth.updateUser({
+        data: { interface_language: selectedInterfaceLanguage }
+      })
+    } catch {}
+  }
+}
+
 function renderCompletion() {
 
   app.innerHTML = `
@@ -1099,14 +1115,14 @@ function renderCompletion() {
       </p>
 
       <h1>
-        Your journey<br>
-        is <em>being prepared.</em>
+        Tu viaje<br>
+        está <em>siendo preparado.</em>
       </h1>
 
       <p>
-        Thank you for telling us about yourself.
-        We now have what we need to begin designing
-        your personalized Vera Orbis journey.
+        Gracias por contarnos sobre ti.
+        Ya contamos con lo necesario para comenzar a diseñar
+        tu experiencia personalizada en Vera Orbis.
       </p>
 
       <div class="completion-note">
@@ -1116,29 +1132,62 @@ function renderCompletion() {
         <div>
 
           <strong>
-            Your responses have been saved.
+            Tus respuestas han sido guardadas.
           </strong>
 
           <small>
-            Your teacher will review your goals,
-            experience and preferences before
-            preparing your next steps.
+            Tu profesor revisará tus metas,
+            experiencia y preferencias antes de
+            preparar tus siguientes pasos.
           </small>
 
         </div>
 
       </div>
 
+      <!-- INTERFACE LANGUAGE SELECTOR (Requirement 2 & 3) -->
+      <section class="completion-lang-selector" aria-labelledby="lang-choice-title">
+        <h3 id="lang-choice-title" class="completion-lang-title">
+          Elige el idioma de tu plataforma
+        </h3>
+        <p class="completion-lang-desc">
+          Este será el idioma en el que verás la interfaz. Podrás cambiarlo cuando desees desde tu perfil.
+        </p>
+        <div class="completion-lang-grid" role="group" aria-label="Selección de idioma de interfaz">
+          ${SUPPORTED_INTERFACE_LANGUAGES.map((item) => `
+            <button
+              type="button"
+              class="lang-choice-btn ${item.code === selectedInterfaceLanguage ? 'selected' : ''}"
+              data-lang="${item.code}"
+              aria-pressed="${item.code === selectedInterfaceLanguage ? 'true' : 'false'}"
+            >
+              <span class="lang-flag">${item.flag}</span>
+              <span>${item.label}</span>
+            </button>
+          `).join('')}
+        </div>
+      </section>
+
       <a
         href="/platform.html?from=onboarding"
         class="primary-button completion-button"
+        id="enter-platform-link"
       >
-        Enter my platform
+        Ingresar a mi plataforma
         <span>↗</span>
       </a>
 
     </main>
   `
+
+  document.querySelectorAll('.lang-choice-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      selectInterfaceLanguage(btn.dataset.lang)
+    })
+  })
+
+  // Ensure initial preference is saved to DB
+  selectInterfaceLanguage(selectedInterfaceLanguage)
 }
 
 
@@ -1149,10 +1198,9 @@ function renderCompletion() {
 async function initialize() {
 
   if (!app) {
-    console.error('Onboarding root element was not found.')
+    console.error('No se encontró el elemento raíz de onboarding.')
     return
   }
-
 
   app.innerHTML = `
     <div class="loading-screen">
@@ -1165,12 +1213,11 @@ async function initialize() {
       </div>
 
       <p>
-        Preparing your journey...
+        Preparando tu viaje...
       </p>
 
     </div>
   `
-
 
   try {
 
@@ -1179,15 +1226,10 @@ async function initialize() {
      */
     student = await getCurrentStudent()
 
-
     if (!student) {
-
-      window.location.href =
-        '/login.html'
-
+      window.location.href = '/login.html'
       return
     }
-
 
     /*
      * 2. Load existing onboarding
@@ -1197,33 +1239,25 @@ async function initialize() {
         student.profile.id
       )
 
-
     /*
      * 3. Determine where the student should start
      */
     determineStartingStep()
 
-
     /*
      * 4. Render ONCE.
-     *
-     * This is extremely important.
-     * Previously renderShell() was being called
-     * twice, which replaced the buttons and removed
-     * their event listeners.
      */
     renderShell()
 
   } catch (error) {
 
-    console.error('Unable to initialize onboarding.')
+    console.error('No se pudo inicializar el onboarding.', error)
 
     app.innerHTML = `
       <div class="loading-screen">
 
         <p>
-          Something went wrong while loading
-          your journey.
+          Ocurrió un problema al cargar tu viaje.
         </p>
 
         <button
@@ -1231,7 +1265,7 @@ async function initialize() {
           class="primary-button"
           onclick="window.location.reload()"
         >
-          Try again
+          Reintentar
         </button>
 
       </div>

@@ -53,7 +53,15 @@ export async function loadTeacherModule(module) {
   const panel = document.querySelector('#teacher-workspace-panel')
   if (!panel) return
   panel.innerHTML = '<div class="teacher-loading">Loading module...</div>'
-  const loaders = { overview: loadOverview, academic: loadAcademic, 'exercise-studio': loadExerciseStudio, calendar: loadCalendar, finance: loadFinance, leads: loadLeads, culture: loadCulture }
+  const loaders = {
+    overview: loadOverview,
+    academic: loadAcademic,
+    'exercise-studio': loadExerciseStudio,
+    calendar: loadCalendar,
+    finance: loadFinance,
+    leads: loadLeads,
+    culture: loadCulture
+  }
   await (loaders[module] || loadOverview)(panel)
 }
 
@@ -86,7 +94,7 @@ async function loadOverview(panel) {
 
 async function loadAcademic(panel) {
   const [materials, challenges, plans, courses] = await Promise.all([
-    supabase.from('materials').select('id, title, type, language, level, student_id, audience, created_at').order('created_at', { ascending: false }).limit(20),
+    supabase.from('materials').select('id, title, type, language, level, student_id, audience, file_path, created_at').order('created_at', { ascending: false }).limit(30),
     supabase.from('weekly_challenges').select('id, title, status, student_id, end_date, created_at').order('created_at', { ascending: false }).limit(20),
     supabase.from('profiles').select('id, name, current_module, next_step, goal').not('next_step', 'is', null).limit(20),
     supabase.from('courses').select('id, name, language, level, status').order('created_at', { ascending: false }).limit(20)
@@ -106,16 +114,113 @@ async function loadAcademic(panel) {
       ${courseForm()}
     </div>
     <div class="teacher-workspace-columns">
-      ${listCard('Materials', materials.data, (item) => `${item.title || 'Untitled'} · ${item.type || 'resource'}`)}
+      ${materialsCard(materials.data)}
       ${listCard('Challenges', challenges.data, (item) => `${item.title || 'Untitled'} · ${item.status || 'draft'}`)}
     </div>
     ${listCard('Courses', coursesList, (item) => `${item.name} · ${item.language}${item.level ? ` · ${item.level}` : ''} · ${item.status}`)}
     <div class="teacher-inline-note"><strong>Work plans:</strong> ${plans.data?.length || 0} visible plan(s). Open a student profile to update the next step and private notes.</div>
   `
 
-  document.querySelector('#teacher-material-form')?.addEventListener('submit', (event) => saveAcademicRecord(event, 'materials'))
-  document.querySelector('#teacher-challenge-form')?.addEventListener('submit', (event) => saveAcademicRecord(event, 'weekly_challenges'))
-  document.querySelector('#teacher-course-form')?.addEventListener('submit', saveCourse)
+  document.querySelector('#teacher-material-form')?.addEventListener('submit', (event) => saveAcademicRecord(event, 'materials', panel))
+  document.querySelector('#teacher-challenge-form')?.addEventListener('submit', (event) => saveAcademicRecord(event, 'weekly_challenges', panel))
+  document.querySelector('#teacher-course-form')?.addEventListener('submit', (event) => saveCourse(event, panel))
+
+  // Material file view button
+  panel.querySelectorAll('[data-view-material-file]').forEach((btn) => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault()
+      const filePath = btn.dataset.viewMaterialFile
+      if (!filePath) return
+      try {
+        const cleanPath = String(filePath).trim().replace(/^\/+/, '')
+        const { data, error } = await supabase.storage.from('materials').createSignedUrl(cleanPath, 3600)
+        if (error || !data?.signedUrl) {
+          alert('Could not open file. Check storage permissions.')
+          return
+        }
+        window.open(data.signedUrl, '_blank')
+      } catch (err) {
+        alert('Could not open material file.')
+      }
+    })
+  })
+
+  // Material delete button
+  panel.querySelectorAll('[data-delete-material-id]').forEach((btn) => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault()
+      const materialId = btn.dataset.deleteMaterialId
+      if (!materialId) return
+      const filePath = btn.dataset.materialFilepath
+      const title = btn.dataset.materialTitle || 'este material'
+
+      const confirmed = window.confirm(`¿Estás seguro de que deseas eliminar el material "${title}"?\nEsta acción no se puede deshacer.`)
+      if (!confirmed) return
+
+      btn.disabled = true
+      const origText = btn.textContent
+      btn.textContent = 'Eliminando...'
+
+      try {
+        if (filePath) {
+          const cleanPath = String(filePath).trim().replace(/^\/+/, '')
+          const { count, error: countErr } = await supabase
+            .from('materials')
+            .select('id', { count: 'exact', head: true })
+            .eq('file_path', cleanPath)
+            .neq('id', materialId)
+
+          if (!countErr && (count === 0 || count == null)) {
+            const { error: storageErr } = await supabase.storage.from('materials').remove([cleanPath])
+            if (storageErr) {
+              console.warn('Storage file deletion warning:', storageErr.message || storageErr)
+            }
+          }
+        }
+
+        const { error: deleteErr } = await supabase.from('materials').delete().eq('id', materialId)
+        if (deleteErr) throw deleteErr
+
+        loadAcademic(panel)
+      } catch (err) {
+        console.error('Delete material error:', err)
+        alert(`No se pudo eliminar el material: ${err.message || 'Error desconocido'}`)
+        btn.disabled = false
+        btn.textContent = origText
+      }
+    })
+  })
+}
+
+function materialsCard(items = []) {
+  return `<article class="teacher-list-card" id="teacher-materials-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <h3 style="margin:0;">Materials (${items?.length || 0})</h3>
+    </div>
+    ${items?.length ? `
+      <ul style="margin:0;">
+        ${items.map((item) => `
+          <li style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--vo-border);flex-wrap:wrap;gap:8px;">
+            <div>
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <strong>${escapeHtml(item.title || 'Untitled')}</strong>
+                <span class="teacher-badge ${item.audience === 'all' ? 'badge-global' : 'badge-individual'}">${item.audience === 'all' ? 'Global' : 'Individual'}</span>
+                <span class="teacher-badge badge-draft">${escapeHtml((item.type || 'resource').toUpperCase())}</span>
+              </div>
+              <small style="color:var(--vo-muted);display:block;margin-top:2px;">
+                ${item.audience === 'all' ? 'Shared with all students' : 'Assigned to individual student'}
+                ${item.description ? ` · ${escapeHtml(item.description)}` : ''}
+              </small>
+            </div>
+            <div class="teacher-inline-actions">
+              ${item.file_path ? `<button type="button" class="teacher-secondary-button" data-view-material-file="${escapeHtml(item.file_path)}" style="padding:4px 10px;font-size:11px;">Open file ↗</button>` : ''}
+              <button type="button" class="teacher-danger-button" data-delete-material-id="${escapeHtml(item.id)}" data-material-filepath="${escapeHtml(item.file_path || '')}" data-material-title="${escapeHtml(item.title || '')}" style="padding:4px 10px;font-size:11px;">Eliminar</button>
+            </div>
+          </li>
+        `).join('')}
+      </ul>
+    ` : '<p class="teacher-muted">No materials created yet.</p>'}
+  </article>`
 }
 
 async function loadExerciseStudio(panel) {
@@ -159,7 +264,7 @@ async function loadExerciseStudio(panel) {
   `
   document.querySelector('#teacher-exercise-form')?.addEventListener('submit', saveExercise)
   document.querySelector('#teacher-exercise-assignment-form')?.addEventListener('submit', saveExerciseAssignment)
-  panel.querySelectorAll('[data-exercise-action]').forEach((button) => button.addEventListener('click', () => updateExercise(button.dataset.exerciseAction, button.dataset.exerciseId)))
+  panel.querySelectorAll?.('[data-exercise-action]')?.forEach((button) => button.addEventListener('click', () => updateExercise(button.dataset.exerciseAction, button.dataset.exerciseId)))
 }
 
 function exerciseList(items = []) {
@@ -247,7 +352,7 @@ function courseForm() {
   </form>`
 }
 
-async function saveCourse(event) {
+async function saveCourse(event, panel) {
   event.preventDefault()
   const form = event.currentTarget
   const values = Object.fromEntries(new FormData(form).entries())
@@ -256,9 +361,10 @@ async function saveCourse(event) {
     teacher_id: user?.id, name: values.name.trim(), language: values.language.trim(),
     level: values.level.trim() || null, description: values.description.trim() || null, status: 'draft'
   }, 'Course saved.')
+  if (panel) loadAcademic(panel)
 }
 
-async function saveAcademicRecord(event, table) {
+async function saveAcademicRecord(event, table, panel) {
   event.preventDefault()
   const form = event.currentTarget
   const status = form.querySelector('[data-form-status]')
@@ -302,32 +408,130 @@ async function saveAcademicRecord(event, table) {
   }
   status.textContent = 'Saved.'
   form.reset()
+  if (panel && table === 'materials') loadAcademic(panel)
 }
 
 async function loadCalendar(panel) {
-  const { data, error } = await supabase.from('classes').select('id, title, starts_at, duration_minutes, modality, status, language, level').order('starts_at', { ascending: true }).limit(30)
-  if (error) {
-    renderMigrationState(panel, 'Calendar and classes', 'Apply the reviewed teacher operations migration before scheduling classes.')
+  const [classesRes, participantsRes, studentsRes] = await Promise.all([
+    supabase.from('classes').select('id, title, starts_at, duration_minutes, modality, status, language, level, notes').order('starts_at', { ascending: true }).limit(50),
+    supabase.from('class_participants').select('class_id, student_id'),
+    supabase.from('profiles').select('id, name').order('name')
+  ])
+
+  if (classesRes.error) {
+    console.warn('Calendar query notice:', classesRes.error.message)
+    renderMigrationState(panel, 'Calendar and classes', 'The classes table is not yet initialized or RLS blocked. Execute migration 0007_teacher_management_enhancements.sql in Supabase.')
     return
   }
-  panel.innerHTML = `<div class="teacher-action-grid">
-    <form class="teacher-form-card" id="teacher-class-form">
-      <div><p class="teacher-label">SCHEDULE</p><h3>Create a class</h3></div>
-      <label>Title<input name="title" required maxlength="160"></label>
-      <label>Start<input name="starts_at" type="datetime-local" required></label>
-      <label>Duration<input name="duration_minutes" type="number" min="15" max="240" value="60" required></label>
-      <label>Modality<select name="modality"><option value="online">Online</option><option value="in_person">In person</option><option value="hybrid">Hybrid</option></select></label>
-      <label>Language<input name="language"></label><label>Level<input name="level"></label>
-      <label>Participant UUIDs (comma separated)<input name="student_ids" required></label>
-      <label>Notes<textarea name="notes" rows="3"></textarea></label>
-      <button class="teacher-primary-button" type="submit">Schedule class</button><p class="teacher-form-status" data-form-status></p>
-    </form>
-    ${listCard('Upcoming and recent classes', data, (item) => `${item.title} · ${formatDate(item.starts_at)} · ${item.status}`)}
-  </div>`
-  document.querySelector('#teacher-class-form')?.addEventListener('submit', saveClass)
+
+  const classes = classesRes.data || []
+  const participants = participantsRes.data || []
+  const students = studentsRes.data || []
+
+  const studentMap = new Map(students.map(s => [s.id, s.name]))
+  const participantsMap = new Map()
+  participants.forEach(p => {
+    if (!participantsMap.has(p.class_id)) participantsMap.set(p.class_id, [])
+    participantsMap.get(p.class_id).push(studentMap.get(p.student_id) || p.student_id)
+  })
+
+  panel.innerHTML = `
+    <div class="teacher-action-grid">
+      <form class="teacher-form-card" id="teacher-class-form">
+        <div><p class="teacher-label">SCHEDULE</p><h3>Create a class</h3></div>
+        <label>Title<input name="title" required maxlength="160" placeholder="e.g. Conversation Practice B1"></label>
+        <label>Start<input name="starts_at" type="datetime-local" required></label>
+        <label>Duration (minutes)<input name="duration_minutes" type="number" min="15" max="240" value="60" required></label>
+        <label>Modality<select name="modality"><option value="online">Online</option><option value="in_person">In person</option><option value="hybrid">Hybrid</option></select></label>
+        <label>Language<input name="language" placeholder="e.g. English"></label>
+        <label>Level<input name="level" placeholder="e.g. B1"></label>
+        <label>Participant UUIDs (comma separated)
+          <input name="student_ids" required placeholder="Select student or paste UUID" list="calendar-students-list">
+          <datalist id="calendar-students-list">
+            ${students.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)}</option>`).join('')}
+          </datalist>
+        </label>
+        <label>Notes<textarea name="notes" rows="3" placeholder="Lesson plan or link..."></textarea></label>
+        <button class="teacher-primary-button" type="submit">Schedule class</button>
+        <p class="teacher-form-status" data-form-status></p>
+      </form>
+      <div class="teacher-list-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
+          <h3 style="margin:0;">Upcoming & scheduled classes (${classes.length})</h3>
+          <div class="teacher-filter-bar" style="margin:0;">
+            <button type="button" class="teacher-filter-btn is-active" data-class-filter="all">All</button>
+            <button type="button" class="teacher-filter-btn" data-class-filter="scheduled">Scheduled</button>
+            <button type="button" class="teacher-filter-btn" data-class-filter="completed">Completed</button>
+            <button type="button" class="teacher-filter-btn" data-class-filter="cancelled">Cancelled</button>
+          </div>
+        </div>
+        ${classes.length ? `
+          <ul style="margin:0;">
+            ${classes.map(item => {
+              const classStudents = participantsMap.get(item.id) || []
+              return `
+                <li class="teacher-class-item" data-class-status-val="${escapeHtml(item.status || 'scheduled')}" style="padding:12px 0;border-bottom:1px solid var(--vo-border);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+                  <div>
+                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                      <strong>${escapeHtml(item.title)}</strong>
+                      <span class="teacher-badge badge-${escapeHtml(item.status)}">${escapeHtml((item.status || 'scheduled').toUpperCase())}</span>
+                      <span class="teacher-badge badge-global">${escapeHtml(item.modality || 'online')}</span>
+                    </div>
+                    <small style="color:var(--vo-muted);display:block;margin-top:2px;">
+                      ${formatDate(item.starts_at)} (${item.duration_minutes} min)${item.language ? ` · ${escapeHtml(item.language)}` : ''}${item.level ? ` · ${escapeHtml(item.level)}` : ''}
+                      ${classStudents.length ? ` · Students: ${escapeHtml(classStudents.join(', '))}` : ''}
+                    </small>
+                    ${item.notes ? `<p style="margin:4px 0 0;font-size:12px;color:rgba(24,59,102,0.8);">${escapeHtml(item.notes)}</p>` : ''}
+                  </div>
+                  <div class="teacher-inline-actions">
+                    ${item.status === 'scheduled' ? `<button type="button" class="teacher-secondary-button" data-update-class-status="completed" data-class-id="${escapeHtml(item.id)}" style="padding:4px 10px;font-size:11px;">Completar</button><button type="button" class="teacher-secondary-button" data-update-class-status="cancelled" data-class-id="${escapeHtml(item.id)}" style="padding:4px 10px;font-size:11px;">Cancelar</button>` : ''}
+                    ${item.status === 'cancelled' ? `<button type="button" class="teacher-secondary-button" data-update-class-status="scheduled" data-class-id="${escapeHtml(item.id)}" style="padding:4px 10px;font-size:11px;">Reactivar</button>` : ''}
+                    <button type="button" class="teacher-danger-button" data-delete-class-id="${escapeHtml(item.id)}" data-class-title="${escapeHtml(item.title)}" style="padding:4px 10px;font-size:11px;">Eliminar</button>
+                  </div>
+                </li>
+              `
+            }).join('')}
+          </ul>
+        ` : '<p class="teacher-muted">No classes scheduled yet.</p>'}
+      </div>
+    </div>
+  `
+
+  document.querySelector('#teacher-class-form')?.addEventListener('submit', (e) => saveClass(e, panel))
+
+  panel.querySelectorAll?.('[data-class-filter]')?.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      panel.querySelectorAll('[data-class-filter]').forEach(b => b.classList.toggle('is-active', b === btn))
+      const filter = btn.dataset.classFilter
+      panel.querySelectorAll('.teacher-class-item').forEach(el => {
+        el.style.display = (filter === 'all' || el.dataset.classStatusVal === filter) ? 'flex' : 'none'
+      })
+    })
+  })
+
+  panel.querySelectorAll?.('[data-update-class-status]')?.forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const classId = btn.dataset.classId
+      const newStatus = btn.dataset.updateClassStatus
+      btn.disabled = true
+      await supabase.from('classes').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', classId)
+      loadCalendar(panel)
+    })
+  })
+
+  panel.querySelectorAll?.('[data-delete-class-id]')?.forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const classId = btn.dataset.deleteClassId
+      const title = btn.dataset.classTitle || 'esta clase'
+      if (!window.confirm(`¿Eliminar la clase "${title}"?`)) return
+      btn.disabled = true
+      await supabase.from('classes').delete().eq('id', classId)
+      loadCalendar(panel)
+    })
+  })
 }
 
-async function saveClass(event) {
+async function saveClass(event, panel) {
   event.preventDefault()
   const form = event.currentTarget
   const status = form.querySelector('[data-form-status]')
@@ -358,79 +562,216 @@ async function saveClass(event) {
   }
   status.textContent = 'Class scheduled.'
   form.reset()
+  if (panel) loadCalendar(panel)
 }
 
 async function loadFinance(panel) {
-  const [payments, expenses, packages] = await Promise.all([
-    supabase.from('payments').select('id, student_id, assignment_id, amount, currency, status, paid_at').order('created_at', { ascending: false }).limit(30),
-    supabase.from('expenses').select('id, amount, currency, category, spent_at').order('spent_at', { ascending: false }).limit(30),
-    supabase.from('packages').select('id, name, class_count, duration_minutes, price, currency, status').order('created_at', { ascending: false }).limit(30)
+  const [payments, expenses, packages, assignmentsRes, studentsRes] = await Promise.all([
+    supabase.from('payments').select('id, student_id, assignment_id, amount, currency, method, status, paid_at, reference, notes, created_at').order('created_at', { ascending: false }).limit(50),
+    supabase.from('expenses').select('id, amount, currency, category, description, spent_at, created_at').order('spent_at', { ascending: false }).limit(50),
+    supabase.from('packages').select('id, name, class_count, duration_minutes, price, currency, status, language, level').order('created_at', { ascending: false }).limit(30),
+    supabase.from('student_packages').select('assignment_id, package_id, student_id, classes_consumed, status, purchased_at').order('purchased_at', { ascending: false }).limit(50),
+    supabase.from('profiles').select('id, name').order('name')
   ])
+
   if (payments.error || expenses.error || packages.error) {
-    renderMigrationState(panel, 'Finance and payments', 'Apply the reviewed teacher operations migration before recording financial data.')
+    console.warn('Finance query notice:', payments.error?.message || expenses.error?.message || packages.error?.message)
+    renderMigrationState(panel, 'Finance and payments', 'Finance tables not yet initialized. Apply migration 0007_teacher_management_enhancements.sql in Supabase.')
     return
   }
-  panel.innerHTML = `<div class="teacher-action-grid">
-    <form class="teacher-form-card" id="teacher-payment-form">
-      <div><p class="teacher-label">PAYMENTS</p><h3>Record a payment</h3></div>
-      <label>Student UUID<input name="student_id" required></label><label>Assignment UUID<input name="assignment_id"></label>
-      <label>Amount<input name="amount" type="number" min="0.01" step="0.01" required></label>
-      <label>Method<select name="method"><option value="bank_transfer">Bank transfer</option><option value="nequi">Nequi</option><option value="daviplata">Daviplata</option><option value="cash">Cash</option></select></label>
-      <label>Status<select name="status"><option value="received">Received</option><option value="partial">Partial</option><option value="pending">Pending</option><option value="refunded">Refunded</option><option value="cancelled">Cancelled</option></select></label>
-      <label>Reference<input name="reference"></label><button class="teacher-primary-button" type="submit">Save payment</button><p class="teacher-form-status" data-form-status></p>
-    </form>
-    <form class="teacher-form-card" id="teacher-expense-form">
-      <div><p class="teacher-label">EXPENSES</p><h3>Record an expense</h3></div>
-      <label>Amount<input name="amount" type="number" min="0.01" step="0.01" required></label><label>Category<input name="category" required></label>
-      <label>Date<input name="spent_at" type="date" required></label><label>Description<textarea name="description" rows="3"></textarea></label>
-      <button class="teacher-primary-button" type="submit">Save expense</button><p class="teacher-form-status" data-form-status></p>
-    </form>
-    <form class="teacher-form-card" id="teacher-package-form">
-      <div><p class="teacher-label">PACKAGES</p><h3>Create a package</h3></div>
-      <label>Name<input name="name" required></label><label>Classes included<input name="class_count" type="number" min="1" required></label>
-      <label>Duration<input name="duration_minutes" type="number" min="15" max="240" value="60" required></label><label>Price<input name="price" type="number" min="0" step="0.01" required></label>
-      <label>Language<input name="language"></label><label>Level<input name="level"></label>
-      <button class="teacher-primary-button" type="submit">Save package</button><p class="teacher-form-status" data-form-status></p>
-    </form>
-    <form class="teacher-form-card" id="teacher-assignment-form">
-      <div><p class="teacher-label">ASSIGNMENTS</p><h3>Assign a package</h3></div>
-      <label>Package UUID<input name="package_id" required></label><label>Student UUID<input name="student_id" required></label>
-      <button class="teacher-primary-button" type="submit">Assign package</button><p class="teacher-form-status" data-form-status></p>
-    </form>
-  </div><div class="teacher-workspace-columns">
-    ${listCard('Payments', payments.data, (item) => `${item.amount} ${item.currency} · ${item.status}`)}
-    ${listCard('Expenses', expenses.data, (item) => `${item.amount} ${item.currency} · ${item.category}`)}
-  </div>${listCard('Packages', packages.data, (item) => `${item.name} · ${item.class_count} classes · ${item.price} ${item.currency}`)}`
-  document.querySelector('#teacher-payment-form')?.addEventListener('submit', savePayment)
-  document.querySelector('#teacher-expense-form')?.addEventListener('submit', saveExpense)
-  document.querySelector('#teacher-package-form')?.addEventListener('submit', savePackage)
-  document.querySelector('#teacher-assignment-form')?.addEventListener('submit', savePackageAssignment)
+
+  const paymentsList = payments.data || []
+  const expensesList = expenses.data || []
+  const packagesList = packages.data || []
+  const students = studentsRes.data || []
+  const studentMap = new Map(students.map(s => [s.id, s.name]))
+
+  // Financial metrics
+  const totalReceived = paymentsList.filter(p => p.status === 'received').reduce((sum, p) => sum + Number(p.amount || 0), 0)
+  const totalPending = paymentsList.filter(p => p.status === 'pending').reduce((sum, p) => sum + Number(p.amount || 0), 0)
+  const totalExpenses = expensesList.reduce((sum, e) => sum + Number(e.amount || 0), 0)
+  const netBalance = totalReceived - totalExpenses
+
+  panel.innerHTML = `
+    <div class="teacher-metric-grid">
+      ${metricCard('Total Recaudado', formatMoney(totalReceived, 'COP'), 'pagos confirmados')}
+      ${metricCard('Pendiente por Cobrar', formatMoney(totalPending, 'COP'), 'pagos pendientes')}
+      ${metricCard('Gastos Operativos', formatMoney(totalExpenses, 'COP'), 'gastos registrados')}
+      ${metricCard('Balance Neto', formatMoney(netBalance, 'COP'), 'recaudado - gastos')}
+    </div>
+    <div class="teacher-action-grid">
+      <form class="teacher-form-card" id="teacher-payment-form">
+        <div><p class="teacher-label">PAYMENTS</p><h3>Record a payment</h3></div>
+        <label>Student UUID
+          <input name="student_id" required placeholder="Select student or UUID" list="finance-students-list">
+          <datalist id="finance-students-list">
+            ${students.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)}</option>`).join('')}
+          </datalist>
+        </label>
+        <label>Assignment UUID<input name="assignment_id"></label>
+        <label>Amount<input name="amount" type="number" min="0.01" step="0.01" required placeholder="e.g. 150000"></label>
+        <label>Method<select name="method"><option value="bank_transfer">Bank transfer</option><option value="nequi">Nequi</option><option value="daviplata">Daviplata</option><option value="cash">Cash</option></select></label>
+        <label>Status<select name="status"><option value="received">Received</option><option value="partial">Partial</option><option value="pending">Pending</option><option value="refunded">Refunded</option><option value="cancelled">Cancelled</option></select></label>
+        <label>Reference<input name="reference" placeholder="e.g. Nequi M123456"></label>
+        <button class="teacher-primary-button" type="submit">Save payment</button><p class="teacher-form-status" data-form-status></p>
+      </form>
+      <form class="teacher-form-card" id="teacher-expense-form">
+        <div><p class="teacher-label">EXPENSES</p><h3>Record an expense</h3></div>
+        <label>Amount<input name="amount" type="number" min="0.01" step="0.01" required placeholder="e.g. 50000"></label>
+        <label>Category<input name="category" required placeholder="e.g. Software, Materials, Internet"></label>
+        <label>Date<input name="spent_at" type="date" required value="${new Date().toISOString().split('T')[0]}"></label>
+        <label>Description<textarea name="description" rows="3"></textarea></label>
+        <button class="teacher-primary-button" type="submit">Save expense</button><p class="teacher-form-status" data-form-status></p>
+      </form>
+      <form class="teacher-form-card" id="teacher-package-form">
+        <div><p class="teacher-label">PACKAGES</p><h3>Create a package</h3></div>
+        <label>Name<input name="name" required placeholder="e.g. 10 Classes B1 Pack"></label>
+        <label>Classes included<input name="class_count" type="number" min="1" required value="10"></label>
+        <label>Duration<input name="duration_minutes" type="number" min="15" max="240" value="60" required></label>
+        <label>Price<input name="price" type="number" min="0" step="0.01" required placeholder="e.g. 450000"></label>
+        <label>Language<input name="language"></label><label>Level<input name="level"></label>
+        <button class="teacher-primary-button" type="submit">Save package</button><p class="teacher-form-status" data-form-status></p>
+      </form>
+      <form class="teacher-form-card" id="teacher-assignment-form">
+        <div><p class="teacher-label">ASSIGNMENTS</p><h3>Assign a package</h3></div>
+        <label>Package UUID
+          <input name="package_id" required placeholder="Select package or UUID" list="finance-packages-list">
+          <datalist id="finance-packages-list">
+            ${packagesList.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)} (${p.price} ${p.currency})</option>`).join('')}
+          </datalist>
+        </label>
+        <label>Student UUID
+          <input name="student_id" required placeholder="Select student or UUID" list="finance-students-assign-list">
+          <datalist id="finance-students-assign-list">
+            ${students.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)}</option>`).join('')}
+          </datalist>
+        </label>
+        <button class="teacher-primary-button" type="submit">Assign package</button><p class="teacher-form-status" data-form-status></p>
+      </form>
+    </div>
+    <div class="teacher-workspace-columns">
+      <article class="teacher-list-card">
+        <h3>Payments (${paymentsList.length})</h3>
+        ${paymentsList.length ? `
+          <ul style="margin:0;">
+            ${paymentsList.map(p => `
+              <li style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--vo-border);flex-wrap:wrap;gap:8px;">
+                <div>
+                  <strong>${formatMoney(p.amount, p.currency || 'COP')}</strong> · <span class="teacher-badge badge-${escapeHtml(p.status)}">${escapeHtml(p.status)}</span>
+                  <small style="color:var(--vo-muted);display:block;">${escapeHtml(studentMap.get(p.student_id) || p.student_id)} · ${escapeHtml(p.method)}${p.paid_at ? ` · ${new Date(p.paid_at).toLocaleDateString()}` : ''}</small>
+                </div>
+                <div class="teacher-inline-actions">
+                  ${p.status === 'pending' ? `<button type="button" class="teacher-secondary-button" data-payment-status="received" data-payment-id="${escapeHtml(p.id)}" style="padding:4px 8px;font-size:11px;">Marcar Pagado</button>` : ''}
+                  <button type="button" class="teacher-danger-button" data-delete-payment-id="${escapeHtml(p.id)}" style="padding:4px 8px;font-size:11px;">Eliminar</button>
+                </div>
+              </li>
+            `).join('')}
+          </ul>
+        ` : '<p class="teacher-muted">No payments recorded.</p>'}
+      </article>
+      <article class="teacher-list-card">
+        <h3>Expenses (${expensesList.length})</h3>
+        ${expensesList.length ? `
+          <ul style="margin:0;">
+            ${expensesList.map(e => `
+              <li style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--vo-border);flex-wrap:wrap;gap:8px;">
+                <div>
+                  <strong>${formatMoney(e.amount, e.currency || 'COP')}</strong> · ${escapeHtml(e.category)}
+                  <small style="color:var(--vo-muted);display:block;">${e.spent_at ? new Date(e.spent_at).toLocaleDateString() : ''}${e.description ? ` · ${escapeHtml(e.description)}` : ''}</small>
+                </div>
+                <button type="button" class="teacher-danger-button" data-delete-expense-id="${escapeHtml(e.id)}" style="padding:4px 8px;font-size:11px;">Eliminar</button>
+              </li>
+            `).join('')}
+          </ul>
+        ` : '<p class="teacher-muted">No expenses recorded.</p>'}
+      </article>
+    </div>
+    <article class="teacher-list-card" style="margin-top:20px;">
+      <h3>Packages (${packagesList.length})</h3>
+      ${packagesList.length ? `
+        <ul style="margin:0;">
+          ${packagesList.map(pkg => `
+            <li style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--vo-border);flex-wrap:wrap;gap:8px;">
+              <div>
+                <strong>${escapeHtml(pkg.name)}</strong> · ${pkg.class_count} classes · ${formatMoney(pkg.price, pkg.currency || 'COP')}
+                <small style="color:var(--vo-muted);display:block;">${pkg.duration_minutes} min/class · ${escapeHtml(pkg.status)}</small>
+              </div>
+              <button type="button" class="teacher-danger-button" data-delete-package-id="${escapeHtml(pkg.id)}" data-package-name="${escapeHtml(pkg.name)}" style="padding:4px 8px;font-size:11px;">Eliminar</button>
+            </li>
+          `).join('')}
+        </ul>
+      ` : '<p class="teacher-muted">No packages configured.</p>'}
+    </article>
+  `
+
+  document.querySelector('#teacher-payment-form')?.addEventListener('submit', (e) => savePayment(e, panel))
+  document.querySelector('#teacher-expense-form')?.addEventListener('submit', (e) => saveExpense(e, panel))
+  document.querySelector('#teacher-package-form')?.addEventListener('submit', (e) => savePackage(e, panel))
+  document.querySelector('#teacher-assignment-form')?.addEventListener('submit', (e) => savePackageAssignment(e, panel))
+
+  panel.querySelectorAll?.('[data-delete-payment-id]')?.forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      if (!window.confirm('¿Eliminar este registro de pago?')) return
+      btn.disabled = true
+      await supabase.from('payments').delete().eq('id', btn.dataset.deletePaymentId)
+      loadFinance(panel)
+    })
+  })
+
+  panel.querySelectorAll?.('[data-payment-status]')?.forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      btn.disabled = true
+      await supabase.from('payments').update({ status: btn.dataset.paymentStatus, paid_at: new Date().toISOString() }).eq('id', btn.dataset.paymentId)
+      loadFinance(panel)
+    })
+  })
+
+  panel.querySelectorAll?.('[data-delete-expense-id]')?.forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      if (!window.confirm('¿Eliminar este gasto?')) return
+      btn.disabled = true
+      await supabase.from('expenses').delete().eq('id', btn.dataset.deleteExpenseId)
+      loadFinance(panel)
+    })
+  })
+
+  panel.querySelectorAll?.('[data-delete-package-id]')?.forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const name = btn.dataset.packageName || 'este paquete'
+      if (!window.confirm(`¿Eliminar el paquete "${name}"?`)) return
+      btn.disabled = true
+      await supabase.from('packages').delete().eq('id', btn.dataset.deletePackageId)
+      loadFinance(panel)
+    })
+  })
 }
 
-async function savePayment(event) {
+async function savePayment(event, panel) {
   event.preventDefault()
   const form = event.currentTarget
   const data = Object.fromEntries(new FormData(form).entries())
   const user = await getCurrentUser()
   await saveFormRecord(form, form.querySelector('[data-form-status]'), 'payments', {
-    teacher_id: user?.id, student_id: data.student_id.trim(), assignment_id: data.assignment_id.trim() || null,
+    teacher_id: user?.id, student_id: data.student_id.trim(), assignment_id: data.assignment_id?.trim() || null,
     amount: Number(data.amount), currency: 'COP', method: data.method, status: data.status,
-    paid_at: data.status === 'pending' ? null : new Date().toISOString(), reference: data.reference.trim() || null
+    paid_at: data.status === 'pending' ? null : new Date().toISOString(), reference: data.reference?.trim() || null
   }, 'Payment saved.')
+  if (panel) loadFinance(panel)
 }
 
-async function saveExpense(event) {
+async function saveExpense(event, panel) {
   event.preventDefault()
   const form = event.currentTarget
   const data = Object.fromEntries(new FormData(form).entries())
   const user = await getCurrentUser()
   await saveFormRecord(form, form.querySelector('[data-form-status]'), 'expenses', {
     teacher_id: user?.id, amount: Number(data.amount), currency: 'COP', category: data.category.trim(),
-    description: data.description.trim() || null, spent_at: data.spent_at
+    description: data.description?.trim() || null, spent_at: data.spent_at
   }, 'Expense saved.')
+  if (panel) loadFinance(panel)
 }
 
-async function savePackage(event) {
+async function savePackage(event, panel) {
   event.preventDefault()
   const form = event.currentTarget
   const data = Object.fromEntries(new FormData(form).entries())
@@ -438,11 +779,12 @@ async function savePackage(event) {
   await saveFormRecord(form, form.querySelector('[data-form-status]'), 'packages', {
     teacher_id: user?.id, name: data.name.trim(), class_count: Number(data.class_count),
     duration_minutes: Number(data.duration_minutes), price: Number(data.price), currency: 'COP',
-    language: data.language.trim() || null, level: data.level.trim() || null, status: 'active'
+    language: data.language?.trim() || null, level: data.level?.trim() || null, status: 'active'
   }, 'Package saved.')
+  if (panel) loadFinance(panel)
 }
 
-async function savePackageAssignment(event) {
+async function savePackageAssignment(event, panel) {
   event.preventDefault()
   const form = event.currentTarget
   const data = Object.fromEntries(new FormData(form).entries())
@@ -455,18 +797,91 @@ async function savePackageAssignment(event) {
     classes_consumed: 0,
     status: 'active'
   }, 'Package assigned.')
+  if (panel) loadFinance(panel)
 }
 
 async function loadLeads(panel) {
-  const { data, error } = await supabase.from('leads').select('id, name, email, language, stage, next_follow_up_at').order('next_follow_up_at', { ascending: true }).limit(50)
-  if (error) { renderMigrationState(panel, 'Leads and follow-up', 'Apply the reviewed teacher operations migration before managing leads.'); return }
-  panel.innerHTML = `<form class="teacher-form-card" id="teacher-lead-form">
-    <div><p class="teacher-label">CRM</p><h3>Add a lead</h3></div><label>Name<input name="name" required></label><label>Email<input name="email" type="email"></label>
-    <label>Phone<input name="phone"></label><label>Language<input name="language"></label>
-    <label>Stage<select name="stage"><option value="new">New</option><option value="contacted">Contacted</option><option value="assessment">Assessment</option><option value="offer">Offer</option><option value="payment_pending">Payment pending</option><option value="lost">Lost</option></select></label>
-    <label>Next follow-up<input name="next_follow_up_at" type="datetime-local"></label><label>Notes<textarea name="notes" rows="3"></textarea></label>
-    <button class="teacher-primary-button" type="submit">Save lead</button><p class="teacher-form-status" data-form-status></p>
-  </form>${listCard('Follow-up pipeline', data, (item) => `${item.name} · ${item.stage}${item.next_follow_up_at ? ` · ${formatDate(item.next_follow_up_at)}` : ''}`)}`
+  const { data, error } = await supabase
+    .from('leads')
+    .select('id, name, email, phone, language, level, stage, next_follow_up_at, notes, created_at')
+    .order('created_at', { ascending: false })
+    .limit(50)
+
+  if (error) {
+    console.warn('Leads query notice:', error.message)
+    renderMigrationState(panel, 'Leads and follow-up', 'Leads table not yet initialized. Apply migration 0007_teacher_management_enhancements.sql in Supabase.')
+    return
+  }
+
+  const leads = data || []
+  panel.innerHTML = `
+    <div class="teacher-action-grid">
+      <form class="teacher-form-card" id="teacher-lead-form">
+        <div><p class="teacher-label">CRM</p><h3>Add a lead</h3></div>
+        <label>Name<input name="name" required placeholder="Lead full name"></label>
+        <label>Email<input name="email" type="email" placeholder="student@example.com"></label>
+        <label>Phone<input name="phone" placeholder="+57 300 0000000"></label>
+        <label>Language<input name="language" placeholder="e.g. English, French"></label>
+        <label>Stage<select name="stage">
+          <option value="new">New</option>
+          <option value="contacted">Contacted</option>
+          <option value="assessment">Assessment</option>
+          <option value="offer">Offer</option>
+          <option value="payment_pending">Payment pending</option>
+          <option value="converted">Converted</option>
+          <option value="lost">Lost</option>
+        </select></label>
+        <label>Next follow-up<input name="next_follow_up_at" type="datetime-local"></label>
+        <label>Notes<textarea name="notes" rows="3" placeholder="Interests, schedule preferences..."></textarea></label>
+        <button class="teacher-primary-button" type="submit">Save lead</button><p class="teacher-form-status" data-form-status></p>
+      </form>
+      <div class="teacher-list-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
+          <h3 style="margin:0;">Follow-up pipeline (${leads.length})</h3>
+          <div class="teacher-filter-bar" style="margin:0;">
+            <button type="button" class="teacher-filter-btn is-active" data-lead-filter="all">All</button>
+            <button type="button" class="teacher-filter-btn" data-lead-filter="new">New</button>
+            <button type="button" class="teacher-filter-btn" data-lead-filter="contacted">Contacted</button>
+            <button type="button" class="teacher-filter-btn" data-lead-filter="assessment">Assessment</button>
+            <button type="button" class="teacher-filter-btn" data-lead-filter="converted">Converted</button>
+          </div>
+        </div>
+        ${leads.length ? `
+          <ul style="margin:0;">
+            ${leads.map(item => `
+              <li class="teacher-lead-item" data-lead-stage-val="${escapeHtml(item.stage || 'new')}" style="padding:12px 0;border-bottom:1px solid var(--vo-border);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+                <div>
+                  <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                    <strong>${escapeHtml(item.name)}</strong>
+                    <span class="teacher-badge badge-${escapeHtml(item.stage)}">${escapeHtml(item.stage)}</span>
+                    ${item.language ? `<span class="teacher-badge badge-global">${escapeHtml(item.language)}</span>` : ''}
+                  </div>
+                  <small style="color:var(--vo-muted);display:block;margin-top:2px;">
+                    ${item.email ? `Email: ${escapeHtml(item.email)} · ` : ''}${item.phone ? `Tel: ${escapeHtml(item.phone)} · ` : ''}
+                    Follow-up: ${item.next_follow_up_at ? formatDate(item.next_follow_up_at) : 'Not scheduled'}
+                  </small>
+                  ${item.notes ? `<p style="margin:4px 0 0;font-size:12px;color:rgba(24,59,102,0.8);">${escapeHtml(item.notes)}</p>` : ''}
+                </div>
+                <div class="teacher-inline-actions">
+                  <select data-lead-stage-select="${escapeHtml(item.id)}" style="font-size:11px;padding:3px 6px;border-radius:6px;border:1px solid var(--vo-border);">
+                    <option value="new"${item.stage === 'new' ? ' selected' : ''}>New</option>
+                    <option value="contacted"${item.stage === 'contacted' ? ' selected' : ''}>Contacted</option>
+                    <option value="assessment"${item.stage === 'assessment' ? ' selected' : ''}>Assessment</option>
+                    <option value="offer"${item.stage === 'offer' ? ' selected' : ''}>Offer</option>
+                    <option value="payment_pending"${item.stage === 'payment_pending' ? ' selected' : ''}>Payment pending</option>
+                    <option value="converted"${item.stage === 'converted' ? ' selected' : ''}>Converted</option>
+                    <option value="lost"${item.stage === 'lost' ? ' selected' : ''}>Lost</option>
+                  </select>
+                  <button type="button" class="teacher-danger-button" data-delete-lead-id="${escapeHtml(item.id)}" data-lead-name="${escapeHtml(item.name)}" style="padding:4px 8px;font-size:11px;">Eliminar</button>
+                </div>
+              </li>
+            `).join('')}
+          </ul>
+        ` : '<p class="teacher-muted">No leads in the pipeline.</p>'}
+      </div>
+    </div>
+  `
+
   document.querySelector('#teacher-lead-form')?.addEventListener('submit', async (event) => {
     event.preventDefault()
     const form = event.currentTarget
@@ -477,17 +892,100 @@ async function loadLeads(panel) {
       language: values.language.trim() || null, stage: values.stage, next_follow_up_at: values.next_follow_up_at ? new Date(values.next_follow_up_at).toISOString() : null,
       notes: values.notes.trim() || null
     }, 'Lead saved.')
+    loadLeads(panel)
+  })
+
+  panel.querySelectorAll?.('[data-lead-filter]')?.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      panel.querySelectorAll('[data-lead-filter]').forEach(b => b.classList.toggle('is-active', b === btn))
+      const filter = btn.dataset.leadFilter
+      panel.querySelectorAll('.teacher-lead-item').forEach(el => {
+        el.style.display = (filter === 'all' || el.dataset.leadStageVal === filter) ? 'flex' : 'none'
+      })
+    })
+  })
+
+  panel.querySelectorAll?.('[data-lead-stage-select]')?.forEach((sel) => {
+    sel.addEventListener('change', async () => {
+      const leadId = sel.dataset.leadStageSelect
+      await supabase.from('leads').update({ stage: sel.value, updated_at: new Date().toISOString() }).eq('id', leadId)
+      loadLeads(panel)
+    })
+  })
+
+  panel.querySelectorAll?.('[data-delete-lead-id]')?.forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const name = btn.dataset.leadName || 'este lead'
+      if (!window.confirm(`¿Eliminar el prospecto "${name}"?`)) return
+      btn.disabled = true
+      await supabase.from('leads').delete().eq('id', btn.dataset.deleteLeadId)
+      loadLeads(panel)
+    })
   })
 }
 
 async function loadCulture(panel) {
-  const { data, error } = await supabase.from('culture_resources').select('id, title, language, topic, status, url').order('created_at', { ascending: false }).limit(50)
-  if (error) { renderMigrationState(panel, 'Culture resources', 'Apply the reviewed teacher operations migration before publishing cultural resources.'); return }
-  panel.innerHTML = `<form class="teacher-form-card" id="teacher-culture-form">
-    <div><p class="teacher-label">CULTURE</p><h3>Add a resource</h3></div><label>Title<input name="title" required></label><label>Language<input name="language" required></label>
-    <label>Topic<input name="topic"></label><label>External URL<input name="url" type="url" placeholder="https://"></label><label>Description<textarea name="description" rows="3"></textarea></label>
-    <button class="teacher-primary-button" type="submit">Save resource</button><p class="teacher-form-status" data-form-status></p>
-  </form>${listCard('Published and draft resources', data, (item) => `${item.title} · ${item.language} · ${item.status}`)}`
+  const { data, error } = await supabase
+    .from('culture_resources')
+    .select('id, title, language, topic, status, url, description, created_at')
+    .order('created_at', { ascending: false })
+    .limit(50)
+
+  if (error) {
+    console.warn('Culture query notice:', error.message)
+    renderMigrationState(panel, 'Culture resources', 'Culture resources table not yet initialized. Apply migration 0007_teacher_management_enhancements.sql in Supabase.')
+    return
+  }
+
+  const resources = data || []
+  panel.innerHTML = `
+    <div class="teacher-action-grid">
+      <form class="teacher-form-card" id="teacher-culture-form">
+        <div><p class="teacher-label">CULTURE</p><h3>Add a resource</h3></div>
+        <label>Title<input name="title" required placeholder="e.g. Traditional Celebrations in Bogotá"></label>
+        <label>Language<input name="language" required placeholder="e.g. Spanish, English"></label>
+        <label>Topic<input name="topic" placeholder="e.g. History, Gastronomy, Art"></label>
+        <label>External URL<input name="url" type="url" placeholder="https://example.com/article"></label>
+        <label>Description<textarea name="description" rows="3" placeholder="Context or discussion prompts for students..."></textarea></label>
+        <button class="teacher-primary-button" type="submit">Save resource</button><p class="teacher-form-status" data-form-status></p>
+      </form>
+      <div class="teacher-list-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
+          <h3 style="margin:0;">Culture resources (${resources.length})</h3>
+          <div class="teacher-filter-bar" style="margin:0;">
+            <button type="button" class="teacher-filter-btn is-active" data-culture-filter="all">All</button>
+            <button type="button" class="teacher-filter-btn" data-culture-filter="published">Published</button>
+            <button type="button" class="teacher-filter-btn" data-culture-filter="draft">Draft</button>
+          </div>
+        </div>
+        ${resources.length ? `
+          <ul style="margin:0;">
+            ${resources.map(item => `
+              <li class="teacher-culture-item" data-culture-status-val="${escapeHtml(item.status || 'draft')}" style="padding:12px 0;border-bottom:1px solid var(--vo-border);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+                <div>
+                  <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                    <strong>${escapeHtml(item.title)}</strong>
+                    <span class="teacher-badge badge-${escapeHtml(item.status)}">${escapeHtml(item.status)}</span>
+                    <span class="teacher-badge badge-global">${escapeHtml(item.language)}</span>
+                    ${item.topic ? `<span class="teacher-badge badge-draft">${escapeHtml(item.topic)}</span>` : ''}
+                  </div>
+                  ${item.description ? `<p style="margin:4px 0 0;font-size:12px;color:rgba(24,59,102,0.8);">${escapeHtml(item.description)}</p>` : ''}
+                  ${item.url ? `<a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" style="font-size:12px;color:var(--vo-purple);text-decoration:underline;display:inline-block;margin-top:2px;">Abrir enlace ↗</a>` : ''}
+                </div>
+                <div class="teacher-inline-actions">
+                  <button type="button" class="teacher-secondary-button" data-toggle-culture-status="${escapeHtml(item.id)}" data-next-status="${item.status === 'published' ? 'draft' : 'published'}" style="padding:4px 10px;font-size:11px;">
+                    ${item.status === 'published' ? 'Despublicar' : 'Publicar'}
+                  </button>
+                  <button type="button" class="teacher-danger-button" data-delete-culture-id="${escapeHtml(item.id)}" data-culture-title="${escapeHtml(item.title)}" style="padding:4px 10px;font-size:11px;">Eliminar</button>
+                </div>
+              </li>
+            `).join('')}
+          </ul>
+        ` : '<p class="teacher-muted">No culture resources added yet.</p>'}
+      </div>
+    </div>
+  `
+
   document.querySelector('#teacher-culture-form')?.addEventListener('submit', async (event) => {
     event.preventDefault()
     const form = event.currentTarget
@@ -497,6 +995,37 @@ async function loadCulture(panel) {
       teacher_id: user?.id, title: values.title.trim(), language: values.language.trim(), topic: values.topic.trim() || null,
       url: values.url.trim() || null, description: values.description.trim() || null, status: 'draft'
     }, 'Resource saved.')
+    loadCulture(panel)
+  })
+
+  panel.querySelectorAll?.('[data-culture-filter]')?.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      panel.querySelectorAll('[data-culture-filter]').forEach(b => b.classList.toggle('is-active', b === btn))
+      const filter = btn.dataset.cultureFilter
+      panel.querySelectorAll('.teacher-culture-item').forEach(el => {
+        el.style.display = (filter === 'all' || el.dataset.cultureStatusVal === filter) ? 'flex' : 'none'
+      })
+    })
+  })
+
+  panel.querySelectorAll?.('[data-toggle-culture-status]')?.forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const resourceId = btn.dataset.toggleCultureStatus
+      const nextStatus = btn.dataset.nextStatus
+      btn.disabled = true
+      await supabase.from('culture_resources').update({ status: nextStatus, updated_at: new Date().toISOString() }).eq('id', resourceId)
+      loadCulture(panel)
+    })
+  })
+
+  panel.querySelectorAll?.('[data-delete-culture-id]')?.forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const title = btn.dataset.cultureTitle || 'este recurso'
+      if (!window.confirm(`¿Eliminar el recurso "${title}"?`)) return
+      btn.disabled = true
+      await supabase.from('culture_resources').delete().eq('id', btn.dataset.deleteCultureId)
+      loadCulture(panel)
+    })
   })
 }
 
@@ -534,6 +1063,11 @@ function renderMigrationState(panel, title, message) {
 function formatDate(value) {
   const date = new Date(value)
   return Number.isNaN(date.getTime()) ? 'No date' : date.toLocaleString()
+}
+
+function formatMoney(amount, currency = 'COP') {
+  const num = Number(amount || 0)
+  return new Intl.NumberFormat('es-CO', { style: 'currency', currency: currency, maximumFractionDigits: 0 }).format(num)
 }
 
 function average(values) {

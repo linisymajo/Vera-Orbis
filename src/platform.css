@@ -222,6 +222,107 @@ a {
 }
 
 /* =========================================================
+   INTERFACE LANGUAGE SELECTOR
+   ========================================================= */
+
+.interface-lang-selector {
+  position: relative;
+  display: inline-block;
+}
+
+.interface-lang-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(24, 36, 58, 0.14);
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--vo-navy);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.interface-lang-btn:hover {
+  background: var(--vo-white);
+  border-color: var(--vo-purple);
+  box-shadow: 0 4px 12px rgba(108, 76, 207, 0.15);
+  transform: translateY(-1px);
+}
+
+.interface-lang-btn .lang-flag {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.interface-lang-btn .lang-arrow {
+  font-size: 9px;
+  opacity: 0.6;
+  transition: transform 0.2s ease;
+}
+
+.interface-lang-btn[aria-expanded="true"] .lang-arrow {
+  transform: rotate(180deg);
+}
+
+.interface-lang-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 170px;
+  background: var(--vo-white);
+  border: 1px solid rgba(24, 36, 58, 0.12);
+  border-radius: 14px;
+  padding: 6px;
+  box-shadow: 0 16px 40px rgba(24, 36, 58, 0.14);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.interface-lang-menu[hidden] {
+  display: none;
+}
+
+.interface-lang-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  color: var(--vo-navy);
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.interface-lang-option:hover {
+  background: #f4efff;
+  color: var(--vo-purple);
+}
+
+.interface-lang-option.is-active {
+  background: #ede8ff;
+  color: var(--vo-purple);
+  font-weight: 700;
+}
+
+.interface-lang-option .lang-check {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--vo-purple);
+}
+
+/* =========================================================
    CONTENT
    ========================================================= */
 
