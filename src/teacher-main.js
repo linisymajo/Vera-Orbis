@@ -2180,9 +2180,8 @@ if (saveAcademicButton) {
               current_module:
                 currentModule,
               next_step:
-                nextStep,
-              interface_language:
-                interfaceLanguage
+                nextStep
+      
             })
             .eq(
               'id',
