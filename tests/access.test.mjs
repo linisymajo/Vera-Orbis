@@ -1110,3 +1110,237 @@ test('challenges render visibly without opacity 0 reveal block and with defensiv
   assert.match(html, /id="challenge-form-ch-2"/)
   assert.match(html, /Submit Challenge ↗/)
 })
+
+test('migration 0010 establishes secure inbox messaging with strict RLS and indexing', () => {
+  const sql = readFileSync(
+    new URL('../supabase/migrations/0010_inbox_messaging.sql', import.meta.url),
+    'utf8'
+  )
+
+  // Table creation & columns
+  assert.match(sql, /create table if not exists public\.inbox_messages/)
+  assert.match(sql, /sender_id uuid references auth\.users\(id\)/)
+  assert.match(sql, /sender_role text not null default 'teacher' check \(sender_role in \('teacher', 'student', 'system'\)\)/)
+  assert.match(sql, /recipient_id uuid not null references public\.profiles\(id\)/)
+  assert.match(sql, /subject text not null/)
+  assert.match(sql, /body text not null/)
+  assert.match(sql, /is_read boolean not null default false/)
+
+  // Security & RLS
+  assert.match(sql, /alter table public\.inbox_messages enable row level security/)
+  assert.match(sql, /create policy "teachers manage messages" on public\.inbox_messages/)
+  assert.match(sql, /create policy "students read own messages" on public\.inbox_messages/)
+  assert.match(sql, /create policy "students can send messages" on public\.inbox_messages/)
+  assert.match(sql, /create policy "students update own message status" on public\.inbox_messages/)
+
+  // Indexing for performance
+  assert.match(sql, /inbox_recipient_unread_idx/)
+  assert.match(sql, /inbox_sender_idx/)
+})
+
+test('student platform views render complete functional interfaces for calendar, packages, culture, academic dossier, and settings', async () => {
+  const { renderCalendar } = await import('../src/components/calendar.js')
+  const { renderPackages } = await import('../src/components/packages.js')
+  const { renderCulture } = await import('../src/components/culture.js')
+  const { renderAcademicReport } = await import('../src/components/academicReport.js')
+  const { renderSettings } = await import('../src/components/settings.js')
+
+  // Calendar
+  const mockClasses = [
+    {
+      id: 'c-1',
+      title: 'Speaking & Fluency Session',
+      scheduled_at: '2026-11-01T15:00:00Z',
+      duration_minutes: 60,
+      modality: 'online',
+      notes: 'Focus on conditional sentences'
+    },
+    {
+      id: 'c-old',
+      title: 'Introductory Conversation',
+      status: 'completed',
+      starts_at: '2026-10-15T15:00:00Z',
+      duration_minutes: 60
+    }
+  ]
+  const mockAttendance = [
+    {
+      id: 'att-1',
+      class_id: 'c-old',
+      status: 'attended',
+      attended_at: '2026-10-15T15:00:00Z',
+      notes: 'Great participation'
+    }
+  ]
+  const calHtml = renderCalendar(mockClasses, mockAttendance, 'es')
+  assert.match(calHtml, /Speaking &amp; Fluency Session/)
+  assert.match(calHtml, /Focus on conditional sentences/)
+  assert.match(calHtml, /Historial de clases y asistencia/)
+  assert.match(calHtml, /Great participation/)
+
+  // Packages & payments
+  const mockPackages = [
+    {
+      assignment_id: 'pkg-1',
+      total_classes: 12,
+      classes_completed: 4,
+      status: 'active',
+      valid_until: '2026-12-31'
+    }
+  ]
+  const mockPayments = [
+    {
+      assignment_id: 'pkg-1',
+      amount_paid: 600000,
+      status: 'paid',
+      created_at: '2026-10-01T10:00:00Z'
+    }
+  ]
+  const pkgHtml = renderPackages(mockPackages, mockPayments, 'es')
+  assert.match(pkgHtml, /Clases disponibles/)
+  assert.match(pkgHtml, /Paquete de 12 clases/)
+  assert.match(pkgHtml, /Historial de pagos/)
+  assert.match(pkgHtml, /600.000/)
+
+  // Culture
+  const mockCulture = [
+    {
+      id: 'cul-1',
+      title: 'French Cinema Classics',
+      topic: 'Cinema',
+      description: 'An overview of the Nouvelle Vague movement.',
+      url: 'https://example.com/nouvelle-vague',
+      language: 'French',
+      status: 'published'
+    }
+  ]
+  const culHtml = renderCulture(mockCulture, 'en')
+  assert.match(culHtml, /French Cinema Classics/)
+  assert.match(culHtml, /Nouvelle Vague/)
+  assert.match(culHtml, /Cinema/)
+  assert.match(culHtml, /Explore resource ↗/)
+
+  // Academic dossier
+  const mockProfile = {
+    name: 'Sofia Martinez',
+    language: 'English',
+    level: 'B2',
+    level_name: 'Upper Intermediate',
+    progress: 75,
+    lessons_completed: 18,
+    total_lessons: 24,
+    current_module: 'Advanced Fluency',
+    next_step: 'Prepare business presentation',
+    goal: 'Pass C1 exam'
+  }
+  const reportHtml = renderAcademicReport(mockProfile, 'es')
+  assert.match(reportHtml, /Dossier Académico Oficial/)
+  assert.match(reportHtml, /Sofia Martinez/)
+  assert.match(reportHtml, /75%/)
+  assert.match(reportHtml, /Advanced Fluency/)
+  assert.match(reportHtml, /Prepare business presentation/)
+  assert.match(reportHtml, /Pass C1 exam/)
+
+  // Settings
+  const settingsHtml = renderSettings(mockProfile, 'es')
+  assert.match(settingsHtml, /preferencias de plataforma/i)
+  assert.match(settingsHtml, /data-set-interface-lang="es"/)
+  assert.match(settingsHtml, /data-set-interface-lang="en"/)
+  assert.match(settingsHtml, /data-set-interface-lang="fr"/)
+  assert.match(settingsHtml, /data-set-interface-lang="zh"/)
+  assert.match(settingsHtml, /Sofia Martinez/)
+})
+
+test('student platform inbox provides bidirectional communication with unread counting and empty/populated states', async () => {
+  const { renderInbox } = await import('../src/components/inbox.js')
+
+  // Empty state
+  const emptyHtml = renderInbox([], 'es')
+  assert.match(emptyHtml, /MENSAJES Y COMUNICACIONES/)
+  assert.match(emptyHtml, /No tienes mensajes en tu bandeja/)
+  assert.match(emptyHtml, /Enviar mensaje/)
+
+  // Populated state with unread message from teacher
+  const mockMessages = [
+    {
+      id: 'msg-1',
+      sender_role: 'teacher',
+      sender_id: 't-1',
+      recipient_role: 'student',
+      recipient_id: 's-1',
+      subject: 'Preparación para la clase del jueves',
+      body: 'Recuerda revisar el vocabulario de la unidad 4 antes de la sesión.',
+      is_read: false,
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 'msg-2',
+      sender_role: 'student',
+      sender_id: 's-1',
+      recipient_role: 'teacher',
+      recipient_id: 't-1',
+      subject: 'Duda sobre el reto de audio',
+      body: 'Hola Vera, ya grabé el audio pero tengo una duda con el conector.',
+      is_read: true,
+      created_at: '2026-10-18T12:00:00Z'
+    }
+  ]
+
+  const populatedHtml = renderInbox(mockMessages, 'es')
+  assert.match(populatedHtml, /Preparación para la clase del jueves/)
+  assert.match(populatedHtml, /Recuerda revisar el vocabulario/)
+  assert.match(populatedHtml, /data-mark-read-id="msg-1"/)
+  assert.match(populatedHtml, /Duda sobre el reto de audio/)
+  assert.match(populatedHtml, /inbox-role-student/)
+  assert.match(populatedHtml, /inbox-role-teacher/)
+  assert.match(populatedHtml, /id="student-send-message-form"/)
+})
+
+test('student platform navigation and views strictly exclude leads', async () => {
+  const platformPageSource = readFileSync(
+    new URL('../src/pages/platform.js', import.meta.url),
+    'utf8'
+  )
+  const platformMainSource = readFileSync(
+    new URL('../src/platform-main.js', import.meta.url),
+    'utf8'
+  )
+
+  // Verify 'leads' is not exposed in student platform page or platform-main
+  assert.doesNotMatch(platformPageSource, /data-platform-view="leads"/)
+  assert.doesNotMatch(platformPageSource, /data-nav-target="leads"/)
+  assert.doesNotMatch(platformMainSource, /case 'leads':/)
+  assert.doesNotMatch(platformMainSource, /renderLeads/)
+
+  // Verify teacher workspace still possesses leads module
+  const teacherWorkspaceSource = readFileSync(
+    new URL('../src/components/teacherWorkspace.js', import.meta.url),
+    'utf8'
+  )
+  assert.match(teacherWorkspaceSource, /\['leads', 'Leads'\]/)
+  assert.match(teacherWorkspaceSource, /leads: loadLeads/)
+})
+
+test('teacher workspace and student profile integrate direct messaging and history', async () => {
+  const teacherWorkspaceSource = readFileSync(
+    new URL('../src/components/teacherWorkspace.js', import.meta.url),
+    'utf8'
+  )
+  const teacherMainSource = readFileSync(
+    new URL('../src/teacher-main.js', import.meta.url),
+    'utf8'
+  )
+
+  // Teacher workspace inbox tab & dispatcher
+  assert.match(teacherWorkspaceSource, /\['inbox', 'Inbox'\]/)
+  assert.match(teacherWorkspaceSource, /inbox: loadInbox/)
+  assert.match(teacherWorkspaceSource, /async function loadInbox\(panel\)/)
+  assert.match(teacherWorkspaceSource, /#teacher-inbox-compose-form/)
+  assert.match(teacherWorkspaceSource, /data-msg-filter/)
+
+  // Teacher student profile inbox section & send form
+  assert.match(teacherMainSource, /function renderStudentInboxSection\(profile, messages = \[\]\)/)
+  assert.match(teacherMainSource, /#student-message-send-form/)
+  assert.match(teacherMainSource, /data-student-msg-read/)
+  assert.match(teacherMainSource, /renderStudentInboxSection\(profile, messages\)/)
+})

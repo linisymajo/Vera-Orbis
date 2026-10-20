@@ -764,7 +764,8 @@ async function openStudentProfile(studentId) {
     materialsRes,
     feedbackRes,
     challengesRes,
-    exercisesRes
+    exercisesRes,
+    messagesRes
   ] = await Promise.all([
     supabase
       .from('profiles')
@@ -815,7 +816,14 @@ async function openStudentProfile(studentId) {
     supabase
       .from('exercise_assignments')
       .select('id, exercise_id, status, assigned_at, due_at')
-      .eq('student_id', studentId)
+      .eq('student_id', studentId),
+
+    supabase
+      .from('inbox_messages')
+      .select('*')
+      .or(`recipient_id.eq.${studentId},sender_id.eq.${studentId}`)
+      .order('created_at', { ascending: false })
+      .limit(30)
   ])
 
   if (profileRes.error || !profileRes.data) {
@@ -835,6 +843,7 @@ async function openStudentProfile(studentId) {
   const feedback = feedbackRes.data || []
   const challenges = challengesRes.data || []
   const exercises = exercisesRes.error ? [] : (exercisesRes.data || [])
+  const messages = messagesRes.error ? [] : (messagesRes.data || [])
 
   renderStudentProfile(
     profile,
@@ -842,7 +851,8 @@ async function openStudentProfile(studentId) {
     materials,
     feedback,
     challenges,
-    exercises
+    exercises,
+    messages
   )
 }
 
@@ -1084,6 +1094,71 @@ function renderStudentChallengesSection(profile, challenges = []) {
   `
 }
 
+
+function renderStudentInboxSection(profile, messages = []) {
+  return `
+    <section class="student-profile-section" id="student-inbox-section">
+      <div class="student-profile-section-heading">
+        <p class="teacher-label">DIRECT MESSAGING & INBOX</p>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;">
+          <h2>Direct communication with ${escapeHtml(profile.name)}</h2>
+          <span class="teacher-label">${messages.length} message(s)</span>
+        </div>
+      </div>
+
+      <div class="teacher-workspace-columns" style="display:grid;grid-template-columns:1fr;gap:20px;">
+        <div class="teacher-list-card">
+          <h3 style="margin-bottom:12px;">Message history</h3>
+          ${messages.length ? `
+            <ul style="margin:0;">
+              ${messages.map(m => {
+                const isFromStudent = m.sender_role === 'student'
+                return `
+                  <li style="padding:12px 0;border-bottom:1px solid var(--vo-border);display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+                    <div style="flex:1;">
+                      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+                        <span class="teacher-badge ${isFromStudent ? 'badge-individual' : 'badge-global'}">
+                          ${isFromStudent ? `From: ${escapeHtml(profile.name)}` : 'Sent by Teacher'}
+                        </span>
+                        <span class="teacher-badge ${m.is_read ? 'badge-published' : 'badge-draft'}">
+                          ${m.is_read ? 'Read' : 'Unread'}
+                        </span>
+                        <span style="font-size:11px;color:rgba(24,59,102,0.6);">${formatDate(m.created_at)}</span>
+                      </div>
+                      <strong style="font-size:14px;color:var(--vo-navy);display:block;">${escapeHtml(m.subject)}</strong>
+                      <p style="margin:4px 0 0;font-size:13px;color:rgba(24,59,102,0.85);white-space:pre-wrap;line-height:1.4;">${escapeHtml(m.body)}</p>
+                    </div>
+                    ${isFromStudent && !m.is_read ? `
+                      <button type="button" class="teacher-secondary-button" data-student-msg-read="${escapeHtml(m.id)}" style="padding:4px 10px;font-size:11px;">Mark read</button>
+                    ` : ''}
+                  </li>
+                `
+              }).join('')}
+            </ul>
+          ` : '<p class="teacher-muted" style="margin-top:10px;">No messages exchanged with this student yet.</p>'}
+        </div>
+
+        <form class="teacher-form-card" id="student-message-send-form">
+          <div>
+            <p class="teacher-label">COMPOSE MESSAGE</p>
+            <h3>Send a direct note to ${escapeHtml(profile.name)}</h3>
+          </div>
+          <label>Subject
+            <input name="subject" required maxlength="160" placeholder="e.g. Preparation for our next session">
+          </label>
+          <label>Message
+            <textarea name="body" required rows="3" placeholder="Write your message or recommendations..."></textarea>
+          </label>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:10px;flex-wrap:wrap;">
+            <button class="teacher-primary-button" type="submit" id="save-student-message-button">Send message</button>
+            <p class="teacher-form-status" id="student-message-status" aria-live="polite"></p>
+          </div>
+        </form>
+      </div>
+    </section>
+  `
+}
+
 /* =========================================================
    RENDER STUDENT PROFILE
    ========================================================= */
@@ -1093,7 +1168,8 @@ function renderStudentProfile(
   materials = [],
   feedback = [],
   challenges = [],
-  exercises = []
+  exercises = [],
+  messages = []
 ) {
   const mainContainer =
     document.querySelector('#teacher-main-container')
@@ -1647,6 +1723,11 @@ function renderStudentProfile(
                ================================================= -->
           ${renderStudentChallengesSection(profile, challenges)}
 
+          <!-- =================================================
+               DIRECT MESSAGING & INBOX
+               ================================================= -->
+          ${renderStudentInboxSection(profile, messages)}
+
 
           <!-- =================================================
                LEARNING PROFILE
@@ -1967,7 +2048,93 @@ function renderStudentProfile(
      EXISTING PROFILE EVENTS
      ========================================================= */
 
-  attachStudentProfileEvents(
+
+  /* Direct student message send form */
+  const studentMessageForm = document.querySelector('#student-message-send-form')
+  if (studentMessageForm) {
+    studentMessageForm.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      const statusEl = document.querySelector('#student-message-status')
+      const submitBtn = document.querySelector('#save-student-message-button')
+      try {
+        const user = await getCurrentUser()
+        if (!user) {
+          if (statusEl) {
+            statusEl.textContent = 'Session expired. Please log in.'
+            statusEl.className = 'teacher-form-status is-error'
+          }
+          return
+        }
+
+        const formData = new FormData(studentMessageForm)
+        const subject = String(formData.get('subject') || '').trim()
+        const body = String(formData.get('body') || '').trim()
+
+        if (!subject || !body) {
+          if (statusEl) {
+            statusEl.textContent = 'Please enter both subject and message.'
+            statusEl.className = 'teacher-form-status is-error'
+          }
+          return
+        }
+
+        if (submitBtn) {
+          submitBtn.disabled = true
+          submitBtn.textContent = 'Sending...'
+        }
+
+        const { error } = await supabase.from('inbox_messages').insert({
+          sender_id: user.id,
+          sender_role: 'teacher',
+          recipient_id: profile.id,
+          recipient_role: 'student',
+          subject,
+          body,
+          is_read: false
+        })
+
+        if (error) {
+          if (statusEl) {
+            statusEl.textContent = error.message || 'Could not send message.'
+            statusEl.className = 'teacher-form-status is-error'
+          }
+          return
+        }
+
+        if (statusEl) {
+          statusEl.textContent = 'Message sent to student.'
+          statusEl.className = 'teacher-form-status is-success'
+        }
+        studentMessageForm.reset()
+        setTimeout(() => {
+          openStudentProfile(profile.id)
+        }, 600)
+      } catch (err) {
+        console.error('Send student message error:', err)
+        if (statusEl) {
+          statusEl.textContent = 'An unexpected error occurred.'
+          statusEl.className = 'teacher-form-status is-error'
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false
+          submitBtn.textContent = 'Send message'
+        }
+      }
+    })
+  }
+
+  /* Direct student message mark-as-read buttons */
+  document.querySelectorAll('[data-student-msg-read]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const msgId = btn.dataset.studentMsgRead
+      btn.disabled = true
+      await supabase.from('inbox_messages').update({ is_read: true, read_at: new Date().toISOString() }).eq('id', msgId)
+      openStudentProfile(profile.id)
+    })
+  })
+
+    attachStudentProfileEvents(
     profile.id
   )
 

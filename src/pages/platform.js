@@ -4,6 +4,12 @@ import { renderClassMaterials } from '../components/classMaterials.js'
 import { renderFeedback } from '../components/feedback.js'
 import { renderChallenges } from '../components/challenges.js'
 import { renderExercises } from '../components/exercises.js'
+import { renderInbox } from '../components/inbox.js'
+import { renderCalendar } from '../components/calendar.js'
+import { renderPackages } from '../components/packages.js'
+import { renderCulture } from '../components/culture.js'
+import { renderAcademicReport } from '../components/academicReport.js'
+import { renderSettings } from '../components/settings.js'
 import {
   SUPPORTED_INTERFACE_LANGUAGES,
   DEFAULT_INTERFACE_LANGUAGE,
@@ -45,7 +51,13 @@ export function renderPlatform(
   feedback = [],
   challenges = [],
   submissions = [],
-  exercises = []
+  exercises = [],
+  classes = [],
+  attendance = [],
+  packages = [],
+  payments = [],
+  culture = [],
+  messages = []
 ) {
   const voiceUrl = getEffectiveVoiceUrl()
   const uiLang = normalizeInterfaceLanguage(
@@ -58,6 +70,7 @@ export function renderPlatform(
   const currentLangObj =
     SUPPORTED_INTERFACE_LANGUAGES.find((l) => l.code === uiLang) ||
     SUPPORTED_INTERFACE_LANGUAGES[0]
+  const unreadMessagesCount = Array.isArray(messages) ? messages.filter((m) => !m.is_read).length : 0
 
   return `
     <div class="platform-page">
@@ -123,6 +136,30 @@ export function renderPlatform(
 
           <a href="#exercises" data-platform-view="exercises">
             ${t('exercises', uiLang)}
+          </a>
+
+          <a href="#calendar" data-platform-view="calendar">
+            ${t('calendar', uiLang)}
+          </a>
+
+          <a href="#packages" data-platform-view="packages">
+            ${t('packages', uiLang)}
+          </a>
+
+          <a href="#culture" data-platform-view="culture">
+            ${t('culture', uiLang)}
+          </a>
+
+          <a href="#inbox" data-platform-view="inbox" class="platform-nav-inbox">
+            ${t('inbox', uiLang)}${unreadMessagesCount > 0 ? ` <span class="nav-unread-badge">${unreadMessagesCount}</span>` : ''}
+          </a>
+
+          <a href="#reports" data-platform-view="reports">
+            ${t('reports', uiLang)}
+          </a>
+
+          <a href="#settings" data-platform-view="settings">
+            ${t('settings', uiLang)}
           </a>
 
         </nav>
@@ -637,6 +674,62 @@ export function renderPlatform(
 
               </button>
 
+              <button
+                type="button"
+                class="learning-access-card learning-access-calendar"
+                data-platform-view="calendar"
+              >
+                <span class="learning-access-number">03</span>
+                <div>
+                  <span class="learning-access-label">${t('calendar', uiLang)}</span>
+                  <h3>${t('calendarHeading', uiLang)}</h3>
+                  <p>${t('calendarDesc', uiLang)}</p>
+                </div>
+                <span class="learning-access-arrow">↗</span>
+              </button>
+
+              <button
+                type="button"
+                class="learning-access-card learning-access-packages"
+                data-platform-view="packages"
+              >
+                <span class="learning-access-number">04</span>
+                <div>
+                  <span class="learning-access-label">${t('packages', uiLang)}</span>
+                  <h3>${t('packagesHeading', uiLang)}</h3>
+                  <p>${t('packagesDesc', uiLang)}</p>
+                </div>
+                <span class="learning-access-arrow">↗</span>
+              </button>
+
+              <button
+                type="button"
+                class="learning-access-card learning-access-inbox"
+                data-platform-view="inbox"
+              >
+                <span class="learning-access-number">05</span>
+                <div>
+                  <span class="learning-access-label">${t('inbox', uiLang)}${unreadMessagesCount > 0 ? ` (${unreadMessagesCount} ${t('unreadMessages', uiLang) || 'unread'})` : ''}</span>
+                  <h3>${t('inboxHeading', uiLang)}</h3>
+                  <p>${t('inboxDesc', uiLang)}</p>
+                </div>
+                <span class="learning-access-arrow">↗</span>
+              </button>
+
+              <button
+                type="button"
+                class="learning-access-card learning-access-culture"
+                data-platform-view="culture"
+              >
+                <span class="learning-access-number">06</span>
+                <div>
+                  <span class="learning-access-label">${t('culture', uiLang)}</span>
+                  <h3>${t('cultureHeading', uiLang)}</h3>
+                  <p>${t('cultureDesc', uiLang)}</p>
+                </div>
+                <span class="learning-access-arrow">↗</span>
+              </button>
+
             </div>
 
           </div>
@@ -904,7 +997,13 @@ export function renderPlatformView(
   feedback = [],
   challenges = [],
   submissions = [],
-  exercises = []
+  exercises = [],
+  classes = [],
+  attendance = [],
+  packages = [],
+  payments = [],
+  culture = [],
+  messages = []
 ) {
   const uiLang = normalizeInterfaceLanguage(
     student?.interfaceLanguage ||
@@ -1089,6 +1188,24 @@ export function renderPlatformView(
 
     case 'exercises':
       return renderExercises(exercises)
+
+    case 'inbox':
+      return `<section class="platform-detail-section">${renderInbox(messages, student)}</section>`
+
+    case 'calendar':
+      return `<section class="platform-detail-section">${renderCalendar(classes, attendance, student)}</section>`
+
+    case 'packages':
+      return `<section class="platform-detail-section">${renderPackages(packages, payments, student)}</section>`
+
+    case 'culture':
+      return `<section class="platform-detail-section">${renderCulture(culture, student)}</section>`
+
+    case 'reports':
+      return `<section class="platform-detail-section">${renderAcademicReport(student, { materials, feedback, challenges, submissions, exercises, classes, attendance, packages, payments, culture, messages })}</section>`
+
+    case 'settings':
+      return `<section class="platform-detail-section">${renderSettings(student)}</section>`
 
     default:
       return ''

@@ -8,7 +8,8 @@ const MODULES = [
   ['calendar', 'Calendar'],
   ['finance', 'Finance'],
   ['leads', 'Leads'],
-  ['culture', 'Culture']
+  ['culture', 'Culture'],
+  ['inbox', 'Inbox']
 ]
 
 export function renderTeacherWorkspace() {
@@ -60,7 +61,8 @@ export async function loadTeacherModule(module) {
     calendar: loadCalendar,
     finance: loadFinance,
     leads: loadLeads,
-    culture: loadCulture
+    culture: loadCulture,
+    inbox: loadInbox
   }
   await (loaders[module] || loadOverview)(panel)
 }
@@ -1056,6 +1058,174 @@ async function loadCulture(panel) {
       loadCulture(panel)
     })
   })
+}
+
+
+async function loadInbox(panel) {
+  const [studentsRes, messagesRes] = await Promise.all([
+    supabase.from('profiles').select('id, name, language, level').order('name'),
+    supabase.from('inbox_messages').select('*').order('created_at', { ascending: false }).limit(60)
+  ]);
+
+  if (studentsRes.error || messagesRes.error) {
+    const err = messagesRes.error || studentsRes.error;
+    if (err?.code === '42P01' || err?.message?.includes('does not exist')) {
+      renderMigrationState(panel, 'Inbox messaging not ready', 'The inbox_messages table has not been created yet in Supabase.');
+      return;
+    }
+    renderError(panel, 'Could not load messages. Check your connection or permissions.');
+    return;
+  }
+
+  const students = studentsRes.data || [];
+  const studentMap = new Map(students.map(s => [s.id, s.name]));
+  const messages = messagesRes.data || [];
+  const fromStudents = messages.filter(m => m.sender_role === 'student');
+  const sentToStudents = messages.filter(m => m.sender_role === 'teacher');
+  const unreadFromStudents = fromStudents.filter(m => !m.is_read);
+
+  panel.innerHTML = `
+    <div class="teacher-metric-grid">
+      ${metricCard('Total messages', messages.length, 'direct communications')}
+      ${metricCard('From students', fromStudents.length, 'student inquiries')}
+      ${metricCard('Unread inquiries', unreadFromStudents.length, 'awaiting response')}
+      ${metricCard('Active students', students.length, 'registered learners')}
+    </div>
+
+    <div class="teacher-action-grid">
+      <form class="teacher-form-card" id="teacher-inbox-compose-form">
+        <div>
+          <p class="teacher-label">DIRECT MESSAGING</p>
+          <h3>Send a message to a student</h3>
+        </div>
+        <label>Student recipient
+          <select name="recipient_id" required>
+            <option value="">Select a student...</option>
+            ${students.map(s => `
+              <option value="${escapeHtml(s.id)}">${escapeHtml(s.name || 'Unnamed')} (${escapeHtml(s.language || 'General')} · ${escapeHtml(s.level || 'No level')})</option>
+            `).join('')}
+          </select>
+        </label>
+        <label>Subject
+          <input name="subject" required maxlength="160" placeholder="e.g. Feedback on recent progress, Next class prep...">
+        </label>
+        <label>Message
+          <textarea name="body" required rows="4" placeholder="Write your message to the student..."></textarea>
+        </label>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:8px;flex-wrap:wrap;">
+          <button class="teacher-primary-button" type="submit" id="teacher-send-msg-btn">Send message</button>
+          <p class="teacher-form-status" data-inbox-status aria-live="polite"></p>
+        </div>
+      </form>
+
+      <div class="teacher-list-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
+          <h3 style="margin:0;">Recent communications (${messages.length})</h3>
+          <div class="teacher-filter-bar" style="margin:0;">
+            <button type="button" class="teacher-filter-btn is-active" data-msg-filter="all">All</button>
+            <button type="button" class="teacher-filter-btn" data-msg-filter="student">From students</button>
+            <button type="button" class="teacher-filter-btn" data-msg-filter="teacher">Sent</button>
+          </div>
+        </div>
+
+        ${messages.length ? `
+          <ul style="margin:0;" id="teacher-messages-list">
+            ${messages.map(item => {
+              const isFromStudent = item.sender_role === 'student';
+              const peerName = isFromStudent
+                ? (studentMap.get(item.sender_id) || 'Student')
+                : (studentMap.get(item.recipient_id) || 'Student');
+
+              return `
+                <li class="teacher-inbox-msg-item" data-sender-role="${escapeHtml(item.sender_role || 'teacher')}" style="padding:12px 0;border-bottom:1px solid var(--vo-border);display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+                  <div style="flex:1;min-width:220px;">
+                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px;">
+                      <span class="teacher-badge ${isFromStudent ? 'badge-individual' : 'badge-global'}">
+                        ${isFromStudent ? `From: ${escapeHtml(peerName)}` : `To: ${escapeHtml(peerName)}`}
+                      </span>
+                      <span class="teacher-badge ${item.is_read ? 'badge-published' : 'badge-draft'}">
+                        ${item.is_read ? 'Read' : 'Unread'}
+                      </span>
+                      <span style="font-size:11px;color:rgba(24,59,102,0.6);">${formatDate(item.created_at)}</span>
+                    </div>
+                    <strong style="display:block;font-size:14px;color:var(--vo-navy);">${escapeHtml(item.subject)}</strong>
+                    <p style="margin:4px 0 0;font-size:13px;color:rgba(24,59,102,0.85);white-space:pre-wrap;line-height:1.4;">${escapeHtml(item.body)}</p>
+                  </div>
+                  <div class="teacher-inline-actions" style="margin-top:4px;">
+                    ${isFromStudent && !item.is_read ? `
+                      <button type="button" class="teacher-secondary-button" data-mark-read-id="${escapeHtml(item.id)}" style="padding:4px 10px;font-size:11px;">Mark read</button>
+                    ` : ''}
+                    ${isFromStudent ? `
+                      <a href="#student-${escapeHtml(item.sender_id)}" class="teacher-secondary-button" style="padding:4px 10px;font-size:11px;text-decoration:none;">View dossier ↗</a>
+                    ` : ''}
+                  </div>
+                </li>
+              `;
+            }).join('')}
+          </ul>
+        ` : '<p class="teacher-muted">No messages in inbox yet.</p>'}
+      </div>
+    </div>
+  `;
+
+  // Wire compose form
+  const form = document.querySelector('#teacher-inbox-compose-form');
+  form?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const status = form.querySelector('[data-inbox-status]');
+    const submitBtn = document.querySelector('#teacher-send-msg-btn');
+    const values = Object.fromEntries(new FormData(form).entries());
+    const user = await getCurrentUser();
+
+    if (!user) {
+      if (status) status.textContent = 'Session expired. Please log in.';
+      return;
+    }
+
+    if (submitBtn) submitBtn.disabled = true;
+    if (status) status.textContent = 'Sending message...';
+
+    const { error } = await supabase.from('inbox_messages').insert({
+      sender_id: user.id,
+      sender_role: 'teacher',
+      recipient_id: values.recipient_id,
+      recipient_role: 'student',
+      subject: values.subject.trim(),
+      body: values.body.trim(),
+      is_read: false
+    });
+
+    if (error) {
+      if (status) status.textContent = formatSupabaseError(error, 'Could not send message.');
+      if (submitBtn) submitBtn.disabled = false;
+      return;
+    }
+
+    if (status) status.textContent = 'Message sent successfully.';
+    form.reset();
+    setTimeout(() => loadInbox(panel), 600);
+  });
+
+  // Wire filter buttons
+  panel.querySelectorAll?.('[data-msg-filter]')?.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      panel.querySelectorAll('[data-msg-filter]').forEach(b => b.classList.toggle('is-active', b === btn));
+      const filter = btn.dataset.msgFilter;
+      panel.querySelectorAll('.teacher-inbox-msg-item').forEach(el => {
+        el.style.display = (filter === 'all' || el.dataset.senderRole === filter) ? 'flex' : 'none';
+      });
+    });
+  });
+
+  // Wire mark as read
+  panel.querySelectorAll?.('[data-mark-read-id]')?.forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const msgId = btn.dataset.markReadId;
+      btn.disabled = true;
+      await supabase.from('inbox_messages').update({ is_read: true, read_at: new Date().toISOString() }).eq('id', msgId);
+      loadInbox(panel);
+    });
+  });
 }
 
 async function saveFormRecord(form, status, table, payload, successMessage) {

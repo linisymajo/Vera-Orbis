@@ -82,6 +82,12 @@ const dictionaries = {
     feedback: 'Feedback',
     progress: 'Progreso',
     exercises: 'Ejercicios',
+    calendar: 'Calendario',
+    packages: 'Paquetes',
+    culture: 'Cultura',
+    inbox: 'Mensajes',
+    reports: 'Reporte',
+    settings: 'Ajustes',
     signOut: 'Cerrar sesión',
     interfaceLangSelect: 'Idioma de la interfaz',
 
@@ -145,6 +151,153 @@ const dictionaries = {
     currentProgress: 'PROGRESO ACTUAL',
     nextStepIs: 'Tu próximo paso:',
 
+    // Inbox
+    inboxKicker: '07 — MENSAJES Y COMUNICACIONES',
+    inboxHeading: 'Tus conversaciones.',
+    inboxHeadingSpan: 'Directo con tu profesora.',
+    inboxDesc: 'Mantén contacto directo con tu profesora, recibe notas de clase y responde mensajes.',
+
+    // Inbox details
+    inboxTitle: 'Bandeja de Mensajes',
+    sendMessageToTeacher: 'Enviar mensaje a tu profesora',
+    sendMessageDesc: 'Escribe tus dudas sobre las clases, tareas o avances.',
+    subjectLabel: 'Asunto',
+    subjectPlaceholder: 'Ej. Duda con la tarea de conversación',
+    messageLabel: 'Mensaje',
+    messagePlaceholder: 'Escribe tu mensaje aquí...',
+    sendMessageBtn: 'Enviar mensaje',
+    receivedMessages: 'Historial de mensajes',
+    noMessagesTitle: 'No tienes mensajes en tu bandeja.',
+    noMessagesDesc: 'Cuando tu profesora te escriba o envíes un mensaje, aparecerán aquí.',
+    allMessagesRead: 'Al día',
+    unreadCount: 'no leídos',
+    totalMessages: 'mensajes en total',
+    markAsRead: 'Marcar como leído',
+    fromTeacher: 'Profesora',
+    fromYou: 'Tú',
+
+    // Calendar details
+    upcomingSessions: 'sesiones programadas',
+    pastSessions: 'sesiones completadas',
+    upcomingClassesTitle: 'Próximas Clases en Vivo',
+    noUpcomingClasses: 'No tienes clases programadas actualmente.',
+    noUpcomingClassesHint: 'Tu profesora programará tu próxima sesión aquí.',
+    sessionNotes: 'Notas de la sesión:',
+    pastSessionsTitle: 'Historial de clases y asistencia',
+    noPastClasses: 'Aún no registras clases completadas.',
+    noPastClassesHint: 'Cuando completes tus primeras sesiones aparecerán aquí con su registro de asistencia.',
+    datePending: 'Fecha pendiente',
+
+    // Packages details
+    availableClasses: 'Clases disponibles',
+    classesRemaining: 'clases restantes',
+    totalCompleted: 'clases completadas en total',
+    activePackagesTitle: 'Paquetes de Aprendizaje Activos',
+    noActivePackages: 'No tienes paquetes de clases activos.',
+    noActivePackagesHint: 'Comunícate con Vera Orbis para renovar o activar tu próximo paquete.',
+    packageOf: 'Paquete de',
+    classes: 'clases',
+    completed: 'completadas',
+    paymentHistoryTitle: 'Historial de pagos y colegiaturas',
+    noPayments: 'No hay registros de pago disponibles.',
+    paymentReceipt: 'Comprobante de pago',
+
+    // Culture details
+    exploreCulture: 'Explorar Recursos',
+    noCultureTitle: 'No hay recursos culturales disponibles.',
+    noCultureDesc: 'Tu profesora publicará artículos, tradiciones y recomendaciones culturales aquí.',
+    openResource: 'Explorar recurso ↗',
+
+    // Academic report details
+    academicReportKicker: '02 — DOSSIER ACADÉMICO',
+    academicReportHeading: 'Tu expediente académico.',
+    academicReportHeadingSpan: 'Progreso certificado.',
+    academicReportDesc: 'Revisa tu nivel CEFR oficial, avance porcentual, módulo actual y recomendaciones pedagógicas.',
+    officialDossier: 'Dossier Académico Oficial',
+
+    // Settings details
+    settingsKicker: '11 — PREFERENCIAS',
+    settingsHeading: 'Configuración de Plataforma.',
+    settingsHeadingSpan: 'Personaliza tu experiencia.',
+    settingsDesc: 'Selecciona el idioma de la interfaz. Esto no altera tu idioma objetivo de aprendizaje ni tu nivel.',
+    interfaceLanguageTitle: 'Idioma de la Interfaz',
+    interfaceLanguageDesc: 'Elige el idioma con el que navegarás en Vera Orbis.',
+
+    // Package counters & titles
+    remainingClassesLabel: 'Clases disponibles',
+    readyToBook: 'sesiones listas para agendar',
+    usedClassesLabel: 'Clases completadas',
+    lessonsDone: 'sesiones realizadas',
+    totalClassesLabel: 'Total asignadas',
+    acrossAllPackages: 'en todos tus paquetes',
+    myPackagesTitle: 'Paquetes de Aprendizaje Activos',
+    noPackagesTitle: 'No tienes paquetes de clases activos.',
+    noPackagesHint: 'Tu profesora activará tu paquete de clases aquí.',
+    classesLeft: 'clases restantes',
+    remaining: 'restantes',
+    paymentsTitle: 'Historial de pagos y colegiaturas',
+    noPaymentsTitle: 'No hay registros de pago disponibles.',
+    noPaymentsHint: 'Los comprobantes de pago de tu colegiatura aparecerán aquí.',
+    dateHeader: 'Fecha',
+    amountHeader: 'Monto',
+    statusHeader: 'Estado',
+    referenceHeader: 'Referencia',
+
+    // Culture
+    exploreResource: 'Explorar recurso ↗',
+    noCultureHint: 'Tu profesora compartirá artículos y tradiciones culturales aquí.',
+
+    // Inbox extra
+    unreadMessages: 'no leídos',
+
+    // Academic Dossier extra
+    officialRecord: 'Dossier Académico Oficial',
+    overallProgress: 'Progreso general',
+    lessonsCompleted: 'lecciones completadas',
+    currentModuleLabel: 'Módulo actual',
+    nextMilestoneLabel: 'Próximo paso',
+    learningGoalLabel: 'Objetivo de aprendizaje',
+    uiLanguageLabel: 'Idioma de interfaz',
+    activitySummary: 'Resumen de actividad',
+    materialsAssigned: 'Materiales asignados',
+    challengesCompleted: 'Retos completados',
+    exercisesAssigned: 'Ejercicios asignados',
+    feedbackReceived: 'Comentarios recibidos',
+    scheduledSessions: 'Clases programadas',
+
+
+
+
+    // Calendar
+    calendarKicker: '08 — CALENDARIO Y CLASES',
+    calendarHeading: 'Tus clases agendadas.',
+    calendarHeadingSpan: 'Aprende en tiempo real.',
+    calendarDesc: 'Consulta tus próximas sesiones en vivo, horario, modalidad e historial de asistencia.',
+
+    // Packages
+    packagesKicker: '09 — PAQUETES Y PAGOS',
+    packagesHeading: 'Tus paquetes de clase.',
+    packagesHeadingSpan: 'Controla tus sesiones disponibles.',
+    packagesDesc: 'Revisa tus paquetes activos, clases restantes y el historial de pagos de tu colegiatura.',
+
+    // Culture
+    cultureKicker: '10 — INMERSIÓN CULTURAL',
+    cultureHeading: 'Más allá de la gramática.',
+    cultureHeadingSpan: 'Vive la cultura.',
+    cultureDesc: 'Descubre artículos, tradiciones y recursos multimedia para sumergirte en tu idioma objetivo.',
+
+    // Reports
+    reportKicker: '11 — REPORTE ACADÉMICO',
+    reportHeading: 'Tu expediente académico.',
+    reportHeadingSpan: 'Cada logro documentado.',
+    reportDesc: 'Resumen completo de tu nivel, avance, asistencia, retos y retroalimentación recibida.',
+
+    // Settings
+    settingsKicker: '12 — AJUSTES Y PREFERENCIAS',
+    settingsHeading: 'Tus preferencias de plataforma.',
+    settingsHeadingSpan: 'Personaliza tu experiencia.',
+    settingsDesc: 'Configura el idioma de la interfaz y revisa los datos de tu perfil de estudiante.',
+
     // Vera Voice
     veraVoiceKicker: '06 — VERA VOICE',
     veraVoiceTitle: 'Conoce a Vera.<br><span>Tu compañera de conversación.</span>',
@@ -186,6 +339,12 @@ const dictionaries = {
     feedback: 'Feedback',
     progress: 'Progress',
     exercises: 'Exercises',
+    calendar: 'Calendar',
+    packages: 'Packages',
+    culture: 'Culture',
+    inbox: 'Inbox',
+    reports: 'Reports',
+    settings: 'Settings',
     signOut: 'Sign out ↗',
     interfaceLangSelect: 'Interface language',
 
@@ -249,6 +408,153 @@ const dictionaries = {
     currentProgress: 'CURRENT PROGRESS',
     nextStepIs: 'Your next step:',
 
+    // Inbox
+    inboxKicker: '07 — INBOX & MESSAGES',
+    inboxHeading: 'Your conversations.',
+    inboxHeadingSpan: 'Direct with your teacher.',
+    inboxDesc: 'Stay in touch with your teacher, receive lesson notes, and review announcements.',
+
+    // Inbox details
+    inboxTitle: 'Message Inbox',
+    sendMessageToTeacher: 'Send message to your teacher',
+    sendMessageDesc: 'Ask questions about your classes, assignments, or progress.',
+    subjectLabel: 'Subject',
+    subjectPlaceholder: 'e.g. Question about speaking assignment',
+    messageLabel: 'Message',
+    messagePlaceholder: 'Write your message here...',
+    sendMessageBtn: 'Send message',
+    receivedMessages: 'Message History',
+    noMessagesTitle: 'No messages in your inbox yet.',
+    noMessagesDesc: 'When your teacher messages you or you send an inquiry, it will appear here.',
+    allMessagesRead: 'All caught up',
+    unreadCount: 'unread',
+    totalMessages: 'total messages',
+    markAsRead: 'Mark as read',
+    fromTeacher: 'Teacher',
+    fromYou: 'You',
+
+    // Calendar details
+    upcomingSessions: 'upcoming sessions',
+    pastSessions: 'completed sessions',
+    upcomingClassesTitle: 'Upcoming Live Classes',
+    noUpcomingClasses: 'No classes currently scheduled.',
+    noUpcomingClassesHint: 'Your teacher will add your next scheduled session time here.',
+    sessionNotes: 'Session notes:',
+    pastSessionsTitle: 'Class History & Attendance',
+    noPastClasses: 'No completed classes recorded yet.',
+    noPastClassesHint: 'Your completed sessions and attendance will appear here once recorded.',
+    datePending: 'Date pending',
+
+    // Packages details
+    availableClasses: 'Available classes',
+    classesRemaining: 'classes remaining',
+    totalCompleted: 'total classes completed',
+    activePackagesTitle: 'Active Learning Packages',
+    noActivePackages: 'No active packages found.',
+    noActivePackagesHint: 'Contact Vera Orbis to activate or renew your class package.',
+    packageOf: 'Package of',
+    classes: 'classes',
+    completed: 'completed',
+    paymentHistoryTitle: 'Payment History & Invoices',
+    noPayments: 'No payment records available.',
+    paymentReceipt: 'Payment receipt',
+
+    // Culture details
+    exploreCulture: 'Explore Resources',
+    noCultureTitle: 'No cultural resources published yet.',
+    noCultureDesc: 'Your teacher will curate articles, media, and cultural traditions here.',
+    openResource: 'Explore resource ↗',
+
+    // Academic report details
+    academicReportKicker: '02 — ACADEMIC DOSSIER',
+    academicReportHeading: 'Your academic record.',
+    academicReportHeadingSpan: 'Certified progress.',
+    academicReportDesc: 'Track your official CEFR level, completion percentage, current module, and learning targets.',
+    officialDossier: 'Official Academic Dossier',
+
+    // Settings details
+    settingsKicker: '11 — PREFERENCES',
+    settingsHeading: 'Platform Settings.',
+    settingsHeadingSpan: 'Personalize your experience.',
+    settingsDesc: 'Select your interface language. This does not alter your learning target language or level.',
+    interfaceLanguageTitle: 'Interface Language',
+    interfaceLanguageDesc: 'Choose the language you navigate Vera Orbis with.',
+
+    // Package counters & titles
+    remainingClassesLabel: 'Available classes',
+    readyToBook: 'sessions ready to schedule',
+    usedClassesLabel: 'Classes completed',
+    lessonsDone: 'sessions accomplished',
+    totalClassesLabel: 'Total allocated',
+    acrossAllPackages: 'across all your packages',
+    myPackagesTitle: 'Active Learning Packages',
+    noPackagesTitle: 'No active packages found.',
+    noPackagesHint: 'Your teacher will activate your class packages upon enrollment.',
+    classesLeft: 'classes left',
+    remaining: 'remaining',
+    paymentsTitle: 'Payment History & Receipts',
+    noPaymentsTitle: 'No payment records available.',
+    noPaymentsHint: 'Recorded tuition and package payments will be documented here.',
+    dateHeader: 'Date',
+    amountHeader: 'Amount',
+    statusHeader: 'Status',
+    referenceHeader: 'Reference',
+
+    // Culture
+    exploreResource: 'Explore resource ↗',
+    noCultureHint: 'Your teacher will share cultural insights and media recommendations here.',
+
+    // Inbox extra
+    unreadMessages: 'unread',
+
+    // Academic Dossier extra
+    officialRecord: 'Official Academic Dossier',
+    overallProgress: 'Overall progress',
+    lessonsCompleted: 'lessons completed',
+    currentModuleLabel: 'Current module',
+    nextMilestoneLabel: 'Next milestone',
+    learningGoalLabel: 'Learning goal',
+    uiLanguageLabel: 'UI language',
+    activitySummary: 'Activity summary',
+    materialsAssigned: 'Materials assigned',
+    challengesCompleted: 'Challenges completed',
+    exercisesAssigned: 'Exercises assigned',
+    feedbackReceived: 'Feedback received',
+    scheduledSessions: 'Scheduled sessions',
+
+
+
+
+    // Calendar
+    calendarKicker: '08 — CALENDAR & SCHEDULE',
+    calendarHeading: 'Your scheduled sessions.',
+    calendarHeadingSpan: 'Learn in real time.',
+    calendarDesc: 'Track your live classes, upcoming session schedules, modality, and past attendance record.',
+
+    // Packages
+    packagesKicker: '09 — PACKAGES & PAYMENTS',
+    packagesHeading: 'Your learning packages.',
+    packagesHeadingSpan: 'Track your available sessions.',
+    packagesDesc: 'Review your active lesson packages, remaining sessions, and complete payment record.',
+
+    // Culture
+    cultureKicker: '10 — CULTURAL IMMERSION',
+    cultureHeading: 'Beyond the grammar.',
+    cultureHeadingSpan: 'Experience the culture.',
+    cultureDesc: 'Explore handpicked articles, traditions, idioms, and multimedia resources to live your target language.',
+
+    // Reports
+    reportKicker: '11 — ACADEMIC REPORT',
+    reportHeading: 'Your learning dossier.',
+    reportHeadingSpan: 'Every milestone documented.',
+    reportDesc: 'A comprehensive summary of your level, milestones achieved, attendance, and feedback throughout your journey.',
+
+    // Settings
+    settingsKicker: '12 — SETTINGS & PREFERENCES',
+    settingsHeading: 'Your platform settings.',
+    settingsHeadingSpan: 'Tailor your experience.',
+    settingsDesc: 'Manage your interface language, view your profile settings, and configure your learning preferences.',
+
     // Vera Voice
     veraVoiceKicker: '06 — VERA VOICE',
     veraVoiceTitle: 'Meet Vera.<br><span>Your speaking partner.</span>',
@@ -290,6 +596,12 @@ const dictionaries = {
     feedback: 'Commentaires',
     progress: 'Progrès',
     exercises: 'Exercices',
+    calendar: 'Calendrier',
+    packages: 'Forfaits',
+    culture: 'Culture',
+    inbox: 'Messagerie',
+    reports: 'Bilan',
+    settings: 'Paramètres',
     signOut: 'Déconnexion ↗',
     interfaceLangSelect: 'Langue de l’interface',
 
@@ -353,6 +665,153 @@ const dictionaries = {
     currentProgress: 'PROGRÈS ACTUEL',
     nextStepIs: 'Votre prochaine étape :',
 
+    // Inbox
+    inboxKicker: '07 — MESSAGERIE',
+    inboxHeading: 'Vos conversations.',
+    inboxHeadingSpan: 'En direct avec votre professeur.',
+    inboxDesc: 'Restez en contact avec votre professeur, recevez des notes de cours et échangez facilement.',
+
+    // Inbox details
+    inboxTitle: 'Boîte de réception',
+    sendMessageToTeacher: 'Envoyer un message à votre professeur',
+    sendMessageDesc: 'Posez vos questions sur vos cours, devoirs ou progrès.',
+    subjectLabel: 'Objet',
+    subjectPlaceholder: 'ex. Question sur le devoir d\'expression',
+    messageLabel: 'Message',
+    messagePlaceholder: 'Écrivez votre message ici...',
+    sendMessageBtn: 'Envoyer le message',
+    receivedMessages: 'Historique des messages',
+    noMessagesTitle: 'Aucun message dans votre boîte.',
+    noMessagesDesc: 'Les échanges avec votre professeur s\'afficheront ici.',
+    allMessagesRead: 'À jour',
+    unreadCount: 'non lus',
+    totalMessages: 'messages au total',
+    markAsRead: 'Marquer comme lu',
+    fromTeacher: 'Professeur',
+    fromYou: 'Vous',
+
+    // Calendar details
+    upcomingSessions: 'séances à venir',
+    pastSessions: 'séances terminées',
+    upcomingClassesTitle: 'Prochains cours en direct',
+    noUpcomingClasses: 'Aucun cours planifié pour le moment.',
+    noUpcomingClassesHint: 'Votre professeur planifiera votre prochain cours ici.',
+    sessionNotes: 'Notes de la séance :',
+    pastSessionsTitle: 'Historique des cours et présences',
+    noPastClasses: 'Aucun cours terminé enregistré pour le moment.',
+    noPastClassesHint: 'Vos cours terminés apparaîtront ici avec leur relevé de présence.',
+    datePending: 'Date en attente',
+
+    // Packages details
+    availableClasses: 'Cours disponibles',
+    classesRemaining: 'cours restants',
+    totalCompleted: 'cours complétés au total',
+    activePackagesTitle: 'Forfaits d\'apprentissage actifs',
+    noActivePackages: 'Aucun forfait actif trouvé.',
+    noActivePackagesHint: 'Contactez Vera Orbis pour activer ou renouveler votre forfait.',
+    packageOf: 'Forfait de',
+    classes: 'cours',
+    completed: 'complétés',
+    paymentHistoryTitle: 'Historique des paiements',
+    noPayments: 'Aucun paiement enregistré.',
+    paymentReceipt: 'Reçu de paiement',
+
+    // Culture details
+    exploreCulture: 'Explorer les ressources',
+    noCultureTitle: 'Aucune ressource culturelle disponible.',
+    noCultureDesc: 'Votre professeur partagera des articles et des traditions culturelles ici.',
+    openResource: 'Explorer la ressource ↗',
+
+    // Academic report details
+    academicReportKicker: '02 — DOSSIER ACADÉMIQUE',
+    academicReportHeading: 'Votre dossier académique.',
+    academicReportHeadingSpan: 'Progression certifiée.',
+    academicReportDesc: 'Consultez votre niveau CECRL officiel, votre progression et vos recommandations pédagogiques.',
+    officialDossier: 'Dossier académique officiel',
+
+    // Settings details
+    settingsKicker: '11 — PRÉFÉRENCES',
+    settingsHeading: 'Paramètres de la plateforme.',
+    settingsHeadingSpan: 'Personnalisez votre expérience.',
+    settingsDesc: 'Choisissez la langue de l\'interface sans modifier votre langue cible.',
+    interfaceLanguageTitle: 'Langue de l\'interface',
+    interfaceLanguageDesc: 'Choisissez la langue pour naviguer sur Vera Orbis.',
+
+    // Package counters & titles
+    remainingClassesLabel: 'Cours disponibles',
+    readyToBook: 'séances prêtes à planifier',
+    usedClassesLabel: 'Cours complétés',
+    lessonsDone: 'séances accomplies',
+    totalClassesLabel: 'Total alloué',
+    acrossAllPackages: 'sur l\'ensemble de vos forfaits',
+    myPackagesTitle: 'Forfaits d\'apprentissage actifs',
+    noPackagesTitle: 'Aucun forfait actif trouvé.',
+    noPackagesHint: 'Votre professeur activera vos forfaits de cours ici.',
+    classesLeft: 'cours restants',
+    remaining: 'restants',
+    paymentsTitle: 'Historique des paiements',
+    noPaymentsTitle: 'Aucun paiement enregistré.',
+    noPaymentsHint: 'L\'historique de vos paiements apparaîtra ici.',
+    dateHeader: 'Date',
+    amountHeader: 'Montant',
+    statusHeader: 'Statut',
+    referenceHeader: 'Référence',
+
+    // Culture
+    exploreResource: 'Explorer la ressource ↗',
+    noCultureHint: 'Votre professeur partagera des repères culturels et recommandations ici.',
+
+    // Inbox extra
+    unreadMessages: 'non lus',
+
+    // Academic Dossier extra
+    officialRecord: 'Dossier académique officiel',
+    overallProgress: 'Progression globale',
+    lessonsCompleted: 'leçons complétées',
+    currentModuleLabel: 'Module actuel',
+    nextMilestoneLabel: 'Prochaine étape',
+    learningGoalLabel: 'Objectif d\'apprentissage',
+    uiLanguageLabel: 'Langue de l\'interface',
+    activitySummary: 'Résumé d\'activité',
+    materialsAssigned: 'Supports assignés',
+    challengesCompleted: 'Défis complétés',
+    exercisesAssigned: 'Exercices assignés',
+    feedbackReceived: 'Retours reçus',
+    scheduledSessions: 'Séances planifiées',
+
+
+
+
+    // Calendar
+    calendarKicker: '08 — CALENDRIER ET COURS',
+    calendarHeading: 'Vos cours planifiés.',
+    calendarHeadingSpan: 'Apprenez en direct.',
+    calendarDesc: 'Consultez vos prochaines séances en direct, horaires, modalités et historique d’assiduité.',
+
+    // Packages
+    packagesKicker: '09 — FORFAITS ET PAIEMENTS',
+    packagesHeading: 'Vos forfaits de cours.',
+    packagesHeadingSpan: 'Suivez vos séances disponibles.',
+    packagesDesc: 'Consultez vos forfaits actifs, vos cours restants et l’historique complet de vos règlements.',
+
+    // Culture
+    cultureKicker: '10 — IMMERSION CULTURELLE',
+    cultureHeading: 'Au-delà de la grammaire.',
+    cultureHeadingSpan: 'Vivez la culture.',
+    cultureDesc: 'Découvrez des articles, traditions et ressources multimédias pour vivre votre langue cible.',
+
+    // Reports
+    reportKicker: '11 — BILAN PÉDAGOGIQUE',
+    reportHeading: 'Votre dossier pédagogique.',
+    reportHeadingSpan: 'Chaque étape documentée.',
+    reportDesc: 'Un récapitulatif complet de votre niveau, de vos progrès, de votre assiduité et des retours reçus.',
+
+    // Settings
+    settingsKicker: '12 — PARAMÈTRES ET PRÉFÉRENCES',
+    settingsHeading: 'Vos préférences de plateforme.',
+    settingsHeadingSpan: 'Personnalisez votre expérience.',
+    settingsDesc: 'Choisissez la langue de l’interface et gérez vos préférences d’apprentissage.',
+
     // Vera Voice
     veraVoiceKicker: '06 — VERA VOICE',
     veraVoiceTitle: 'Rencontrez Vera.<br><span>Votre partenaire d’expression.</span>',
@@ -394,6 +853,12 @@ const dictionaries = {
     feedback: '教师反馈',
     progress: '学习进度',
     exercises: '课后练习',
+    calendar: '课表日程',
+    packages: '课时包',
+    culture: '文化沉浸',
+    inbox: '收件箱',
+    reports: '学情报告',
+    settings: '个性设置',
     signOut: '退出登录 ↗',
     interfaceLangSelect: '界面语言',
 
@@ -456,6 +921,42 @@ const dictionaries = {
     progressCardDesc: '清晰掌握已学内容、待学课时与未来进阶路线。',
     currentProgress: '当前进度',
     nextStepIs: '下一步计划：',
+
+    // Inbox
+    inboxKicker: '07 — 消息与沟通',
+    inboxHeading: '专属对话。',
+    inboxHeadingSpan: '与授课导师直连。',
+    inboxDesc: '与授课导师保持紧密联系，查阅课后要点与专属教学通知。',
+
+    // Calendar
+    calendarKicker: '08 — 课表与日程',
+    calendarHeading: '实时课表安排。',
+    calendarHeadingSpan: '实时互动精进。',
+    calendarDesc: '掌握即将开始的直播互动课时、上课形式及往期考勤记录。',
+
+    // Packages
+    packagesKicker: '09 — 课时包与支付',
+    packagesHeading: '您的课时账户。',
+    packagesHeadingSpan: '掌握剩余课时明细。',
+    packagesDesc: '查阅当前生效的课时包、可用节数及完整学费流水记录。',
+
+    // Culture
+    cultureKicker: '10 — 文化深度沉浸',
+    cultureHeading: '超越语法本身。',
+    cultureHeadingSpan: '地道体验文化。',
+    cultureDesc: '探索精选文化札记、生活风俗与音视频素材，全方位融入目标语言。',
+
+    // Reports
+    reportKicker: '11 — 学业档案报告',
+    reportHeading: '您的学业里程碑。',
+    reportHeadingSpan: '见证每一步成长。',
+    reportDesc: '详尽汇总您的语言级别、课时出勤、周挑战成果与综合导师评述。',
+
+    // Settings
+    settingsKicker: '12 — 设置与偏好',
+    settingsHeading: '平台设置与偏好。',
+    settingsHeadingSpan: '定制专属体验。',
+    settingsDesc: '自主切换系统界面语言，查看个人学籍信息与学习偏好。',
 
     // Vera Voice
     veraVoiceKicker: '06 — VERA VOICE',

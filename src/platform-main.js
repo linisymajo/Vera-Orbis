@@ -7,6 +7,7 @@ import {
 } from './pages/platform.js'
 import { supabase } from './lib/supabase.js'
 import { setupExerciseForms } from './components/exercises.js'
+import { setupInboxHandlers } from './components/inbox.js'
 import { normalizeInterfaceLanguage, t } from './lib/i18n.js'
 
 let currentStudent = null
@@ -390,7 +391,13 @@ export async function loadPlatform() {
       feedbackRes,
       challengesRes,
       submissionsRes,
-      exercisesRes
+      exercisesRes,
+      classesRes,
+      attendanceRes,
+      packagesRes,
+      paymentsRes,
+      cultureRes,
+      messagesRes
     ] = await withTimeout(
       Promise.all([
         supabase
@@ -438,7 +445,39 @@ export async function loadPlatform() {
         supabase
           .from('student_exercises')
           .select('*')
-          .order('due_at', { ascending: true })
+          .order('due_at', { ascending: true }),
+
+        supabase
+          .from('classes')
+          .select('id, title, starts_at, duration_minutes, modality, status, language, level, notes')
+          .order('starts_at', { ascending: true }),
+
+        supabase
+          .from('class_attendance')
+          .select('*')
+          .eq('student_id', student.id),
+
+        supabase
+          .from('student_packages')
+          .select('assignment_id, package_id, classes_total, classes_used, status, created_at, packages(name, class_count, duration_minutes, price, currency)')
+          .eq('student_id', student.id),
+
+        supabase
+          .from('student_payment_summary')
+          .select('*')
+          .order('created_at', { ascending: false }),
+
+        supabase
+          .from('culture_resources')
+          .select('*')
+          .eq('status', 'published')
+          .order('created_at', { ascending: false }),
+
+        supabase
+          .from('inbox_messages')
+          .select('*')
+          .or(`recipient_id.eq.${student.id},sender_id.eq.${student.id}`)
+          .order('created_at', { ascending: false })
       ]),
       12000,
       'Platform data load timed out'
@@ -472,7 +511,19 @@ export async function loadPlatform() {
       submissions:
         submissionsRes.data || [],
       exercises:
-        exercisesRes.error ? [] : (exercisesRes.data || [])
+        exercisesRes.error ? [] : (exercisesRes.data || []),
+      classes:
+        classesRes.error ? [] : (classesRes.data || []),
+      attendance:
+        attendanceRes.error ? [] : (attendanceRes.data || []),
+      packages:
+        packagesRes.error ? [] : (packagesRes.data || []),
+      payments:
+        paymentsRes.error ? [] : (paymentsRes.data || []),
+      culture:
+        cultureRes.error ? [] : (cultureRes.data || []),
+      messages:
+        messagesRes.error ? [] : (messagesRes.data || [])
     }
 
     const app = document.querySelector('#app')
@@ -484,7 +535,13 @@ export async function loadPlatform() {
           platformData.feedback,
           platformData.challenges,
           platformData.submissions,
-          platformData.exercises
+          platformData.exercises,
+          platformData.classes,
+          platformData.attendance,
+          platformData.packages,
+          platformData.payments,
+          platformData.culture,
+          platformData.messages
         )
     }
 
@@ -1204,7 +1261,13 @@ if (sourceElement) {
         platformData.feedback,
         platformData.challenges,
         platformData.submissions,
-        platformData.exercises
+        platformData.exercises,
+        platformData.classes,
+        platformData.attendance,
+        platformData.packages,
+        platformData.payments,
+        platformData.culture,
+        platformData.messages
       )
 
 
@@ -1255,6 +1318,21 @@ if (sourceElement) {
     floatingContent.innerHTML =
       floatingView
     setupExerciseForms(supabase)
+    if (view === 'inbox') {
+      setupInboxHandlers(supabase, currentStudent, async () => {
+        try {
+          const mRes = await supabase.from('inbox_messages').select('*').or(`recipient_id.eq.${currentStudent.id},sender_id.eq.${currentStudent.id}`).order('created_at', { ascending: false })
+          if (mRes.data) {
+            platformData.messages = mRes.data
+            const unread = mRes.data.filter(m => !m.is_read).length
+            document.querySelectorAll('.nav-unread-badge').forEach(b => {
+              b.textContent = unread > 0 ? String(unread) : ''
+              b.style.display = unread > 0 ? 'inline-block' : 'none'
+            })
+          }
+        } catch (e) { console.warn('Inbox refresh error:', e) }
+      })
+    }
 
     floatingContent
       .querySelectorAll('.roadmap-step')
@@ -1566,6 +1644,30 @@ backButton.style.right =
       viewTitle = 'EXERCISES'
       break
 
+    case 'inbox':
+      viewTitle = 'INBOX & MESSAGES'
+      break
+
+    case 'calendar':
+      viewTitle = 'CALENDAR & SESSIONS'
+      break
+
+    case 'packages':
+      viewTitle = 'PACKAGES & PAYMENTS'
+      break
+
+    case 'culture':
+      viewTitle = 'CULTURAL IMMERSION'
+      break
+
+    case 'reports':
+      viewTitle = 'ACADEMIC REPORT'
+      break
+
+    case 'settings':
+      viewTitle = 'SETTINGS & PREFERENCES'
+      break
+
   }
 
 
@@ -1583,7 +1685,13 @@ backButton.style.right =
       platformData.feedback,
       platformData.challenges,
       platformData.submissions,
-      platformData.exercises
+      platformData.exercises,
+      platformData.classes,
+      platformData.attendance,
+      platformData.packages,
+      platformData.payments,
+      platformData.culture,
+      platformData.messages
     )
 
 
@@ -1634,6 +1742,21 @@ backButton.style.right =
   content.innerHTML =
     viewContent
   setupExerciseForms(supabase)
+  if (view === 'inbox') {
+    setupInboxHandlers(supabase, currentStudent, async () => {
+      try {
+        const mRes = await supabase.from('inbox_messages').select('*').or(`recipient_id.eq.${currentStudent.id},sender_id.eq.${currentStudent.id}`).order('created_at', { ascending: false })
+        if (mRes.data) {
+          platformData.messages = mRes.data
+          const unread = mRes.data.filter(m => !m.is_read).length
+          document.querySelectorAll('.nav-unread-badge').forEach(b => {
+            b.textContent = unread > 0 ? String(unread) : ''
+            b.style.display = unread > 0 ? 'inline-block' : 'none'
+          })
+        }
+      } catch (e) { console.warn('Inbox refresh error:', e) }
+    })
+  }
 
 
   internalView.classList.add(
