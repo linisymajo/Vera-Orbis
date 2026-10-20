@@ -101,11 +101,10 @@ create policy "teachers manage weekly challenges" on public.weekly_challenges
 drop policy if exists "students read assigned challenges" on public.weekly_challenges;
 create policy "students read assigned challenges" on public.weekly_challenges
   for select to authenticated
-  using (
-    student_id = (select auth.uid())
-    or audience = 'all'
-    or student_id is null
-  );
+ using (
+  student_id = (select auth.uid())
+  or audience = 'all'
+);
 
 
 -- ============================================================================
