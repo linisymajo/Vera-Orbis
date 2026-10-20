@@ -396,7 +396,7 @@ async function saveAcademicRecord(event, table, panel) {
 
   let payload = table === 'materials'
     ? { teacher_id: user.id, title: data.title.trim(), type: data.type, student_id: data.student_id.trim() || null, audience: data.student_id.trim() ? 'student' : 'all', description: data.description.trim() || null, language: data.language?.trim() || null, level: data.level?.trim() || null }
-    : { title: data.title.trim(), student_id: data.student_id.trim() || null, audience: data.student_id.trim() ? 'student' : 'all', instructions: data.instructions.trim() || null, end_date: data.end_date || null, status: 'active' }
+    : { teacher_id: user.id, title: data.title.trim(), student_id: data.student_id.trim() || null, audience: data.student_id.trim() ? 'student' : 'all', description: data.instructions?.trim() || null, instructions: data.instructions.trim() || null, end_date: data.end_date || null, status: 'active' }
 
   status.textContent = 'Saving...'
   let uploadedFilePath = null
@@ -427,7 +427,7 @@ async function saveAcademicRecord(event, table, panel) {
   }
   status.textContent = 'Saved.'
   form.reset()
-  if (panel && table === 'materials') loadAcademic(panel)
+  if (panel && (table === 'materials' || table === 'weekly_challenges')) loadAcademic(panel)
 }
 
 async function loadCalendar(panel) {

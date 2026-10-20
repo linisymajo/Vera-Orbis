@@ -397,7 +397,7 @@ export async function loadPlatform() {
           .from('materials')
           .select('*')
           .or(
-            `student_id.eq.${student.id},audience.eq.all`
+            `student_id.eq.${student.id},audience.eq.all,student_id.is.null`
           )
           .order(
             'created_at',
@@ -420,11 +420,7 @@ export async function loadPlatform() {
           .from('weekly_challenges')
           .select('*')
           .or(
-            `student_id.eq.${student.id},audience.eq.all`
-          )
-          .eq(
-            'status',
-            'active'
+            `student_id.eq.${student.id},audience.eq.all,student_id.is.null`
           )
           .order(
             'created_at',
@@ -448,13 +444,31 @@ export async function loadPlatform() {
       'Platform data load timed out'
     )
 
+    if (materialsRes.error) {
+      console.warn('Materials query warning:', materialsRes.error.message)
+    }
+    if (feedbackRes.error) {
+      console.warn('Feedback query warning:', feedbackRes.error.message)
+    }
+    if (challengesRes.error) {
+      console.warn('Weekly challenges query warning:', challengesRes.error.message)
+    }
+    if (submissionsRes.error) {
+      console.warn('Challenge submissions query warning:', submissionsRes.error.message)
+    }
+
+    const rawChallenges = challengesRes.data || []
+    const activeChallenges = rawChallenges.filter(
+      c => !c.status || String(c.status).toLowerCase() === 'active'
+    )
+
     platformData = {
       materials:
         materialsRes.data || [],
       feedback:
         feedbackRes.data || [],
       challenges:
-        challengesRes.data || [],
+        activeChallenges,
       submissions:
         submissionsRes.data || [],
       exercises:
@@ -504,10 +518,13 @@ export async function switchInterfaceLanguage(newLang) {
   } catch {}
 
   try {
-    await supabase
+    const { error: updateErr } = await supabase
       .from('profiles')
       .update({ interface_language: norm })
       .eq('id', currentStudent.id)
+    if (updateErr) {
+      console.warn('Could not persist interface_language to Supabase:', updateErr.message)
+    }
   } catch (err) {
     console.warn('Could not persist interface_language to Supabase:', err)
   }

@@ -455,20 +455,7 @@ async function loadStudents() {
     error
   } = await supabase
     .from('profiles')
-    .select(`
-      id,
-      name,
-      language,
-      level,
-      level_name,
-      progress,
-      goal,
-      lessons_completed,
-      total_lessons,
-      current_module,
-      next_step
-    
-    `)
+    .select('*')
     .order('name')
 
   if (error) {
@@ -781,20 +768,7 @@ async function openStudentProfile(studentId) {
   ] = await Promise.all([
     supabase
       .from('profiles')
-      .select(`
-        id,
-        name,
-        language,
-        level,
-        level_name,
-        progress,
-        goal,
-        lessons_completed,
-        total_lessons,
-        current_module,
-        next_step
-        
-      `)
+      .select('*')
       .eq('id', studentId)
       .maybeSingle(),
 
@@ -835,7 +809,7 @@ async function openStudentProfile(studentId) {
     supabase
       .from('weekly_challenges')
       .select('*')
-      .or(`student_id.eq.${studentId},audience.eq.all`)
+      .or(`student_id.eq.${studentId},audience.eq.all,student_id.is.null`)
       .order('created_at', { ascending: false }),
 
     supabase
@@ -1022,8 +996,8 @@ function renderStudentFeedbackSection(profile, feedback = []) {
                       ${item.created_at ? new Date(item.created_at).toLocaleDateString() : ''}
                     </small>
                   </div>
-                  <h4 style="margin:0 0 4px;font-size:15px;color:var(--vo-navy);">${escapeHtml(item.title || 'Session Feedback')}</h4>
-                  <p style="margin:0;font-size:13px;line-height:1.6;color:rgba(24,59,102,0.85);">${escapeHtml(item.message || '').replace(/\n/g, '<br>')}</p>
+                  <h4 style="margin:0 0 4px;font-size:15px;color:var(--vo-navy);">${escapeHtml(item.title || item.type || 'Session Feedback')}</h4>
+                  <p style="margin:0;font-size:13px;line-height:1.6;color:rgba(24,59,102,0.85);">${escapeHtml(item.message || item.notes || '').replace(/\n/g, '<br>')}</p>
                 </li>
               `).join('')}
             </ul>
@@ -1431,6 +1405,24 @@ function renderStudentProfile(
                   gap:16px;
                 "
               >
+
+                <label class="teacher-form-field">
+
+                  <span class="teacher-label">
+                    TARGET LANGUAGE
+                  </span>
+
+                  <input
+                    type="text"
+                    id="academic-language"
+                    value="${escapeHtml(
+                      profile.language || 'English'
+                    )}"
+                    placeholder="e.g. English, French, Mandarin"
+                  >
+
+                </label>
+
 
                 <label class="teacher-form-field">
 
@@ -2104,6 +2096,11 @@ if (saveAcademicButton) {
           return
         }
 
+        const language =
+          document.querySelector(
+            '#academic-language'
+          )?.value.trim() || profile.language || 'English'
+
         const level =
           document.querySelector(
             '#academic-level'
@@ -2165,28 +2162,48 @@ if (saveAcademicButton) {
         saveAcademicButton.disabled = true
         saveAcademicButton.textContent = 'Saving...'
 
-        const { error } =
+        const payload = {
+          language: language,
+          level: level,
+          level_name: levelName,
+          progress: updatedProgress,
+          goal: goal,
+          lessons_completed:
+            updatedLessonsCompleted,
+          total_lessons:
+            updatedTotalLessons,
+          current_module:
+            currentModule,
+          next_step:
+            nextStep
+        }
+
+        let updateResult =
           await supabase
             .from('profiles')
             .update({
-              level: level,
-              level_name: levelName,
-              progress: updatedProgress,
-              goal: goal,
-              lessons_completed:
-                updatedLessonsCompleted,
-              total_lessons:
-                updatedTotalLessons,
-              current_module:
-                currentModule,
-              next_step:
-                nextStep
-      
+              ...payload,
+              interface_language: interfaceLanguage
             })
             .eq(
               'id',
               profile.id
             )
+            .select('id')
+
+        let error = updateResult.error
+
+        // Handle PGRST204 if interface_language column does not exist on profiles
+        if (error && (error.code === 'PGRST204' || String(error.message || '').includes('interface_language'))) {
+          console.warn('interface_language column not available in profiles; saving academic fields without it:', error.message)
+          const fallback = await supabase
+            .from('profiles')
+            .update(payload)
+            .eq('id', profile.id)
+            .select('id')
+          error = fallback.error
+          updateResult = fallback
+        }
 
         if (error) {
 
@@ -2211,6 +2228,9 @@ if (saveAcademicButton) {
 
           return
         }
+
+        profile.language =
+          language
 
         profile.level =
           level
@@ -2265,6 +2285,7 @@ if (saveAcademicButton) {
           Object.assign(
             cachedStudent,
             {
+              language: language,
               level: level,
               level_name: levelName,
               progress: updatedProgress,
@@ -2672,6 +2693,7 @@ if (saveAcademicButton) {
           student_id: audience === 'all' ? null : profile.id,
           audience: audience,
           title: title,
+          description: instructions || title,
           instructions: instructions,
           end_date: endDate,
           status: 'active'

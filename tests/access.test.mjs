@@ -957,4 +957,104 @@ test('migration 0008 provides defensive column backfills and hardened teacher RL
   assert.match(sql, /grant select on public\.student_payment_summary to authenticated/)
 })
 
+test('academic synchronization and profile update resilience against PGRST204', () => {
+  const teacherMain = readFileSync(
+    new URL('../src/teacher-main.js', import.meta.url),
+    'utf8'
+  )
 
+  // Target language edit field in teacher dossier
+  assert.match(teacherMain, /id="academic-language"/)
+  assert.match(teacherMain, /TARGET LANGUAGE/)
+  assert.match(teacherMain, /profile\.language\s*=\s*language/)
+  assert.match(teacherMain, /cachedStudent[\s\S]*language:\s*language/)
+
+  // Update payload includes target language and academic fields
+  assert.match(teacherMain, /const payload = \{[\s\S]*language:\s*language/)
+
+  // PGRST204 fallback resilience when interface_language column is not in cache
+  assert.match(teacherMain, /error\.code === 'PGRST204' \|\| String\(error\.message \|\| ''\)\.includes\('interface_language'\)/)
+  assert.match(teacherMain, /profiles'\)[\s\S]*?\.update\(payload\)/)
+})
+
+test('weekly challenges end-to-end synchronization and audience querying', () => {
+  const teacherMain = readFileSync(
+    new URL('../src/teacher-main.js', import.meta.url),
+    'utf8'
+  )
+  const workspace = readFileSync(
+    new URL('../src/components/teacherWorkspace.js', import.meta.url),
+    'utf8'
+  )
+  const platform = readFileSync(
+    new URL('../src/platform-main.js', import.meta.url),
+    'utf8'
+  )
+
+  // Teacher workspace challenge insert includes teacher_id and refreshes academic panel
+  assert.match(workspace, /teacher_id:\s*user\.id[\s\S]*table === 'weekly_challenges'/)
+  assert.match(workspace, /table === 'materials' \|\| table === 'weekly_challenges'/)
+
+  // Teacher profile assigns challenge with description and audience
+  assert.match(teacherMain, /description:\s*instructions \|\| title/)
+  assert.match(teacherMain, /instructions:\s*instructions/)
+  assert.match(teacherMain, /audience:\s*audience/)
+
+  // Student platform queries both student-specific and global challenges without rigid status DB lock
+  assert.match(platform, /weekly_challenges'[\s\S]*student_id\.eq\.\${student\.id},audience\.eq\.all,student_id\.is\.null/)
+  assert.match(platform, /activeChallenges = rawChallenges\.filter/)
+})
+
+test('feedback and challenge submissions error resilience and legacy column support', () => {
+  const feedbackComp = readFileSync(
+    new URL('../src/components/feedback.js', import.meta.url),
+    'utf8'
+  )
+  const teacherMain = readFileSync(
+    new URL('../src/teacher-main.js', import.meta.url),
+    'utf8'
+  )
+  const platform = readFileSync(
+    new URL('../src/platform-main.js', import.meta.url),
+    'utf8'
+  )
+
+  // Feedback components support both message/notes and title/type
+  assert.match(feedbackComp, /item\.message \|\| item\.notes/)
+  assert.match(feedbackComp, /item\.title \|\| item\.type/)
+  assert.match(teacherMain, /item\.title \|\| item\.type/)
+  assert.match(teacherMain, /item\.message \|\| item\.notes/)
+
+  // Platform logs query warnings for transparency
+  assert.match(platform, /Weekly challenges query warning/)
+  assert.match(platform, /Challenge submissions query warning/)
+})
+
+test('migration 0009 provides complete RLS policies and table definitions for academic sync', () => {
+  const sql = readFileSync(
+    new URL('../supabase/migrations/0009_academic_sync_challenges_feedback.sql', import.meta.url),
+    'utf8'
+  )
+
+  // Profiles teacher update policy
+  assert.match(sql, /create policy "teachers can update student profiles" on public\.profiles/)
+  assert.match(sql, /for update to authenticated/)
+  assert.match(sql, /exists \(select 1 from public\.teachers where id = \(select auth\.uid\(\)\)\)/)
+
+  // Weekly challenges table & RLS
+  assert.match(sql, /create table if not exists public\.weekly_challenges/)
+  assert.match(sql, /create policy "teachers manage weekly challenges" on public\.weekly_challenges/)
+  assert.match(sql, /create policy "students read assigned challenges" on public\.weekly_challenges/)
+  assert.match(sql, /audience = 'all'[\s\S]*student_id is null/)
+
+  // Challenge submissions table & RLS
+  assert.match(sql, /create table if not exists public\.challenge_submissions/)
+  assert.match(sql, /create policy "teachers manage challenge submissions" on public\.challenge_submissions/)
+  assert.match(sql, /create policy "students read own submissions" on public\.challenge_submissions/)
+  assert.match(sql, /create policy "students insert own submissions" on public\.challenge_submissions/)
+
+  // Feedback table & RLS
+  assert.match(sql, /create table if not exists public\.feedback/)
+  assert.match(sql, /create policy "teachers manage feedback" on public\.feedback/)
+  assert.match(sql, /create policy "students read own feedback" on public\.feedback/)
+})

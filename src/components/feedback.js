@@ -54,8 +54,8 @@ export function renderFeedback(feedbackList = []) {
             ? new Date(item.created_at).toLocaleDateString()
             : ''
 
-          const message = item.message
-            ? item.message.replace(/\n/g, '<br>')
+          const message = (item.message || item.notes || '')
+            ? (item.message || item.notes).replace(/\n/g, '<br>')
             : ''
 
           return `
@@ -74,7 +74,7 @@ export function renderFeedback(feedbackList = []) {
               </div>
 
               <h3>
-                ${item.title || 'Feedback'}
+                ${item.title || item.type || 'Feedback'}
               </h3>
 
               <p>
