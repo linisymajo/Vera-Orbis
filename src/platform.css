@@ -2317,6 +2317,170 @@ a {
   transform: translateX(4px);
   background: var(--vo-purple);
 }
+
+/* =========================================================
+   WEEKLY CHALLENGES
+   ========================================================= */
+
+.challenges-section {
+  width: 100%;
+}
+
+.challenges-list {
+  display: grid;
+  gap: 16px;
+}
+
+.challenge-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 26px 30px;
+  border-radius: 20px;
+  background: white;
+  border: 1px solid var(--vo-border);
+  box-shadow: 0 4px 20px rgba(24, 36, 58, 0.04);
+  transition:
+    transform 0.4s ease,
+    box-shadow 0.4s ease;
+}
+
+.challenge-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 35px rgba(24, 36, 58, 0.08);
+}
+
+.challenge-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.challenge-points {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(108, 76, 207, 0.1);
+  color: var(--vo-purple);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.challenge-date {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--vo-muted);
+}
+
+.challenge-info h3 {
+  margin: 10px 0 6px;
+  font-family: "Playfair Display", serif;
+  font-size: 24px;
+  color: var(--vo-navy);
+}
+
+.challenge-desc {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--vo-muted);
+}
+
+.challenge-instructions {
+  margin-top: 14px;
+  padding: 16px 20px;
+  border-radius: 14px;
+  background: var(--vo-cream);
+  border: 1px solid var(--vo-border);
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--vo-navy);
+}
+
+.challenge-instructions strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--vo-purple);
+}
+
+.challenge-submit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.challenge-submit-form textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--vo-border);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--vo-navy);
+  background: white;
+  resize: vertical;
+  box-sizing: border-box;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.challenge-submit-form textarea:focus {
+  outline: none;
+  border-color: var(--vo-purple);
+  box-shadow: 0 0 0 3px rgba(108, 76, 207, 0.15);
+}
+
+.challenge-submit-form .next-step-button {
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+.challenge-success-state {
+  padding: 16px 20px;
+  border-radius: 14px;
+  background: rgba(24, 183, 160, 0.08);
+  border: 1px solid rgba(24, 183, 160, 0.3);
+  color: var(--vo-navy);
+}
+
+.challenge-success-state strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--vo-turquoise);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.challenge-success-state p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--vo-muted);
+}
+
+.teacher-feedback-note {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: white;
+  border: 1px solid var(--vo-border);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.teacher-feedback-note strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--vo-purple);
+}
 /* =========================================================
    LEARNING ACCESS
    ========================================================= */
@@ -4062,6 +4226,8 @@ body.modal-open {
 
 .platform-detail-section
   .class-materials-section,
+.platform-detail-section
+  .challenges-section,
 .platform-detail-section
   .feedback-section {
   padding-top: 0;

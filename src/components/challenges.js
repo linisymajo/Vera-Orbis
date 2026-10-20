@@ -68,8 +68,22 @@ export function renderChallenges(challenges = [], submissions = []) {
 
           const isSubmitted = !!submission
 
+          const title = challenge.title || challenge.name || 'Weekly Challenge'
+          const rawInstructions = challenge.instructions || challenge.description || challenge.task || ''
+          const instructions = typeof rawInstructions === 'string' ? rawInstructions.trim() : String(rawInstructions).trim()
+          const description = (challenge.description && challenge.description.trim() !== instructions && challenge.description.trim() !== title)
+            ? challenge.description.trim()
+            : ''
+
+          const rawDate = challenge.end_date || challenge.due_date || challenge.due_at || null
+          const formattedDate = rawDate && !isNaN(new Date(rawDate).getTime())
+            ? new Date(rawDate).toLocaleDateString()
+            : null
+
+          const points = challenge.points ?? challenge.reward_points ?? null
+
           return `
-            <article class="challenge-card reveal">
+            <article class="challenge-card">
 
               <div class="challenge-info">
 
@@ -77,20 +91,18 @@ export function renderChallenges(challenges = [], submissions = []) {
 
                   <span class="challenge-points">
                     ${
-                      challenge.points
-                        ? `${challenge.points} POINTS`
+                      points
+                        ? `${points} POINTS`
                         : 'CHALLENGE'
                     }
                   </span>
 
                   ${
-                    challenge.end_date
+                    formattedDate
                       ? `
                         <span class="challenge-date">
                           Due:
-                          ${new Date(
-                            challenge.end_date
-                          ).toLocaleDateString()}
+                          ${formattedDate}
                         </span>
                       `
                       : ''
@@ -100,22 +112,28 @@ export function renderChallenges(challenges = [], submissions = []) {
 
 
                 <h3>
-                  ${challenge.title}
+                  ${title}
                 </h3>
 
 
-                <p class="challenge-desc">
-                  ${challenge.description || ''}
-                </p>
+                ${
+                  description
+                    ? `
+                      <p class="challenge-desc">
+                        ${description}
+                      </p>
+                    `
+                    : ''
+                }
 
 
                 ${
-                  challenge.instructions
+                  instructions
                     ? `
                       <div class="challenge-instructions">
                         <strong>Instructions:</strong>
                         <br>
-                        ${challenge.instructions.replace(
+                        ${instructions.replace(
                           /\n/g,
                           '<br>'
                         )}
@@ -140,7 +158,7 @@ export function renderChallenges(challenges = [], submissions = []) {
 
                         <p>
                           Status:
-                          ${submission.status}
+                          ${submission.status || 'Submitted'}
                         </p>
 
                         ${
@@ -154,7 +172,7 @@ export function renderChallenges(challenges = [], submissions = []) {
 
                                 <br>
 
-                                ${submission.teacher_feedback.replace(
+                                ${String(submission.teacher_feedback).replace(
                                   /\n/g,
                                   '<br>'
                                 )}

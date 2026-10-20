@@ -1058,3 +1058,55 @@ test('migration 0009 provides complete RLS policies and table definitions for ac
   assert.match(sql, /create policy "teachers manage feedback" on public\.feedback/)
   assert.match(sql, /create policy "students read own feedback" on public\.feedback/)
 })
+
+test('challenges render visibly without opacity 0 reveal block and with defensive property fallbacks', async () => {
+  const { renderChallenges } = await import('../src/components/challenges.js')
+
+  // Empty state
+  const emptyHtml = renderChallenges([])
+  assert.match(emptyHtml, /No active challenges this week/)
+
+  // Populated challenge: ensure no dangling 'reveal' hiding the card
+  const testChallenges = [
+    {
+      id: 'ch-1',
+      title: 'Practice Conversation',
+      instructions: 'Record 2 minutes introducing yourself.\nFocus on vowels.',
+      end_date: '2026-10-30T00:00:00Z',
+      points: 25
+    },
+    {
+      id: 'ch-2',
+      name: 'Vocabulary Review',
+      description: 'Review the 10 verbs from yesterday',
+      due_date: '2026-11-05T00:00:00Z'
+    }
+  ]
+
+  const submissions = [
+    {
+      challenge_id: 'ch-1',
+      status: 'submitted',
+      teacher_feedback: 'Great effort on vowels!'
+    }
+  ]
+
+  const html = renderChallenges(testChallenges, submissions)
+
+  // Must have challenge-card without reveal class that forces opacity: 0
+  assert.match(html, /class="challenge-card"/)
+  assert.doesNotMatch(html, /challenge-card reveal/)
+
+  // First challenge assertions
+  assert.match(html, /Practice Conversation/)
+  assert.match(html, /25 POINTS/)
+  assert.match(html, /Record 2 minutes introducing yourself\.<br>Focus on vowels\./)
+  assert.match(html, /✓ Challenge Submitted/)
+  assert.match(html, /Great effort on vowels!/)
+
+  // Second challenge assertions (property fallbacks: name -> title, description -> instructions, due_date)
+  assert.match(html, /Vocabulary Review/)
+  assert.match(html, /Review the 10 verbs from yesterday/)
+  assert.match(html, /id="challenge-form-ch-2"/)
+  assert.match(html, /Submit Challenge ↗/)
+})
