@@ -10,6 +10,7 @@ import { renderPackages } from '../components/packages.js'
 import { renderCulture } from '../components/culture.js'
 import { renderAcademicReport } from '../components/academicReport.js'
 import { renderSettings } from '../components/settings.js'
+import { renderPassportBook } from '../components/passportBook.js'
 import {
   SUPPORTED_INTERFACE_LANGUAGES,
   DEFAULT_INTERFACE_LANGUAGE,
@@ -79,152 +80,157 @@ export function renderPlatform(
            NAVBAR
       ====================================================== -->
 
-      <header class="platform-navbar">
+      <header class="platform-navbar platform-header-container">
 
-        <a href="/" class="platform-logo">
-          <img
-            src="${VO_LOGO}"
-            alt="Vera Orbis"
-          >
-        </a>
-
-        <nav class="platform-nav">
-
-          <a
-            href="#home"
-            class="active"
-            data-platform-view="home"
-          >
-            ${t('home', uiLang)}
+        <div class="platform-topbar">
+          <a href="/" class="platform-logo" aria-label="Vera Orbis Home">
+            <img
+              src="${VO_LOGO}"
+              alt="Vera Orbis"
+            >
           </a>
 
-          <a
-            href="#journey"
-            data-platform-view="journey"
-          >
-            ${actionLabels.journey}
-          </a>
+          <div class="student-profile-actions">
 
-          <a
-            href="#materials"
-            class="platform-nav-card"
-            data-platform-view="materials"
-          >
-            ${actionLabels.materials}
-          </a>
+            <!-- INTERFACE LANGUAGE SWITCHER -->
+            <div class="interface-lang-selector" id="interface-lang-dropdown">
+              <button
+                type="button"
+                class="interface-lang-btn"
+                id="interface-lang-toggle"
+                aria-label="${t('interfaceLangSelect', uiLang)}"
+                title="${t('interfaceLangSelect', uiLang)}"
+                aria-expanded="false"
+                aria-haspopup="true"
+              >
+                <span class="lang-flag">${currentLangObj.flag}</span>
+                <span class="lang-code">${uiLang.toUpperCase()}</span>
+                <span class="lang-arrow">▾</span>
+              </button>
+              <div class="interface-lang-menu" id="interface-lang-menu" hidden>
+                ${SUPPORTED_INTERFACE_LANGUAGES.map((item) => `
+                  <button
+                    type="button"
+                    class="interface-lang-option ${item.code === uiLang ? 'is-active' : ''}"
+                    data-set-interface-lang="${item.code}"
+                    role="menuitem"
+                  >
+                    <span class="lang-flag">${item.flag}</span>
+                    <span>${item.label}</span>
+                    ${item.code === uiLang ? '<span class="lang-check">✓</span>' : ''}
+                  </button>
+                `).join('')}
+              </div>
+            </div>
 
-          <a
-            href="#feedback"
-            data-platform-view="feedback"
-          >
-            ${t('feedback', uiLang)}
-          </a>
+            <div
+              class="student-profile"
+              tabindex="0"
+              role="region"
+              aria-label="Perfil de estudiante"
+            >
+              <span class="profile-avatar">
+                <img
+                  src="${VO_LOGO}"
+                  alt="Vera Orbis"
+                >
+              </span>
 
-          <a
-            href="#challenges"
-            data-platform-view="challenges"
-          >
-            ${actionLabels.challenges}
-          </a>
+              <span class="student-profile-name">
+                ${student.name}
+              </span>
+            </div>
 
-          <a
-            href="#progress"
-            data-platform-view="progress"
-          >
-            ${t('progress', uiLang)}
-          </a>
-
-          <a href="#exercises" data-platform-view="exercises">
-            ${t('exercises', uiLang)}
-          </a>
-
-          <a href="#calendar" data-platform-view="calendar">
-            ${t('calendar', uiLang)}
-          </a>
-
-          <a href="#packages" data-platform-view="packages">
-            ${t('packages', uiLang)}
-          </a>
-
-          <a href="#culture" data-platform-view="culture">
-            ${t('culture', uiLang)}
-          </a>
-
-          <a href="#inbox" data-platform-view="inbox" class="platform-nav-inbox">
-            ${t('inbox', uiLang)}${unreadMessagesCount > 0 ? ` <span class="nav-unread-badge">${unreadMessagesCount}</span>` : ''}
-          </a>
-
-          <a href="#reports" data-platform-view="reports">
-            ${t('reports', uiLang)}
-          </a>
-
-          <a href="#settings" data-platform-view="settings">
-            ${t('settings', uiLang)}
-          </a>
-
-        </nav>
-
-
-        <div class="student-profile-actions">
-
-          <!-- INTERFACE LANGUAGE SWITCHER -->
-          <div class="interface-lang-selector" id="interface-lang-dropdown">
             <button
               type="button"
-              class="interface-lang-btn"
-              id="interface-lang-toggle"
-              aria-label="${t('interfaceLangSelect', uiLang)}"
-              title="${t('interfaceLangSelect', uiLang)}"
-              aria-expanded="false"
-              aria-haspopup="true"
+              id="student-logout-button"
+              class="platform-logout-btn"
+              aria-label="${t('signOut', uiLang)}"
+              title="${t('signOut', uiLang)}"
             >
-              <span class="lang-flag">${currentLangObj.flag}</span>
-              <span class="lang-code">${uiLang.toUpperCase()}</span>
-              <span class="lang-arrow">▾</span>
+              ${t('signOut', uiLang)}
             </button>
-            <div class="interface-lang-menu" id="interface-lang-menu" hidden>
-              ${SUPPORTED_INTERFACE_LANGUAGES.map((item) => `
-                <button
-                  type="button"
-                  class="interface-lang-option ${item.code === uiLang ? 'is-active' : ''}"
-                  data-set-interface-lang="${item.code}"
-                  role="menuitem"
-                >
-                  <span class="lang-flag">${item.flag}</span>
-                  <span>${item.label}</span>
-                  ${item.code === uiLang ? '<span class="lang-check">✓</span>' : ''}
-                </button>
-              `).join('')}
-            </div>
           </div>
+        </div>
 
-          <div
-            class="student-profile"
-            tabindex="0"
-            role="region"
-            aria-label="Perfil de estudiante"
-          >
-            <span class="profile-avatar">
-              <img
-                src="${VO_LOGO}"
-                alt="Vera Orbis"
-              >
-            </span>
+        <div class="platform-nav-dock-wrapper">
+          <nav class="platform-nav platform-nav-dock" aria-label="Navegación principal">
 
-            <span>
-              ${student.name}
-            </span>
-          </div>
+            <a
+              href="#home"
+              class="active"
+              data-platform-view="home"
+            >
+              ${t('home', uiLang)}
+            </a>
 
-          <button
-            type="button"
-            id="student-logout-button"
-            class="platform-logout-btn"
-            aria-label="${t('signOut', uiLang)}"
-            title="${t('signOut', uiLang)}"
-          >
-            ${t('signOut', uiLang)}
-          </button>
+            <a
+              href="#journey"
+              data-platform-view="journey"
+            >
+              ${actionLabels.journey}
+            </a>
+
+            <a
+              href="#materials"
+              class="platform-nav-card"
+              data-platform-view="materials"
+            >
+              ${actionLabels.materials}
+            </a>
+
+            <a
+              href="#feedback"
+              data-platform-view="feedback"
+            >
+              ${t('feedback', uiLang)}
+            </a>
+
+            <a
+              href="#challenges"
+              data-platform-view="challenges"
+            >
+              ${actionLabels.challenges}
+            </a>
+
+            <a
+              href="#progress"
+              data-platform-view="progress"
+            >
+              ${t('progress', uiLang)}
+            </a>
+
+            <a href="#exercises" data-platform-view="exercises">
+              ${t('exercises', uiLang)}
+            </a>
+
+            <span class="platform-nav-divider" aria-hidden="true"></span>
+
+            <a href="#calendar" data-platform-view="calendar">
+              ${t('calendar', uiLang)}
+            </a>
+
+            <a href="#packages" data-platform-view="packages">
+              ${t('packages', uiLang)}
+            </a>
+
+            <a href="#culture" data-platform-view="culture">
+              ${t('culture', uiLang)}
+            </a>
+
+            <a href="#inbox" data-platform-view="inbox" class="platform-nav-inbox">
+              ${t('inbox', uiLang)}${unreadMessagesCount > 0 ? ` <span class="nav-unread-badge">${unreadMessagesCount}</span>` : ''}
+            </a>
+
+            <a href="#reports" data-platform-view="reports">
+              ${t('reports', uiLang)}
+            </a>
+
+            <a href="#settings" data-platform-view="settings">
+              ${t('settings', uiLang)}
+            </a>
+
+          </nav>
         </div>
 
       </header>
@@ -310,231 +316,7 @@ export function renderPlatform(
             </div>
 
 
-            <div class="language-passport-wrapper">
-
-              <div class="language-passport">
-
-                <div class="passport-glow"></div>
-
-                <div class="passport-orbit orbit-a"></div>
-
-                <div class="passport-orbit orbit-b"></div>
-
-
-                <div class="passport-top">
-
-                  <div class="passport-brand">
-
-                    <div class="passport-brand-logo">
-
-                      <img
-                        src="${VO_LOGO}"
-                        alt="Vera Orbis"
-                      >
-
-                    </div>
-
-                    <div class="passport-stamps">
-
-                      <span class="passport-stamp stamp-turquoise">
-                        ${t('learnIt', uiLang)}
-                      </span>
-
-                      <span class="passport-stamp stamp-purple">
-                        ${t('liveIt', uiLang)}
-                      </span>
-
-                      <span class="passport-stamp stamp-yellow">
-                        ${t('speakIt', uiLang)}
-                      </span>
-
-                    </div>
-
-                  </div>
-
-
-                  <div class="passport-information">
-
-                    <div class="passport-field passport-name">
-
-                      <span>
-                        ${t('studentLabel', uiLang)}
-                      </span>
-
-                      <strong>
-                        ${student.name}
-                      </strong>
-
-                    </div>
-
-
-                    <div class="passport-info-grid">
-
-                      <div class="passport-field">
-
-                        <span>
-                          ${t('languageLabel', uiLang)}
-                        </span>
-
-                        <strong>
-                          ${student.language}
-                        </strong>
-
-                      </div>
-
-
-                      <div class="passport-field">
-
-                        <span>
-                          ${t('levelLabel', uiLang)}
-                        </span>
-
-                        <strong>
-                          ${student.level}
-                        </strong>
-
-                        <small>
-                          ${student.levelName}
-                        </small>
-
-                      </div>
-
-
-                      <div class="passport-field">
-
-                        <span>
-                          ${t('destinationLabel', uiLang)}
-                        </span>
-
-                        <strong>
-                          ${student.goal}
-                        </strong>
-
-                      </div>
-
-
-                      <div class="passport-field">
-
-                        <span>
-                          ${t('journeyLabel', uiLang)}
-                        </span>
-
-                        <strong>
-                          ${student.totalLessons ? `${student.lessonsCompleted} ${t('of', uiLang)} ${student.totalLessons}` : `${student.lessonsCompleted} ${t('completed', uiLang)}`}
-                        </strong>
-
-                        <small>
-                          ${student.totalLessons ? t('lessonsLabel', uiLang) : t('totalPending', uiLang)}
-                        </small>
-
-                      </div>
-
-                    </div>
-
-
-                    <div class="passport-journey">
-
-                      <div class="passport-journey-top">
-
-                        <div>
-
-                          <span>
-                            ${t('journeyProgress', uiLang)}
-                          </span>
-
-                          <strong>
-                            ${student.progress}%
-                          </strong>
-
-                        </div>
-
-                        <span class="journey-status">
-                          ${t('inProgress', uiLang)}
-                        </span>
-
-                      </div>
-
-
-                      <div class="passport-progress-track">
-
-                        <div
-                          class="passport-progress-fill"
-                          style="--passport-progress: ${student.progress}%"
-                        ></div>
-
-                      </div>
-
-
-                      <div class="passport-progress-labels">
-
-                        <span>
-                          ${t('beginning', uiLang)}
-                        </span>
-
-                        <span>
-                          ${t('yourJourney', uiLang)}
-                        </span>
-
-                        <span>
-                          ${t('destination', uiLang)}
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                  </div>
-
-                </div>
-
-
-                <div class="passport-bottom">
-
-                  <div class="passport-motto">
-
-                    <span>${t('learnIt', uiLang)}</span>
-                    <i></i>
-                    <span>${t('liveIt', uiLang)}</span>
-                    <i></i>
-                    <span>${t('speakIt', uiLang)}</span>
-
-                  </div>
-
-
-                  <div class="passport-status">
-
-                    <span class="status-dot"></span>
-
-                    ${t('activeJourney', uiLang)}
-
-                  </div>
-
-                </div>
-
-
-                <span class="passport-coordinate coordinate-one">
-                  04° 36' N
-                </span>
-
-                <span class="passport-coordinate coordinate-two">
-                  74° 05' W
-                </span>
-
-                <span class="passport-star star-one">
-                  ✦
-                </span>
-
-                <span class="passport-star star-two">
-                  ✦
-                </span>
-
-                <span class="passport-star star-three">
-                  ✦
-                </span>
-
-              </div>
-
-            </div>
+            ${renderPassportBook(student, { materials, feedback, challenges, submissions, exercises, classes, attendance, packages, payments, culture, messages }, uiLang)}
 
           </section>
 

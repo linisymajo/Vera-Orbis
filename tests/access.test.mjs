@@ -1128,14 +1128,31 @@ test('migration 0010 establishes secure inbox messaging with strict RLS and inde
 
   // Security & RLS
   assert.match(sql, /alter table public\.inbox_messages enable row level security/)
+  assert.match(sql, /alter table public\.inbox_messages force row level security/)
   assert.match(sql, /create policy "teachers manage messages" on public\.inbox_messages/)
   assert.match(sql, /create policy "students read own messages" on public\.inbox_messages/)
   assert.match(sql, /create policy "students can send messages" on public\.inbox_messages/)
   assert.match(sql, /create policy "students update own message status" on public\.inbox_messages/)
 
+  // Hardened Anti-Spoofing & Immutability Triggers
+  assert.match(sql, /create or replace function public\.trg_validate_inbox_message_insert/)
+  assert.match(sql, /create trigger trg_validate_inbox_message_insert/)
+  assert.match(sql, /Students cannot impersonate teacher or system roles/)
+  assert.match(sql, /create or replace function public\.trg_enforce_inbox_message_immutability/)
+  assert.match(sql, /create trigger trg_enforce_inbox_message_immutability/)
+  assert.match(sql, /Students cannot modify message content/)
+
+  // Granular Column Permissions & Secure RPC
+  assert.match(sql, /create or replace function public\.mark_inbox_message_as_read/)
+  assert.match(sql, /revoke update on public\.inbox_messages from authenticated/)
+  assert.match(sql, /grant update \(is_read, read_at, updated_at\) on public\.inbox_messages to authenticated/)
+  assert.match(sql, /grant execute on function public\.mark_inbox_message_as_read\(uuid\) to authenticated/)
+  assert.match(sql, /revoke all on public\.inbox_messages from anon/)
+
   // Indexing for performance
   assert.match(sql, /inbox_recipient_unread_idx/)
   assert.match(sql, /inbox_sender_idx/)
+  assert.match(sql, /inbox_conversation_idx/)
 })
 
 test('student platform views render complete functional interfaces for calendar, packages, culture, academic dossier, and settings', async () => {
@@ -1343,4 +1360,121 @@ test('teacher workspace and student profile integrate direct messaging and histo
   assert.match(teacherMainSource, /#student-message-send-form/)
   assert.match(teacherMainSource, /data-student-msg-read/)
   assert.match(teacherMainSource, /renderStudentInboxSection\(profile, messages\)/)
+})
+
+test('student platform packages module is renamed to Pagos without colegiatura references', async () => {
+  const { t } = await import('../src/lib/i18n.js')
+  const platformPageSource = readFileSync(
+    new URL('../src/pages/platform.js', import.meta.url),
+    'utf8'
+  )
+  const platformMainSource = readFileSync(
+    new URL('../src/platform-main.js', import.meta.url),
+    'utf8'
+  )
+
+  // Verify labels in i18n dictionaries
+  assert.equal(t('packages', 'es'), 'Pagos')
+  assert.equal(t('packages', 'en'), 'Payments')
+  assert.equal(t('packages', 'fr'), 'Paiements')
+  assert.equal(t('packages', 'zh'), '支付')
+
+  // Verify kickers and headings
+  assert.match(t('packagesKicker', 'es'), /09 — PAGOS/)
+  assert.match(t('packagesHeading', 'es'), /pagos/i)
+  assert.doesNotMatch(t('packagesHeading', 'es'), /colegiatura/i)
+  assert.doesNotMatch(t('packagesDesc', 'es'), /colegiatura/i)
+
+  // Verify platform-main sets viewTitle to PAGOS
+  assert.match(platformMainSource, /viewTitle = 'PAGOS'/)
+
+  // Verify platform page renders Pagos link and cards
+  assert.match(platformPageSource, /data-platform-view="packages"/)
+  assert.doesNotMatch(platformPageSource, /Pago de colegiatura/i)
+})
+
+test('interactive 3D passport book component provides booklet cover, 3D spread, MRZ, and stamps', async () => {
+  const { renderPassportBook } = await import('../src/components/passportBook.js')
+  const { renderPlatform } = await import('../src/pages/platform.js')
+
+  const student = {
+    id: 'student-uuid-42',
+    name: 'Elena Rostova',
+    language: 'English',
+    level: 'B2',
+    levelName: 'Vantage',
+    lessonsCompleted: 8,
+    totalLessons: 24,
+    progress: 33,
+    goal: 'Academic research & lectures',
+    currentModule: 'Advanced Rhetoric',
+    nextStep: 'Defend thesis proposal'
+  }
+
+  const bookHtml = renderPassportBook(student, { challenges: [1, 2], submissions: [1], classes: [1] }, 'es')
+
+  // Booklet cover verification
+  assert.match(bookHtml, /class="passport-book-container"/)
+  assert.match(bookHtml, /id="passport-book-interactive"/)
+  assert.match(bookHtml, /class="passport-book-closed"/)
+  assert.match(bookHtml, /id="passport-cover"/)
+  assert.match(bookHtml, /class="passport-book-spine"/)
+  assert.match(bookHtml, /class="passport-gold-border"/)
+  assert.match(bookHtml, /class="passport-gold-emblem"/)
+  assert.match(bookHtml, /DISCE · VIVE · LOQUERE/)
+  assert.match(bookHtml, /passport-tap-hint/)
+
+  // Open spread verification
+  assert.match(bookHtml, /class="passport-book-open"/)
+  assert.match(bookHtml, /id="passport-spread"/)
+  assert.match(bookHtml, /id="passport-close-trigger"/)
+  assert.match(bookHtml, /data-passport-target-spread="1"/)
+  assert.match(bookHtml, /data-passport-target-spread="2"/)
+  assert.match(bookHtml, /class="passport-page passport-page-left"/)
+  assert.match(bookHtml, /class="passport-page passport-page-right"/)
+
+  // Official Identity Page & MRZ
+  assert.match(bookHtml, /REPÚBLICA DE VERA ORBIS/)
+  assert.match(bookHtml, /passport-mrz-zone/)
+  assert.match(bookHtml, /P<VO/)
+
+  // Visas & Rubber Stamps
+  assert.match(bookHtml, /stamp-aprende/)
+  assert.match(bookHtml, /stamp-vive/)
+  assert.match(bookHtml, /stamp-habla/)
+  assert.match(bookHtml, /stamp-cefr/)
+
+  // Integrated in platform page
+  const fullPageHtml = renderPlatform(student)
+  assert.match(fullPageHtml, /passport-book-interactive/)
+  assert.match(fullPageHtml, /passport-cover/)
+})
+
+test('top header redesign provides responsive two-tier layout with utility topbar and nav dock', () => {
+  const platformPageSource = readFileSync(
+    new URL('../src/pages/platform.js', import.meta.url),
+    'utf8'
+  )
+  const platformCss = readFileSync(
+    new URL('../src/platform.css', import.meta.url),
+    'utf8'
+  )
+
+  // Two-tier HTML structure
+  assert.match(platformPageSource, /class="platform-navbar platform-header-container"/)
+  assert.match(platformPageSource, /class="platform-topbar"/)
+  assert.match(platformPageSource, /class="student-profile-actions"/)
+  assert.match(platformPageSource, /class="platform-nav-dock-wrapper"/)
+  assert.match(platformPageSource, /class="platform-nav platform-nav-dock"/)
+
+  // CSS Styling rules exist
+  assert.match(platformCss, /\.platform-header-container/)
+  assert.match(platformCss, /\.platform-topbar/)
+  assert.match(platformCss, /\.platform-nav-dock-wrapper/)
+  assert.match(platformCss, /\.platform-nav-dock/)
+  assert.match(platformCss, /\.passport-book-closed/)
+  assert.match(platformCss, /\.passport-book-open/)
+  assert.match(platformCss, /\.passport-rubber-stamp/)
+  assert.match(platformCss, /@media\s*\(max-width:\s*900px\)/)
+  assert.match(platformCss, /@media\s*\(prefers-reduced-motion:\s*reduce\)/)
 })

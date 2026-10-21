@@ -192,7 +192,7 @@ export function setupInboxHandlers(supabase, student, onRefresh) {
       btn.textContent = 'Updating...'
 
       try {
-        const { error } = await supabase
+        let { error } = await supabase
           .from('inbox_messages')
           .update({
             is_read: true,
@@ -200,6 +200,13 @@ export function setupInboxHandlers(supabase, student, onRefresh) {
           })
           .eq('id', msgId)
           .eq('recipient_id', student.id)
+
+        if (error && typeof supabase.rpc === 'function') {
+          const rpcRes = await supabase.rpc('mark_inbox_message_as_read', { p_message_id: msgId })
+          if (!rpcRes.error) {
+            error = null
+          }
+        }
 
         if (!error) {
           const card = document.querySelector(`#inbox-msg-${msgId}`)
@@ -268,7 +275,10 @@ export function setupInboxHandlers(supabase, student, onRefresh) {
 
         if (error) {
           if (statusEl) {
-            statusEl.textContent = error.message || 'Could not send message.'
+            const isSchemaMissing = error.code === 'PGRST205' || error.message?.includes('schema cache') || error.message?.includes('inbox_messages')
+            statusEl.textContent = isSchemaMissing
+              ? (uiLang === 'es' ? 'La tabla de mensajería aún no está activa en Supabase. Aplica la migración 0010_inbox_messaging.sql en el SQL Editor.' : 'The inbox_messages table is not active in Supabase yet. Please apply migration 0010_inbox_messaging.sql.')
+              : (error.message || 'Could not send message.')
             statusEl.className = 'inbox-form-status is-error'
           }
         } else {

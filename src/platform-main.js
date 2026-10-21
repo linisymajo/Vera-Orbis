@@ -8,6 +8,7 @@ import {
 import { supabase } from './lib/supabase.js'
 import { setupExerciseForms } from './components/exercises.js'
 import { setupInboxHandlers } from './components/inbox.js'
+import { setupPassportBook } from './components/passportBook.js'
 import { normalizeInterfaceLanguage, t } from './lib/i18n.js'
 
 let currentStudent = null
@@ -1653,7 +1654,7 @@ backButton.style.right =
       break
 
     case 'packages':
-      viewTitle = 'PACKAGES & PAYMENTS'
+      viewTitle = 'PAGOS'
       break
 
     case 'culture':
@@ -2396,6 +2397,8 @@ function initializeDynamicPlatform(root = document) {
   setupCardMovement(root)
 
   setupMaterialButtons(root)
+
+  setupPassportBook(root)
 
 }
 

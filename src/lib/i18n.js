@@ -83,7 +83,7 @@ const dictionaries = {
     progress: 'Progreso',
     exercises: 'Ejercicios',
     calendar: 'Calendario',
-    packages: 'Paquetes',
+    packages: 'Pagos',
     culture: 'Cultura',
     inbox: 'Mensajes',
     reports: 'Reporte',
@@ -198,7 +198,7 @@ const dictionaries = {
     packageOf: 'Paquete de',
     classes: 'clases',
     completed: 'completadas',
-    paymentHistoryTitle: 'Historial de pagos y colegiaturas',
+    paymentHistoryTitle: 'Historial de pagos',
     noPayments: 'No hay registros de pago disponibles.',
     paymentReceipt: 'Comprobante de pago',
 
@@ -235,9 +235,9 @@ const dictionaries = {
     noPackagesHint: 'Tu profesora activará tu paquete de clases aquí.',
     classesLeft: 'clases restantes',
     remaining: 'restantes',
-    paymentsTitle: 'Historial de pagos y colegiaturas',
+    paymentsTitle: 'Historial de pagos',
     noPaymentsTitle: 'No hay registros de pago disponibles.',
-    noPaymentsHint: 'Los comprobantes de pago de tu colegiatura aparecerán aquí.',
+    noPaymentsHint: 'Los comprobantes de pago de tus clases aparecerán aquí.',
     dateHeader: 'Fecha',
     amountHeader: 'Monto',
     statusHeader: 'Estado',
@@ -275,10 +275,10 @@ const dictionaries = {
     calendarDesc: 'Consulta tus próximas sesiones en vivo, horario, modalidad e historial de asistencia.',
 
     // Packages
-    packagesKicker: '09 — PAQUETES Y PAGOS',
-    packagesHeading: 'Tus paquetes de clase.',
+    packagesKicker: '09 — PAGOS',
+    packagesHeading: 'Tus pagos y clases.',
     packagesHeadingSpan: 'Controla tus sesiones disponibles.',
-    packagesDesc: 'Revisa tus paquetes activos, clases restantes y el historial de pagos de tu colegiatura.',
+    packagesDesc: 'Revisa tus pagos, paquetes activos y el historial de transacciones.',
 
     // Culture
     cultureKicker: '10 — INMERSIÓN CULTURAL',
@@ -340,7 +340,7 @@ const dictionaries = {
     progress: 'Progress',
     exercises: 'Exercises',
     calendar: 'Calendar',
-    packages: 'Packages',
+    packages: 'Payments',
     culture: 'Culture',
     inbox: 'Inbox',
     reports: 'Reports',
@@ -532,7 +532,7 @@ const dictionaries = {
     calendarDesc: 'Track your live classes, upcoming session schedules, modality, and past attendance record.',
 
     // Packages
-    packagesKicker: '09 — PACKAGES & PAYMENTS',
+    packagesKicker: '09 — PAYMENTS',
     packagesHeading: 'Your learning packages.',
     packagesHeadingSpan: 'Track your available sessions.',
     packagesDesc: 'Review your active lesson packages, remaining sessions, and complete payment record.',
@@ -597,7 +597,7 @@ const dictionaries = {
     progress: 'Progrès',
     exercises: 'Exercices',
     calendar: 'Calendrier',
-    packages: 'Forfaits',
+    packages: 'Paiements',
     culture: 'Culture',
     inbox: 'Messagerie',
     reports: 'Bilan',
@@ -789,7 +789,7 @@ const dictionaries = {
     calendarDesc: 'Consultez vos prochaines séances en direct, horaires, modalités et historique d’assiduité.',
 
     // Packages
-    packagesKicker: '09 — FORFAITS ET PAIEMENTS',
+    packagesKicker: '09 — PAIEMENTS',
     packagesHeading: 'Vos forfaits de cours.',
     packagesHeadingSpan: 'Suivez vos séances disponibles.',
     packagesDesc: 'Consultez vos forfaits actifs, vos cours restants et l’historique complet de vos règlements.',
@@ -854,7 +854,7 @@ const dictionaries = {
     progress: '学习进度',
     exercises: '课后练习',
     calendar: '课表日程',
-    packages: '课时包',
+    packages: '支付',
     culture: '文化沉浸',
     inbox: '收件箱',
     reports: '学情报告',
@@ -935,10 +935,10 @@ const dictionaries = {
     calendarDesc: '掌握即将开始的直播互动课时、上课形式及往期考勤记录。',
 
     // Packages
-    packagesKicker: '09 — 课时包与支付',
-    packagesHeading: '您的课时账户。',
-    packagesHeadingSpan: '掌握剩余课时明细。',
-    packagesDesc: '查阅当前生效的课时包、可用节数及完整学费流水记录。',
+    packagesKicker: '09 — 支付',
+    packagesHeading: '您的支付与课时。',
+    packagesHeadingSpan: '掌握课时账户与支付明细。',
+    packagesDesc: '查阅当前生效的课时安排、可用节数及完整支付记录。',
 
     // Culture
     cultureKicker: '10 — 文化深度沉浸',

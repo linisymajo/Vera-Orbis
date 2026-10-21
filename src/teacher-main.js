@@ -2095,7 +2095,10 @@ function renderStudentProfile(
 
         if (error) {
           if (statusEl) {
-            statusEl.textContent = error.message || 'Could not send message.'
+            const isSchemaMissing = error.code === 'PGRST205' || error.message?.includes('schema cache') || error.message?.includes('inbox_messages')
+            statusEl.textContent = isSchemaMissing
+              ? 'La tabla inbox_messages aún no está activa en Supabase. Aplica la migración 0010_inbox_messaging.sql en SQL Editor.'
+              : (error.message || 'Could not send message.')
             statusEl.className = 'teacher-form-status is-error'
           }
           return

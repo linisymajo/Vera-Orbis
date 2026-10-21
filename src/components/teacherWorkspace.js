@@ -1069,8 +1069,8 @@ async function loadInbox(panel) {
 
   if (studentsRes.error || messagesRes.error) {
     const err = messagesRes.error || studentsRes.error;
-    if (err?.code === '42P01' || err?.message?.includes('does not exist')) {
-      renderMigrationState(panel, 'Inbox messaging not ready', 'The inbox_messages table has not been created yet in Supabase.');
+    if (err?.code === '42P01' || err?.code === 'PGRST205' || err?.message?.includes('does not exist') || err?.message?.includes('schema cache')) {
+      renderMigrationState(panel, 'Inbox messaging not ready', 'The inbox_messages table has not been created yet in Supabase. Please execute migration 0010_inbox_messaging.sql in the Supabase SQL Editor.');
       return;
     }
     renderError(panel, 'Could not load messages. Check your connection or permissions.');
