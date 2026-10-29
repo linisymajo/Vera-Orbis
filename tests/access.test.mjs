@@ -1478,3 +1478,57 @@ test('top header redesign provides responsive two-tier layout with utility topba
   assert.match(platformCss, /@media\s*\(max-width:\s*900px\)/)
   assert.match(platformCss, /@media\s*\(prefers-reduced-motion:\s*reduce\)/)
 })
+
+test('public landing page reintegrates Mandarin Chinese across navbar, hero, B2C and B2B with honest pedagogy', () => {
+  const mainJs = readFileSync('src/main.js', 'utf8')
+  const styleCss = readFileSync('src/style.css', 'utf8')
+
+  // 1. Official Logo and Identity
+  assert.match(mainJs, /Logo%20Vera%20Orbis%20recoloreado.png/)
+  assert.match(mainJs, /WE SPEAK THE WORLD/i)
+
+  // 2. Navbar & Mobile Menu: Inglés, Francés, Mandarín
+  assert.match(mainJs, /id="languages-dropdown-wrap"/)
+  assert.match(mainJs, /href="#ingles"[^>]*>[sS]*?Inglés/i)
+  assert.match(mainJs, /href="#frances"[^>]*>[sS]*?Francés/i)
+  assert.match(mainJs, /href="#mandarin"[^>]*>[sS]*?Mandarín/i)
+  assert.match(mainJs, /class="mobile-languages-box"/)
+  assert.match(mainJs, /class="mobile-lang-chip">Inglés<\/a>/)
+  assert.match(mainJs, /class="mobile-lang-chip">Francés<\/a>/)
+  assert.match(mainJs, /class="mobile-lang-chip">Mandarín<\/a>/)
+
+  // 3. Hero Section Subtitle: Exact requested copy
+  const expectedHeroSub = 'Acompañamiento personalizado en inglés, francés y mandarín para personas y equipos que necesitan comunicarse con soltura, rigor y contexto cultural real.'
+  assert.ok(mainJs.includes(expectedHeroSub), 'Hero subtitle must include the exact requested three-language phrase')
+
+  // 4. B2C Showcase: Mandarin Card
+  assert.match(mainJs, /id="mandarin"/)
+  assert.match(mainJs, /Mandarín: Comunicación, Cultura &amp; Negocios/)
+  assert.match(mainJs, /Pensamiento directo y soltura comunicativa desde las primeras sesiones/)
+  assert.match(mainJs, /Comprensión fonética \(pinyin\)/)
+  assert.match(mainJs, /HSK 1 A 6/)
+  assert.match(mainJs, /preparación estratégica para exámenes oficiales/i)
+
+  // 5. B2B Corporate Section: Mandarín Comercial & Protocolo de Negocios
+  assert.match(mainJs, /class="format-card format-mandarin-b2b"/)
+  assert.match(mainJs, /Mandarín Comercial &amp; Protocolo/)
+  assert.match(mainJs, /COMERCIO EXTERIOR &amp; ASIA/)
+
+  // 6. CSS Styles for 3-grid and Mandarin
+  assert.match(styleCss, /.languages-three-grid/)
+  assert.match(styleCss, /.mandarin-theme/)
+  assert.match(styleCss, /.format-mandarin-b2b/)
+  assert.match(styleCss, /.nav-dropdown-wrap/)
+  assert.match(styleCss, /.mobile-languages-box/)
+
+  // 7. STRICT: Zero emojis
+  const emojiRegex = /[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}]/u
+  assert.ok(!emojiRegex.test(mainJs), 'Landing page main.js must contain zero emojis')
+
+  // 8. Honest Certification Language: No false promises
+  assert.doesNotMatch(mainJs, /te certificamos/i)
+  assert.doesNotMatch(mainJs, /obtén tu certificado con nosotros/i)
+  assert.doesNotMatch(mainJs, /programas certificados/i)
+  assert.match(mainJs, /Transparencia pedagógica/i)
+})
+

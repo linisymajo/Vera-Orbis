@@ -6333,6 +6333,11 @@ body.modal-open {
   animation: passportSpreadOpen 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+.passport-book-open[hidden],
+.passport-book-closed[hidden] {
+  display: none !important;
+}
+
 @keyframes passportSpreadOpen {
   from {
     opacity: 0;

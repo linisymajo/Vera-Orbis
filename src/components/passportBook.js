@@ -480,10 +480,12 @@ export function setupPassportBook(root = document) {
     container.classList.add('is-open')
     if (cover) {
       cover.hidden = true
+      cover.style.display = 'none'
       cover.setAttribute('aria-expanded', 'true')
     }
     if (spread) {
       spread.hidden = false
+      spread.style.display = 'block'
       spread.setAttribute('aria-hidden', 'false')
     }
     updateSpreadView(1)
@@ -498,10 +500,12 @@ export function setupPassportBook(root = document) {
     container.classList.remove('is-open')
     if (spread) {
       spread.hidden = true
+      spread.style.display = 'none'
       spread.setAttribute('aria-hidden', 'true')
     }
     if (cover) {
       cover.hidden = false
+      cover.style.display = ''
       cover.setAttribute('aria-expanded', 'false')
       cover.focus()
     }
@@ -510,12 +514,14 @@ export function setupPassportBook(root = document) {
   // Cover click / keydown to open
   cover?.addEventListener('click', (e) => {
     e.preventDefault()
+    e.stopPropagation()
     openPassport()
   })
 
   cover?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
+      e.stopPropagation()
       openPassport()
     }
   })
@@ -523,6 +529,7 @@ export function setupPassportBook(root = document) {
   // Close button
   closeBtn?.addEventListener('click', (e) => {
     e.preventDefault()
+    e.stopPropagation()
     closePassport()
   })
 
