@@ -4,12 +4,23 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "node scripts/dev-staging.mjs",
+    "dev:staging": "node scripts/dev-staging.mjs",
+    "build": "node scripts/build-production.mjs",
+    "build:staging": "node scripts/build-staging.mjs",
     "preview": "vite preview",
-    "test": "node --test tests/access.test.mjs"
+    "test": "node --test --test-concurrency=2 tests/*.test.mjs",
+    "test:access": "node --test tests/access.test.mjs",
+    "test:web": "node --test tests/web-experience.test.mjs",
+    "test:database": "node --test --test-concurrency=2 tests/exercise-database.test.mjs tests/enrollment.test.mjs tests/academic-ai.test.mjs tests/material-storage.test.mjs tests/material-authorization.test.mjs tests/academic-record-scope.test.mjs tests/inbox-authorization.test.mjs tests/exercise-attachments.test.mjs tests/learning-plans.test.mjs tests/challenge-notifications.test.mjs tests/finals.test.mjs",
+    "test:browser": "playwright test",
+    "staging:manifest": "node scripts/staging-manifest.mjs",
+    "staging:preflight": "node scripts/staging-preflight.mjs"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.15",
+    "@playwright/test": "^1.65.0",
+    "pg": "^8.23.1",
     "vite": "^8.3.0"
   },
   "dependencies": {

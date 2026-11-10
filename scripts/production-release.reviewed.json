@@ -1,0 +1,122 @@
+{
+  "format": "vera-production-release-v1",
+  "target": "iopgzmvaqobigjwibual",
+  "entries": [
+    {
+      "order": 1,
+      "file": "supabase/production/release_tracking.sql",
+      "bytes": 1153,
+      "sha256": "afae929e8222e6766d8f0cd81892963ca57cc955db586bd5062f05baec9e6dcc",
+      "migration_version": null
+    },
+    {
+      "order": 2,
+      "file": "supabase/production/academic_compatibility.sql",
+      "bytes": 1101,
+      "sha256": "701f6067b013db40dbd56462c09046178b2d142ec0885560755679cc71a4ddaa",
+      "migration_version": null
+    },
+    {
+      "order": 3,
+      "file": "supabase/migrations/0012_exercise_workflow.sql",
+      "bytes": 16343,
+      "sha256": "2948fda844f726bc612c651762e8ed7e9b4e3be56513624b8a2db3181bcc7f10",
+      "migration_version": "0012"
+    },
+    {
+      "order": 4,
+      "file": "supabase/migrations/0013_hybrid_enrollment.sql",
+      "bytes": 19359,
+      "sha256": "88b37326445127eee2d5d11954390d000122df4a799e5c0b8606f54efa9a21fc",
+      "migration_version": "0013"
+    },
+    {
+      "order": 5,
+      "file": "supabase/migrations/0014_ai_drafts.sql",
+      "bytes": 20116,
+      "sha256": "9c134d44d7bb3a405552e236ee0a20a1303c80e4c4c50f0a385255e06f582e62",
+      "migration_version": "0014"
+    },
+    {
+      "order": 6,
+      "file": "supabase/migrations/0015_material_owner_boundary.sql",
+      "bytes": 5627,
+      "sha256": "d3979ac3d9219d700523ba824df4e3f2dee0f8eaf6a2e8567c8571e85866f787",
+      "migration_version": "0015"
+    },
+    {
+      "order": 7,
+      "file": "supabase/migrations/0016_academic_teacher_scope.sql",
+      "bytes": 7690,
+      "sha256": "ae8117c3fb8497db50c8781853dc56ddf2407978a0d1771671dd14124811f5a6",
+      "migration_version": "0016"
+    },
+    {
+      "order": 8,
+      "file": "supabase/migrations/0017_inbox_authorization.sql",
+      "bytes": 5112,
+      "sha256": "22103240cc8f7bb09ae373db1e8e13a7d3a7785083e639c57977edf41ff01692",
+      "migration_version": "0017"
+    },
+    {
+      "order": 9,
+      "file": "supabase/migrations/0018_student_attachments.sql",
+      "bytes": 22251,
+      "sha256": "04bcd4c8970d1f02f6278d2f8391a9d45ec1bc95e62cede595f3de2da7cb185b",
+      "migration_version": "0018"
+    },
+    {
+      "order": 10,
+      "file": "supabase/migrations/0019_learning_plans.sql",
+      "bytes": 22697,
+      "sha256": "a89cc573f9f34c8d8cb1fc9e6265b264cd50a9559f9e20a3fdde73cd1a148024",
+      "migration_version": "0019"
+    },
+    {
+      "order": 11,
+      "file": "supabase/migrations/0020_challenges_notifications.sql",
+      "bytes": 23250,
+      "sha256": "806949a4b1e14c96d992ca33f83eab6ca4d87667b976367af72df8586959b61d",
+      "migration_version": "0020"
+    },
+    {
+      "order": 12,
+      "file": "supabase/migrations/0021_final_assessments.sql",
+      "bytes": 16367,
+      "sha256": "a57d743088ed1545ade4fef89ed9c917bbcfcbfb4dc303552b894d6e6f6a91b7",
+      "migration_version": "0021"
+    },
+    {
+      "order": 13,
+      "file": "supabase/migrations/0022_exercise_experience.sql",
+      "bytes": 42586,
+      "sha256": "65419f21e4b8ce92948611dac31a323e96bfa009a99d2b834148e768e0d062cb",
+      "migration_version": "0022"
+    },
+    {
+      "order": 14,
+      "file": "supabase/migrations/0023_legacy_exercise_feedback.sql",
+      "bytes": 5616,
+      "sha256": "fee211a3060aa20422704579d445ded136a9b4e273f12d968d9113b78e02f02b",
+      "migration_version": "0023"
+    },
+    {
+      "order": 15,
+      "file": "supabase/production/client_privilege_hardening.sql",
+      "bytes": 1304,
+      "sha256": "f4514b51383db4d2fbb13ab5f5cfdae039bbcdd96de195b24b179d075a351091",
+      "migration_version": null
+    }
+  ],
+  "plan_sha256": "5e84b4268969a225ace5dbec7a6a7b4db2ed61bf335ee003fc23659cb387ec70",
+  "approval_required": true,
+  "user_approved": false,
+  "production_writes_allowed": false,
+  "excluded": [
+    "staging initialization and accounts",
+    "legacy migrations 0001-0010",
+    "0011 (existing null MIME allowlist already permits Office; SQL would preserve null)",
+    "0024 revenue engine",
+    "AI activation and SMTP changes"
+  ]
+}

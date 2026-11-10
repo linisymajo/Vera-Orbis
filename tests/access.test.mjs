@@ -76,7 +76,8 @@ test('teacher material inserts include the authenticated owner and allow global 
   assert.match(source, /teacher_id: user\.id/)
   assert.match(source, /student_id: data\.student_id\.trim\(\) \|\| null/)
   assert.match(source, /audience: data\.student_id\.trim\(\) \? 'student' : 'all'/)
-  assert.match(source, /file_path: filePath/)
+  assert.match(source, /file_path: path/)
+  assert.match(source, /uploadMaterialFile\(supabase/)
   assert.doesNotMatch(source, /file_name: file\.name/)
 })
 
@@ -111,7 +112,7 @@ test('exercise studio keeps answer keys private and supports teacher ownership',
     'utf8'
   )
   const source = readFileSync(
-    new URL('../src/components/teacherWorkspace.js', import.meta.url),
+    new URL('../src/components/exerciseStudio.js', import.meta.url),
     'utf8'
   )
 
@@ -126,20 +127,21 @@ test('exercise studio keeps answer keys private and supports teacher ownership',
   assert.doesNotMatch(sql, /create policy "students manage own exercise attempts"/)
   assert.match(source, /id="teacher-exercise-form"/)
   assert.match(source, /id="teacher-exercise-assignment-form"/)
-  assert.match(source, /exercise_id: values\.exercise_id\.trim\(\)/)
+  assert.match(source, /publishExercise\(client/)
 })
 
 test('teacher workspace dispatcher loads exercise-studio without ReferenceError', async () => {
   const { loadTeacherModule } = await import('../src/components/teacherWorkspace.js')
-  const mockPanel = { innerHTML: '' }
+  const modulePanel = { innerHTML: '' }
+  const mockPanel = { innerHTML: '', querySelector: () => modulePanel }
   globalThis.document = {
     querySelector: (sel) => (sel === '#teacher-workspace-panel' ? mockPanel : null)
   }
   await assert.doesNotReject(async () => {
     await loadTeacherModule('exercise-studio')
   })
-  assert.ok(mockPanel.innerHTML.length > 0)
-  assert.doesNotMatch(mockPanel.innerHTML, /ReferenceError/)
+  assert.ok(modulePanel.innerHTML.length > 0)
+  assert.doesNotMatch(modulePanel.innerHTML, /ReferenceError/)
 })
 
 test('academic module queries student plans from profiles instead of unmigrated work_plans table', () => {
@@ -373,9 +375,15 @@ test('registration and onboarding do not hardcode total_lessons to 12', () => {
     'utf8'
   )
 
-  assert.match(regSource, /total_lessons:\s*null/)
-  assert.match(onbSource, /total_lessons:\s*null/)
-  assert.match(platSource, /total_lessons:\s*null/)
+  assert.doesNotMatch(regSource, /total_lessons:\s*12/)
+  assert.doesNotMatch(onbSource, /total_lessons:\s*12/)
+  assert.doesNotMatch(regSource, /from\('profiles'\)\.upsert/)
+  assert.match(onbSource, /initializeEnrollmentProfile\(supabase\)/)
+  const enrollmentSql = readFileSync(new URL('../supabase/migrations/0013_hybrid_enrollment.sql', import.meta.url), 'utf8')
+  const initializer = enrollmentSql.split('function public.initialize_student_profile()')[1].split('function public.get_my_enrollment()')[0]
+  assert.match(initializer, /on conflict \(id\) do nothing/)
+  assert.doesNotMatch(initializer, /total_lessons|\b12\b/)
+  assert.match(platSource, /initializeEnrollmentProfile\(supabase\)/)
 })
 
 test('student material opening maintains valid method chaining and popup-blocker defense', () => {
@@ -643,7 +651,7 @@ test('onboarding form, questions, validation, errors, and completion screen are 
   assert.match(onboardingSource, /Tus respuestas han sido guardadas\./)
   assert.match(onboardingSource, /Tu profesor revisará tus metas/)
   assert.match(onboardingSource, /Elige el idioma de tu plataforma/)
-  assert.match(onboardingSource, /Ingresar a mi plataforma/)
+  assert.match(onboardingSource, /Revisar mi acceso/)
 })
 
 test('action buttons strictly adhere to the student target language across English, French, and Mandarin', async () => {
@@ -1436,7 +1444,8 @@ test('interactive 3D passport book component provides booklet cover, 3D spread, 
   // Official Identity Page & MRZ
   assert.match(bookHtml, /REPÚBLICA DE VERA ORBIS/)
   assert.match(bookHtml, /passport-mrz-zone/)
-  assert.match(bookHtml, /P<VO/)
+  assert.match(bookHtml, /P&lt;VO/)
+  assert.doesNotMatch(bookHtml, /P<VO/, 'Passport machine-readable angle brackets must stay escaped in HTML')
 
   // Visas & Rubber Stamps
   assert.match(bookHtml, /stamp-aprende/)

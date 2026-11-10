@@ -1,0 +1,55 @@
+<!doctype html><html lang="en"><meta charset="UTF-8"><title>Vera Orbis isolated exercise test</title><main id="test-app"></main><script type="module">
+import { mountExerciseStudio } from '/src/components/exerciseStudio.js'
+import { renderExercises,setupExerciseForms } from '/src/components/exercises.js'
+import { mountLearningPlans } from '/src/components/learningPlans.js'
+import { mountFinalsStudio,renderFinals,setupFinals } from '/src/components/finals.js'
+import { mountChallengeManager } from '/src/components/challengeManager.js'
+import { renderChallenges } from '/src/components/challenges.js'
+import { listStudentChallenges,submitAcademicChallenge } from '/src/lib/academicChallenges.js'
+import { mountNotifications } from '/src/components/notifications.js'
+import { mountMaterialsStudio } from '/src/components/materialsStudio.js'
+import '/src/academic.css'
+import '/src/teacher.css'
+import '/src/platform.css'
+const query=new URLSearchParams(location.search),mode=query.get('mode')||query.get('view')||''
+const actor=query.get('actor')||(mode.startsWith('student-')||mode==='notifications'?'student':'teacher')
+const identities={teacher:'10000000-0000-4000-8000-000000000001',teacher2:'10000000-0000-4000-8000-000000000002',student:'20000000-0000-4000-8000-000000000001',student2:'20000000-0000-4000-8000-000000000002'}
+async function send(input){try{return await(await fetch('/__academic_test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({actor,...input})})).json()}catch(error){return{error:{message:error.message}}}}
+class Query{
+  constructor(table){this.table=table;this.filters=[];this.orders=[];this.mode='select'}
+  select(columns,options={}){this.head=Boolean(options.head);return this}
+  order(key,{ascending=true}={}){this.orders.push([key,ascending]);return this}
+  limit(number){this.rowLimit=number;return this}
+  eq(key,value){this.filters.push([key,value]);return this}
+  in(key,values){this.filters.push([key,values,'in']);return this}
+  is(key,value){this.filters.push([key,value,'is']);return this}
+  insert(payload){this.mode='insert';this.payload=payload;return this}
+  update(payload){this.mode='update';this.payload=payload;return this}
+  single(){this.single=true;return this}
+  maybeSingle(){this.maybeSingle=true;return this}
+  then(resolve,reject){return send({table:this.table,filters:this.filters,orders:this.orders,limit:this.rowLimit,head:this.head,mode:this.mode,payload:this.payload,single:this.single===true,maybeSingle:this.maybeSingle===true}).then(resolve,reject)}
+}
+const client={auth:{getUser:async()=>({data:{user:{id:identities[actor]}}})},from:table=>new Query(table),rpc:(name,params)=>send({rpc:name,params}),storage:{from:bucket=>({
+  async upload(path,file,options){const bytes=new Uint8Array(await file.arrayBuffer());let raw='';for(const byte of bytes)raw+=String.fromCharCode(byte);return send({storage:'upload',bucket,path,base64:btoa(raw),contentType:options.contentType})},
+  createSignedUrl:path=>send({storage:'signedUrl',bucket,path}),
+  async download(path){const result=await send({storage:'download',bucket,path});if(result.error)return result;const bytes=Uint8Array.from(atob(result.data.base64),c=>c.charCodeAt(0));return{data:new Blob([bytes],{type:result.data.contentType})}}
+})}}
+window.testClient=client
+const app=document.querySelector('#test-app')
+if(mode==='teacher-materials')await mountMaterialsStudio(app,client)
+else if(mode==='teacher-plans'||mode==='student-plans')await mountLearningPlans(app,client,{studentView:mode==='student-plans'})
+else if(mode==='teacher-finals')await mountFinalsStudio(app,client)
+else if(mode==='student-finals'){const result=await client.from('student_finals').select('*');app.innerHTML=renderFinals(result.data||[]);setupFinals(client,app)}
+else if(mode==='teacher-challenges')await mountChallengeManager(app,client)
+else if(mode==='student-challenges'){
+  const result=await listStudentChallenges(client);app.innerHTML=renderChallenges(result.challenges,result.submissions)
+  window.voPlatform={submitChallenge:async id=>{
+    const form=document.getElementById('challenge-form-'+id),button=form.querySelector('button');button.disabled=true
+    try{form.dataset.requestId ||= crypto.randomUUID();await submitAcademicChallenge(client,{challengeId:id,response:document.getElementById('response-'+id).value,requestId:form.dataset.requestId});location.reload()}
+    catch(error){document.getElementById('challenge-error-'+id).textContent=error.message;button.disabled=false}
+  }}
+}
+else if(mode==='notifications')await mountNotifications(app,client,{onNavigate:(view,id)=>{window.testNavigation={view,id}}})
+else if(actor.startsWith('student')){const result=await client.from('student_exercises').select('*');app.innerHTML=renderExercises(result.data||[]);setupExerciseForms(client)}else await mountExerciseStudio(app,client)
+window.testReady=true
+</script></html>

@@ -1,3 +1,4 @@
+import { sendAcademicMessage } from '../lib/messaging.js'
 import { escapeHtml } from '../lib/auth.js'
 import { normalizeInterfaceLanguage, t } from '../lib/i18n.js'
 
@@ -13,7 +14,7 @@ export function renderInbox(messages = [], student = {}) {
       : (student?.interfaceLanguage || student?.interface_language || 'es')
   )
 
-  const unreadCount = messages.filter((m) => !m.is_read).length
+  const unreadCount = messages.filter((m) => !m.is_read && m.sender_role !== 'student').length
 
   return `
     <section class="inbox-section" id="inbox-view-container">
@@ -107,7 +108,7 @@ export function renderInbox(messages = [], student = {}) {
                       minute: '2-digit'
                     })
                   : ''
-                const isUnread = !msg.is_read
+                const isUnread = !msg.is_read && msg.sender_role !== 'student'
                 const formattedBody = String(msg.body || '').replace(/\n/g, '<br>')
 
                 return `
@@ -192,21 +193,8 @@ export function setupInboxHandlers(supabase, student, onRefresh) {
       btn.textContent = 'Updating...'
 
       try {
-        let { error } = await supabase
-          .from('inbox_messages')
-          .update({
-            is_read: true,
-            read_at: new Date().toISOString()
-          })
-          .eq('id', msgId)
-          .eq('recipient_id', student.id)
-
-        if (error && typeof supabase.rpc === 'function') {
-          const rpcRes = await supabase.rpc('mark_inbox_message_as_read', { p_message_id: msgId })
-          if (!rpcRes.error) {
-            error = null
-          }
-        }
+        const result = await supabase.rpc('mark_inbox_message_as_read', { p_message_id: msgId })
+        const error = result.error || (result.data === true ? null : { message: 'Read status was not confirmed.' })
 
         if (!error) {
           const card = document.querySelector(`#inbox-msg-${msgId}`)
@@ -263,14 +251,14 @@ export function setupInboxHandlers(supabase, student, onRefresh) {
 
       try {
         const user = (await supabase.auth.getUser())?.data?.user
-        const { error } = await supabase.from('inbox_messages').insert({
-          sender_id: user?.id || student.id,
+        const { error } = await sendAcademicMessage(supabase, {
+          sender_id: user?.id,
           sender_name: student.name || 'Student',
           sender_role: 'student',
           recipient_id: student.id, // linked to student conversation
           subject: subject,
           body: body,
-          is_read: true // sender's own copy is considered read
+          is_read: false // The authorized teacher still needs to read this reply
         })
 
         if (error) {

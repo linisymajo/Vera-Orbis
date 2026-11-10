@@ -41,7 +41,15 @@ begin
 end $$;
 
 -- 2. Ensure RLS is active on storage.objects
-alter table storage.objects enable row level security;
+-- Managed Storage can grant policy management without granting table ownership.
+-- Skip an owner-only ALTER when RLS is already active; otherwise require ownership.
+do $storage_rls$
+begin
+  if not (select c.relrowsecurity from pg_catalog.pg_class c
+    where c.oid = 'storage.objects'::regclass) then
+    alter table storage.objects enable row level security;
+  end if;
+end $storage_rls$;
 
 -- 3. Clean up any previous, contradictory, or overly-restrictive materials policies
 drop policy if exists "Students can read assigned materials" on storage.objects;

@@ -1,0 +1,12 @@
+{
+  "format": "vera-orbis-additive-migration-v1",
+  "target": "duinvkphfnugoyvvlbbq",
+  "approval_required": true,
+  "entry": {
+    "version": "0022",
+    "name": "exercise_experience",
+    "file": "supabase/migrations/0022_exercise_experience.sql",
+    "bytes": 42586,
+    "sha256": "65419f21e4b8ce92948611dac31a323e96bfa009a99d2b834148e768e0d062cb"
+  }
+}

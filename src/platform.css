@@ -6980,3 +6980,864 @@ body.modal-open {
     transform: none !important;
   }
 }
+
+/* Communication activities: warm solid surfaces, clear controls and reduced motion. */
+.exercise-activity { background: #ffffff; color: #183b66; border-radius: 24px; border: 1px solid rgba(24, 59, 102, 0.14); box-shadow: 0 14px 36px rgba(24, 59, 102, 0.08); padding: 1.6rem; }
+.exercise-activity fieldset { border: 1px solid rgba(24, 59, 102, 0.16); background: #faf6ef; padding: 1.2rem; margin: 1rem 0; border-radius: 16px; }
+.exercise-activity legend { font-weight: 800; color: #183b66; padding: 0 0.4rem; }
+.exercise-activity textarea, .exercise-activity select { width: 100%; padding: .85rem; border: 1px solid rgba(24, 59, 102, 0.24); border-radius: 10px; background: #ffffff; color: #183b66; font: inherit; }
+.exercise-activity img { max-width: 100%; max-height: 24rem; object-fit: contain; border-radius: 12px; }
+.exercise-choice { display: flex; align-items: center; gap: .75rem; padding: .75rem 1rem; border-radius: 12px; background: #ffffff; border: 1px solid rgba(24, 59, 102, 0.16); cursor: pointer; font-weight: 600; }
+.exercise-blocks { display: flex; flex-wrap: wrap; gap: .55rem; margin: .8rem 0; }
+.exercise-blocks button { background: linear-gradient(135deg, #6c3bff, #4e24cc); color: #ffffff; border: 0; border-radius: 999px; padding: .6rem 1.05rem; font-weight: 700; cursor: pointer; }
+.exercise-activity progress { width: 100%; accent-color: #6c3bff; margin: 0.75rem 0; height: 10px; border-radius: 999px; }
+.exercise-activity :focus-visible { outline: 3px solid #ff6b35; outline-offset: 3px; }
+@media (prefers-reduced-motion: no-preference) { .exercise-choice { transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease; } .exercise-choice:hover { border-color: #6c3bff; transform: translateY(-2px); box-shadow: 0 8px 18px rgba(108, 59, 255, 0.12); } }
+
+/* =========================================================
+   STUDENT PRIORITY COMMAND STRIP & INTERACTIVE PRACTICE 3.0
+   ========================================================= */
+
+.vo-student-priority-deck {
+  max-width: 1280px;
+  margin: 0 auto 2.5rem;
+  padding: 0 24px;
+}
+
+.vo-student-command-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.15rem;
+}
+
+.vo-student-priority-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.65rem;
+  padding: 1.4rem;
+  border-radius: 1.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 16px 38px rgba(24, 59, 102, 0.14);
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease;
+}
+
+.vo-student-priority-card:hover,
+.vo-student-priority-card:focus-visible {
+  transform: translateY(-5px);
+  box-shadow: 0 24px 52px rgba(24, 59, 102, 0.2);
+}
+
+.vo-student-priority-card--teal {
+  background: linear-gradient(145deg, #0d7468 0%, #19a392 100%);
+}
+
+.vo-student-priority-card--indigo {
+  background: linear-gradient(145deg, #16345b 0%, #26538d 100%);
+}
+
+.vo-student-priority-card--violet {
+  background: linear-gradient(145deg, #451fb9 0%, #6c3bff 100%);
+}
+
+.vo-student-priority-card--coral {
+  background: linear-gradient(145deg, #b83d22 0%, #e85d35 100%);
+}
+
+.vo-student-priority-card--gold {
+  background: linear-gradient(145deg, #915a08 0%, #c98212 100%);
+}
+
+.vo-student-priority-card--terracotta {
+  background: linear-gradient(145deg, #7a2c37 0%, #ab424f 100%);
+}
+
+.vo-student-priority-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.vo-student-priority-kicker {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.84);
+}
+
+.vo-student-priority-badge {
+  padding: 0.24rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.vo-student-priority-card strong {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.vo-student-priority-card p {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.vo-student-priority-cta {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #fff9f0;
+  margin-top: 0.25rem;
+}
+
+.vo-exercise-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.vo-exercise-meta-badges {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.vo-exercise-choices-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.65rem;
+  margin-top: 0.5rem;
+}
+
+.vo-exercise-matching-grid {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.5rem;
+}
+
+.vo-matching-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(160px, 1.3fr);
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.6rem 0.85rem;
+  border-radius: 0.75rem;
+  background: #ffffff;
+  border: 1px solid rgba(24, 59, 102, 0.14);
+  font-weight: 700;
+}
+
+.vo-question-hint-flip {
+  margin-top: 0.75rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: 0.75rem;
+  background: rgba(108, 59, 255, 0.08);
+  border: 1px dashed rgba(108, 59, 255, 0.35);
+}
+
+.vo-question-hint-flip summary {
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: #4e24cc;
+}
+
+.vo-student-feedback-callout {
+  margin-top: 1.1rem;
+  padding: 1rem 1.2rem;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, #eefaf8 0%, #f5f0ff 100%);
+  border-left: 5px solid #0f8a7b;
+  color: #183b66;
+}
+
+@media (max-width: 980px) {
+  .vo-student-command-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .vo-student-command-grid,
+  .vo-matching-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* =========================================================
+   STUDENT HOMEPAGE COMPACT HERO & ABOVE-THE-FOLD PRIORITY
+   ========================================================= */
+
+.platform-welcome {
+  min-height: auto !important;
+  padding: 2.2rem 24px 1.5rem !important;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.platform-welcome h1,
+.platform-welcome h1 span,
+.platform-welcome .platform-intro,
+.platform-welcome .platform-label,
+.platform-welcome .welcome-orbit {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.platform-welcome h1 {
+  font-size: clamp(2.2rem, 4vw, 3.2rem) !important;
+  margin: 0.35rem 0 0.5rem !important;
+}
+
+.platform-welcome .welcome-orbit {
+  width: 160px !important;
+  height: 160px !important;
+}
+
+.platform-welcome .orbit-center {
+  width: 90px !important;
+  height: 90px !important;
+}
+
+/* =========================================================
+   STUDENT PLATFORM 3D INTERACTION RESTORATION & VISUAL POLISH
+   ========================================================= */
+
+/* 1. VISUAL DENSITY & EDITORIAL SPACING */
+.passport-section,
+.roadmap-section,
+.materials-section,
+.platform-learning-access,
+.vera-voice-access {
+  padding: 48px 0;
+  scroll-margin-top: 32px;
+}
+
+.roadmap-section.roadmap-section-compact {
+  padding: 6px 0 32px;
+}
+
+.platform-section-heading {
+  margin-bottom: 26px;
+}
+
+.platform-section-heading h2,
+.platform-section-heading h1 {
+  margin-bottom: 10px;
+}
+
+.platform-detail-section > .platform-section-heading {
+  margin-bottom: 26px;
+}
+
+.platform-internal-header {
+  padding: 20px 32px 0;
+}
+
+.platform-view-content {
+  padding: 18px 32px 64px;
+}
+
+.platform-floating-card-content {
+  padding: 76px 40px 44px;
+}
+
+.floating-back-button {
+  top: 22px;
+  left: 36px;
+  z-index: 25;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(255, 252, 247, 0.94);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(24, 36, 58, 0.12);
+  box-shadow: 0 6px 18px rgba(24, 36, 58, 0.08);
+}
+
+.class-materials-section {
+  padding: 16px 0 48px;
+}
+
+.next-step {
+  min-height: 320px;
+  margin: 44px 0;
+  padding: 52px 36px;
+}
+
+.passport-book-container {
+  margin: 22px auto 32px;
+}
+
+/* 2. TOP NAVIGATION DOCK & MORE POPOVER HIERARCHY */
+.platform-nav-dock-wrapper {
+  overflow: visible !important;
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+}
+
+.platform-nav.platform-nav-dock {
+  display: flex !important;
+  flex-wrap: wrap;
+  justify-content: center;
+  overflow: visible !important;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 26px;
+}
+
+.platform-nav-more {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.platform-nav-more > summary {
+  list-style: none;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(24, 36, 58, 0.72);
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  user-select: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.platform-nav-more > summary::-webkit-details-marker {
+  display: none;
+}
+
+.platform-nav-more > summary::after {
+  content: "▾";
+  font-size: 11px;
+  opacity: 0.75;
+  transition: transform 0.2s ease;
+}
+
+.platform-nav-more[open] > summary {
+  color: var(--vo-navy, #18243A);
+  background: rgba(108, 59, 255, 0.12);
+}
+
+.platform-nav-more[open] > summary::after {
+  transform: rotate(180deg);
+}
+
+.platform-nav-more > summary:hover,
+.platform-nav-more > summary:focus-visible {
+  color: var(--vo-navy, #18243A);
+  background: rgba(108, 59, 255, 0.08);
+  outline: none;
+}
+
+.platform-nav-more > div {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 224px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(108, 59, 255, 0.16);
+  border-radius: 18px;
+  box-shadow: 0 22px 54px rgba(24, 36, 58, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 150;
+}
+
+.platform-nav-more > div a {
+  width: 100%;
+  padding: 9px 14px;
+  border-radius: 12px;
+  justify-content: flex-start;
+  box-sizing: border-box;
+}
+
+.platform-nav-more > div .platform-nav-divider {
+  width: calc(100% - 16px);
+  height: 1px;
+  margin: 4px 8px;
+  background: rgba(24, 36, 58, 0.1);
+}
+
+/* 3. SIX COLORFUL HOME CARDS — PERSPECTIVE TILT & ELEVATION */
+.vo-student-priority-card,
+.learning-access-card,
+.home-module-card,
+.passport-main,
+.progress-card {
+  --card-tilt-x: 0deg;
+  --card-tilt-y: 0deg;
+  --card-glow-x: 50%;
+  --card-glow-y: 50%;
+  transform:
+    perspective(1000px)
+    translateY(0)
+    rotateX(0deg)
+    rotateY(0deg)
+    scale(1);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition:
+    transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.32s ease;
+  will-change: transform, box-shadow;
+}
+
+.vo-student-priority-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    280px circle at var(--card-glow-x, 50%) var(--card-glow-y, 50%),
+    rgba(255, 255, 255, 0.18),
+    transparent 65%
+  );
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.vo-student-priority-card:hover::after,
+.vo-student-priority-card:focus-visible::after {
+  opacity: 1;
+}
+
+.vo-student-priority-card:hover,
+.vo-student-priority-card:focus-visible,
+.learning-access-card:hover,
+.learning-access-card:focus-visible,
+.home-module-card:hover,
+.home-module-card:focus-visible,
+.passport-main:hover,
+.passport-main:focus-visible,
+.progress-card:hover,
+.progress-card:focus-visible {
+  transform:
+    perspective(1000px)
+    translateY(-7px)
+    rotateX(var(--card-tilt-x, 0deg))
+    rotateY(var(--card-tilt-y, 0deg))
+    scale(1.012);
+  box-shadow: 0 26px 56px rgba(24, 36, 58, 0.22);
+}
+
+.vo-student-priority-card:focus-visible,
+.learning-access-card:focus-visible,
+.home-module-card:focus-visible {
+  outline: 3px solid var(--vo-yellow, #FFC83D);
+  outline-offset: 4px;
+}
+
+/* 4. MATERIALS & VOCABULARY 3D FRONT/BACK FLIP CARDS */
+.material-card {
+  min-height: 280px;
+  background: transparent !important;
+  perspective: 1400px;
+  --card-tilt-x: 0deg;
+  --card-tilt-y: 0deg;
+  transform: translateY(0);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.material-card::after {
+  display: none;
+}
+
+.material-card:hover,
+.material-card:focus-visible {
+  transform: translateY(-6px);
+  box-shadow: none;
+}
+
+.material-card-inner {
+  display: grid;
+  grid-template-areas: "material-face";
+  min-height: 280px;
+  width: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transform:
+    rotateX(var(--card-tilt-x, 0deg))
+    rotateY(var(--card-tilt-y, 0deg));
+  transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.material-card.is-flipped .material-card-inner {
+  transform:
+    rotateX(var(--card-tilt-x, 0deg))
+    rotateY(calc(180deg + var(--card-tilt-y, 0deg)));
+}
+
+.material-card-face {
+  grid-area: material-face;
+  position: relative;
+  inset: auto;
+  width: 100%;
+  min-height: 280px;
+  padding: 28px 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: 28px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  box-shadow: var(--vo-shadow);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.material-card-front {
+  transform: rotateY(0deg) translateZ(1px);
+}
+
+.material-card-back {
+  transform: rotateY(180deg) translateZ(1px);
+  justify-content: space-between;
+}
+
+.material-card:not(.is-flipped) .material-card-back {
+  pointer-events: none;
+}
+
+.material-card.is-flipped .material-card-front {
+  pointer-events: none;
+}
+
+.material-type {
+  margin-top: 22px;
+}
+
+.material-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  position: relative;
+  z-index: 4;
+}
+
+.material-yellow .material-card-front .material-card-actions,
+.material-card-back .material-card-actions {
+  border-top-color: rgba(24, 36, 58, 0.12);
+}
+
+.material-card-actions .material-button,
+.material-card-actions .material-flip-trigger,
+.material-card-front .material-flip-front-trigger {
+  position: static;
+  margin: 0;
+  padding: 6px 0;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.material-card-front .material-flip-front-trigger {
+  color: inherit;
+  opacity: 0.88;
+}
+
+.material-card-back .material-button {
+  color: var(--vo-navy, #18243A);
+}
+
+/* 5. LEARNING JOURNEY (ROADMAP) 3D FLIP CARDS */
+.roadmap-step {
+  padding: 10px 0 22px;
+  align-items: stretch;
+}
+
+.roadmap-step:last-child {
+  padding-bottom: 6px;
+}
+
+.roadmap-content {
+  padding: 0 !important;
+  min-height: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  perspective: 1400px;
+}
+
+.roadmap-content::before,
+.roadmap-content::after {
+  display: none !important;
+}
+
+.roadmap-step:hover .roadmap-content {
+  transform: none;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.roadmap-card-inner {
+  display: grid;
+  grid-template-areas: "roadmap-face";
+  position: relative;
+  width: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.roadmap-step.is-flipped .roadmap-card-inner {
+  transform: rotateY(180deg);
+}
+
+.roadmap-card-face {
+  grid-area: roadmap-face;
+  position: relative;
+  width: 100%;
+  padding: 26px 32px;
+  border-radius: 24px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  box-sizing: border-box;
+  border: 1px solid rgba(24, 59, 102, 0.1);
+  box-shadow:
+    0 16px 38px rgba(24, 36, 58, 0.07),
+    0 4px 12px rgba(24, 36, 58, 0.04);
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease,
+    border-color 0.35s ease;
+}
+
+.roadmap-card-front {
+  transform: rotateY(0deg) translateZ(1px);
+  background: linear-gradient(
+    135deg,
+    rgba(108, 59, 255, 0.12) 0%,
+    rgba(32, 199, 181, 0.08) 55%,
+    rgba(255, 200, 61, 0.14) 100%
+  );
+}
+
+.roadmap-step.completed .roadmap-card-front {
+  background: linear-gradient(
+    135deg,
+    rgba(32, 199, 181, 0.2) 0%,
+    rgba(255, 249, 240, 0.92) 100%
+  );
+  border-color: rgba(32, 199, 181, 0.28);
+}
+
+.roadmap-step.current .roadmap-card-front {
+  background: linear-gradient(
+    135deg,
+    rgba(108, 59, 255, 0.18) 0%,
+    rgba(32, 199, 181, 0.12) 100%
+  );
+  border-color: rgba(108, 59, 255, 0.26);
+  box-shadow:
+    0 20px 46px rgba(108, 59, 255, 0.12),
+    0 5px 14px rgba(24, 36, 58, 0.05);
+}
+
+.roadmap-step.upcoming .roadmap-card-front {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 200, 61, 0.2) 0%,
+    rgba(255, 107, 53, 0.1) 100%
+  );
+  border-color: rgba(255, 200, 61, 0.3);
+}
+
+.roadmap-step.destination .roadmap-card-front {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 107, 53, 0.16) 0%,
+    rgba(108, 59, 255, 0.14) 100%
+  );
+  border-color: rgba(255, 107, 53, 0.26);
+}
+
+.roadmap-card-back {
+  transform: rotateY(180deg) translateZ(1px);
+  background:
+    radial-gradient(circle at 90% 15%, rgba(108, 59, 255, 0.14), transparent 35%),
+    linear-gradient(135deg, #ffffff 0%, #f5f0ff 100%);
+  border-color: rgba(108, 59, 255, 0.28);
+  color: var(--vo-navy, #18243A);
+}
+
+.roadmap-step:not(.is-flipped) .roadmap-card-back {
+  pointer-events: none;
+}
+
+.roadmap-step.is-flipped .roadmap-card-front {
+  pointer-events: none;
+}
+
+.roadmap-step:hover .roadmap-card-face {
+  box-shadow: 0 22px 48px rgba(24, 36, 58, 0.12);
+}
+
+.roadmap-step:focus-visible {
+  outline: none;
+}
+
+.roadmap-step:focus-visible .roadmap-card-face {
+  outline: 3px solid var(--vo-yellow, #FFC83D);
+  outline-offset: 4px;
+}
+
+.roadmap-card-back h4 {
+  margin: 0 0 10px;
+  font-family: "Playfair Display", serif;
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--vo-navy, #18243A);
+}
+
+.roadmap-back-points {
+  margin: 0;
+  padding: 0 0 0 18px;
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(24, 36, 58, 0.85);
+}
+
+.roadmap-back-points strong {
+  color: var(--vo-purple, #6C3BFF);
+}
+
+.roadmap-flip-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 14px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--vo-purple, #6C3BFF);
+}
+
+/* 6. LANGUAGE PASSPORT 3D COVER TILT & PAGE-TURN ANIMATION */
+.passport-book-closed {
+  --card-tilt-x: 2deg;
+  --card-tilt-y: -4deg;
+  transform-style: preserve-3d;
+}
+
+.passport-book-closed:hover,
+.passport-book-closed:focus-visible {
+  transform:
+    perspective(1200px)
+    translateY(-8px)
+    rotateX(var(--card-tilt-x, 2deg))
+    rotateY(var(--card-tilt-y, -4deg))
+    scale(1.02);
+}
+
+.passport-book-closed:focus-visible {
+  outline: 3px solid var(--vo-yellow, #FFC83D);
+  outline-offset: 5px;
+}
+
+.passport-spread-book.is-turning-page,
+.passport-spread-viewport.is-turning-page {
+  animation: passportPageTurn 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes passportPageTurn {
+  0% {
+    opacity: 0.72;
+    transform: perspective(1400px) rotateY(-6deg) scale(0.99);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(1400px) rotateY(0deg) scale(1);
+  }
+}
+
+/* 7. VERA VOICE PRESENTATION — NON-CLIPPING GRID FLIP & RESPONSIVE AVATAR */
+.vera-voice-card {
+  display: grid;
+  grid-template-areas: "vera-face";
+  min-height: 310px;
+}
+
+.vera-voice-card-face {
+  grid-area: vera-face;
+  position: relative;
+  inset: auto;
+  width: 100%;
+  min-height: 310px;
+  height: 100%;
+  box-sizing: border-box;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.vera-voice-card-front {
+  transform: rotateY(0deg) translateZ(1px);
+}
+
+.vera-voice-card-back {
+  transform: rotateY(180deg) translateZ(1px);
+}
+
+.vera-voice-card:not(.is-flipped) .vera-voice-card-back {
+  pointer-events: none;
+}
+
+.vera-voice-card.is-flipped .vera-voice-card-front {
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .vera-voice-card,
+  .vera-voice-card-face {
+    min-height: 0;
+  }
+
+  .vera-voice-card-front {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: 18px;
+  }
+
+  .vera-voice-avatar {
+    width: 116px;
+    align-self: flex-start;
+    margin-top: 0;
+  }
+
+  .platform-nav-more > div {
+    right: auto;
+    left: 0;
+  }
+}
+

@@ -71,7 +71,7 @@ export function renderPlatform(
   const currentLangObj =
     SUPPORTED_INTERFACE_LANGUAGES.find((l) => l.code === uiLang) ||
     SUPPORTED_INTERFACE_LANGUAGES[0]
-  const unreadMessagesCount = Array.isArray(messages) ? messages.filter((m) => !m.is_read).length : 0
+  const unreadMessagesCount = Array.isArray(messages) ? messages.filter((m) => !m.is_read && m.sender_id !== student?.id).length : 0
 
   return `
     <div class="platform-page">
@@ -164,6 +164,14 @@ export function renderPlatform(
               ${t('home', uiLang)}
             </a>
 
+            <a href="#exercises" data-platform-view="exercises">
+              ${t('exercises', uiLang)}
+            </a>
+
+            <a href="#calendar" data-platform-view="calendar">
+              ${t('calendar', uiLang)}
+            </a>
+
             <a
               href="#journey"
               data-platform-view="journey"
@@ -179,36 +187,30 @@ export function renderPlatform(
               ${actionLabels.materials}
             </a>
 
-            <a
-              href="#feedback"
-              data-platform-view="feedback"
-            >
-              ${t('feedback', uiLang)}
+            <a href="#inbox" data-platform-view="inbox" class="platform-nav-inbox">
+              ${t('inbox', uiLang)}${unreadMessagesCount > 0 ? ` <span class="nav-unread-badge">${unreadMessagesCount}</span>` : ''}
             </a>
 
+            <a href="#notifications" data-platform-view="notifications">${t('notifications', uiLang)} <span data-academic-unread class="academic-unread-badge" hidden></span></a>
+
+            <details class="platform-nav-more"><summary>${t('moreMenu', uiLang)}</summary><div>
+            <a href="#learning-plans" data-platform-view="learning-plans">${t('learningPlan', uiLang)}</a>
+            <a href="#finals" data-platform-view="finals">${t('finalAssessments', uiLang)}</a>
             <a
               href="#challenges"
               data-platform-view="challenges"
             >
               ${actionLabels.challenges}
             </a>
-
             <a
-              href="#progress"
-              data-platform-view="progress"
+              href="#feedback"
+              data-platform-view="feedback"
             >
-              ${t('progress', uiLang)}
+              ${t('feedback', uiLang)}
             </a>
-
-            <a href="#exercises" data-platform-view="exercises">
-              ${t('exercises', uiLang)}
-            </a>
+            <a href="#progress" data-platform-view="progress">${t('progress', uiLang)}</a>
 
             <span class="platform-nav-divider" aria-hidden="true"></span>
-
-            <a href="#calendar" data-platform-view="calendar">
-              ${t('calendar', uiLang)}
-            </a>
 
             <a href="#packages" data-platform-view="packages">
               ${t('packages', uiLang)}
@@ -218,10 +220,6 @@ export function renderPlatform(
               ${t('culture', uiLang)}
             </a>
 
-            <a href="#inbox" data-platform-view="inbox" class="platform-nav-inbox">
-              ${t('inbox', uiLang)}${unreadMessagesCount > 0 ? ` <span class="nav-unread-badge">${unreadMessagesCount}</span>` : ''}
-            </a>
-
             <a href="#reports" data-platform-view="reports">
               ${t('reports', uiLang)}
             </a>
@@ -229,6 +227,7 @@ export function renderPlatform(
             <a href="#settings" data-platform-view="settings">
               ${t('settings', uiLang)}
             </a>
+            </div></details>
 
           </nav>
         </div>
@@ -288,6 +287,71 @@ export function renderPlatform(
 
             </div>
 
+          </section>
+
+          <!-- STUDENT PRIORITY COMMAND STRIP -->
+          <section class="vo-student-priority-deck" aria-label="Priority learning actions">
+            <div class="vo-student-command-grid">
+              <button type="button" class="vo-student-priority-card vo-student-priority-card--teal" data-platform-view="calendar">
+                <div class="vo-student-priority-top">
+                  <span class="vo-student-priority-kicker">NEXT CLASS</span>
+                  <span class="vo-student-priority-badge">${Array.isArray(classes) ? classes.filter((c) => c.status !== 'cancelled').length : 0} scheduled</span>
+                </div>
+                <strong>${(Array.isArray(classes) && classes.find((c) => c.status === 'scheduled')?.title) || t('calendarHeading', uiLang)}</strong>
+                <p>${(Array.isArray(classes) && classes.find((c) => c.status === 'scheduled')?.scheduled_at) ? new Date(classes.find((c) => c.status === 'scheduled').scheduled_at).toLocaleString() : t('calendarDesc', uiLang)}</p>
+                <span class="vo-student-priority-cta">Open Calendar →</span>
+              </button>
+
+              <button type="button" class="vo-student-priority-card vo-student-priority-card--indigo" data-platform-view="learning-plans">
+                <div class="vo-student-priority-top">
+                  <span class="vo-student-priority-kicker">CONTINUE LEARNING</span>
+                  <span class="vo-student-priority-badge">${student.level || 'Roadmap'}</span>
+                </div>
+                <strong>My Learning Plan</strong>
+                <p>Listen → Repeat → Personalize → Use milestones tailored to your goals.</p>
+                <span class="vo-student-priority-cta">Open Learning Plan →</span>
+              </button>
+
+              <button type="button" class="vo-student-priority-card vo-student-priority-card--violet" data-platform-view="exercises">
+                <div class="vo-student-priority-top">
+                  <span class="vo-student-priority-kicker">PRACTICE ACTIVITIES</span>
+                  <span class="vo-student-priority-badge">${Array.isArray(exercises) ? exercises.filter((e) => Number(e.attempt_count || 0) < Number(e.attempt_limit || 1)).length : 0} pending</span>
+                </div>
+                <strong>${t('exercises', uiLang)}</strong>
+                <p>${Array.isArray(exercises) && exercises.length ? `${exercises.length} assigned interactive practice activity(ies).` : 'Complete interactive language practice assigned by your teacher.'}</p>
+                <span class="vo-student-priority-cta">Practice Now →</span>
+              </button>
+
+              <button type="button" class="vo-student-priority-card vo-student-priority-card--coral" data-platform-view="challenges">
+                <div class="vo-student-priority-top">
+                  <span class="vo-student-priority-kicker">WEEKLY CHALLENGE</span>
+                  <span class="vo-student-priority-badge">${Array.isArray(challenges) ? challenges.length : 0} active</span>
+                </div>
+                <strong>${t('challengesCardTitle', uiLang)}</strong>
+                <p>${t('challengesCardDesc', uiLang)}</p>
+                <span class="vo-student-priority-cta">Start Challenge →</span>
+              </button>
+
+              <button type="button" class="vo-student-priority-card vo-student-priority-card--gold" data-platform-view="feedback">
+                <div class="vo-student-priority-top">
+                  <span class="vo-student-priority-kicker">RECENT FEEDBACK</span>
+                  <span class="vo-student-priority-badge">${Array.isArray(feedback) ? feedback.length : 0} notes</span>
+                </div>
+                <strong>${t('feedbackCardTitle', uiLang)}</strong>
+                <p>${t('feedbackCardDesc', uiLang)}</p>
+                <span class="vo-student-priority-cta">Review Notes →</span>
+              </button>
+
+              <button type="button" class="vo-student-priority-card vo-student-priority-card--terracotta" data-platform-view="progress">
+                <div class="vo-student-priority-top">
+                  <span class="vo-student-priority-kicker">LEARNING PROGRESS</span>
+                  <span class="vo-student-priority-badge">${student.progress || 0}%</span>
+                </div>
+                <strong>${t('progressCardTitle', uiLang)}</strong>
+                <p>${student.lessonsCompleted || 0} ${t('completed', uiLang)} · ${student.nextStep || ''}</p>
+                <span class="vo-student-priority-cta">View Mastery →</span>
+              </button>
+            </div>
           </section>
 
 
@@ -797,6 +861,11 @@ export function renderPlatformView(
 
   switch (view) {
 
+    case 'learning-plans':
+    case 'notifications':
+    case 'finals':
+      return '<section class="platform-detail-section" data-student-academic-view aria-live="polite"><p>Loading your learning information...</p></section>'
+
     case 'journey':
 
       return `
@@ -819,7 +888,7 @@ export function renderPlatformView(
 
           </div>
 
-          ${renderRoadmap(student)}
+          ${renderRoadmap(student, { showHeading: false })}
 
         </section>
       `

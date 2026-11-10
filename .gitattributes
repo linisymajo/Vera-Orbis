@@ -1,0 +1,2 @@
+supabase/**/*.sql -text
+scripts/production-release.reviewed.json -text

@@ -212,8 +212,8 @@ export function renderPassportBook(student = {}, platformData = {}, langOrStuden
 
                 <!-- MACHINE READABLE ZONE -->
                 <div class="passport-mrz-zone" aria-hidden="true">
-                  <p>${mrzLine1}</p>
-                  <p>${mrzLine2}</p>
+                  <p>${escapeHtml(mrzLine1)}</p>
+                  <p>${escapeHtml(mrzLine2)}</p>
                 </div>
               </div>
             </div>
@@ -417,12 +417,17 @@ export function renderPassportBook(student = {}, platformData = {}, langOrStuden
             ← ${uiLang === 'es' ? 'Página anterior' : 'Previous page'}
           </button>
 
-          <span class="passport-page-indicator" id="passport-page-indicator">
-            ${uiLang === 'es' ? 'Páginas 1 – 2 de 4' : 'Pages 1 – 2 of 4'}
+          <span
+            class="passport-page-indicator"
+            id="passport-page-indicator"
+            data-pages-spread-1="${uiLang === 'es' ? 'Páginas 1 – 2 de 4' : uiLang === 'fr' ? 'Pages 1 – 2 sur 4' : uiLang === 'zh' ? '第 1 – 2 页 / 共 4 页' : 'Pages 1 – 2 of 4'}"
+            data-pages-spread-2="${uiLang === 'es' ? 'Páginas 3 – 4 de 4' : uiLang === 'fr' ? 'Pages 3 – 4 sur 4' : uiLang === 'zh' ? '第 3 – 4 页 / 共 4 页' : 'Pages 3 – 4 of 4'}"
+          >
+            ${uiLang === 'es' ? 'Páginas 1 – 2 de 4' : uiLang === 'fr' ? 'Pages 1 – 2 sur 4' : uiLang === 'zh' ? '第 1 – 2 页 / 共 4 页' : 'Pages 1 – 2 of 4'}
           </span>
 
           <button type="button" class="passport-nav-turn-btn" id="passport-next-btn">
-            ${uiLang === 'es' ? 'Página siguiente' : 'Next page'} →
+            ${uiLang === 'es' ? 'Página siguiente' : uiLang === 'fr' ? 'Page suivante' : uiLang === 'zh' ? '下一页' : 'Next page'} →
           </button>
         </div>
 
@@ -441,6 +446,7 @@ export function setupPassportBook(root = document) {
 
   const cover = root.querySelector('#passport-cover')
   const spread = root.querySelector('#passport-spread')
+  const viewport = root.querySelector('.passport-spread-book') || root.querySelector('.passport-spread-viewport')
   const closeBtn = root.querySelector('#passport-close-trigger')
   const prevBtn = root.querySelector('#passport-prev-btn')
   const nextBtn = root.querySelector('#passport-next-btn')
@@ -451,7 +457,14 @@ export function setupPassportBook(root = document) {
   const totalSpreads = 2
 
   function updateSpreadView(spreadNum) {
+    const isChanging = currentSpread !== spreadNum
     currentSpread = spreadNum
+
+    if (isChanging && viewport) {
+      viewport.classList.remove('is-turning-page')
+      void viewport.offsetWidth
+      viewport.classList.add('is-turning-page')
+    }
 
     // Toggle spread pairs
     root.querySelectorAll('.passport-spread-pair').forEach((pair) => {
@@ -472,7 +485,9 @@ export function setupPassportBook(root = document) {
 
     // Update indicator
     if (pageIndicator) {
-      pageIndicator.textContent = spreadNum === 1 ? 'Páginas 1 – 2 de 4' : 'Páginas 3 – 4 de 4'
+      const label1 = pageIndicator.dataset.pagesSpread1 || 'Páginas 1 – 2 de 4'
+      const label2 = pageIndicator.dataset.pagesSpread2 || 'Páginas 3 – 4 de 4'
+      pageIndicator.textContent = spreadNum === 1 ? label1 : label2
     }
   }
 
@@ -550,10 +565,15 @@ export function setupPassportBook(root = document) {
     })
   })
 
-  // Keyboard shortcut: Escape to close when open
+  // Keyboard shortcuts when open: Escape to close, ArrowLeft/ArrowRight to turn pages
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && container.classList.contains('is-open')) {
+    if (!container.classList.contains('is-open')) return
+    if (e.key === 'Escape') {
       closePassport()
+    } else if (e.key === 'ArrowRight' && currentSpread < totalSpreads) {
+      updateSpreadView(currentSpread + 1)
+    } else if (e.key === 'ArrowLeft' && currentSpread > 1) {
+      updateSpreadView(currentSpread - 1)
     }
   })
 }

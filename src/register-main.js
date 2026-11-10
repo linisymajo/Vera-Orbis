@@ -1,6 +1,12 @@
 import './login.css'
 import { supabase } from './lib/supabase.js'
 import { getAuthRedirectUrl } from './lib/auth.js'
+import { captureEnrollmentInvitation } from './lib/enrollment.js'
+
+let invitationToken
+let invitationError = ''
+try { invitationToken = captureEnrollmentInvitation() }
+catch (error) { invitationError = error.message }
 
 document.querySelector('#app').innerHTML = `
   <main class="login-page">
@@ -49,8 +55,8 @@ document.querySelector('#app').innerHTML = `
           </h2>
 
           <p>
-            Crea tu cuenta en Vera Orbis
-            para iniciar tu aprendizaje de idiomas.
+            Crea tu cuenta, confirma tu correo y solicita tu inscripci?n.
+            El acceso acad?mico requiere invitaci?n o aprobaci?n.
           </p>
 
         </div>
@@ -174,6 +180,8 @@ const buttonText =
   registerButton.querySelector('.button-text')
 
 
+registerError.textContent = invitationError
+
 registerForm.addEventListener('submit', async (event) => {
 
   event.preventDefault()
@@ -209,7 +217,8 @@ registerForm.addEventListener('submit', async (event) => {
   registerButton.disabled = true
   buttonText.textContent = 'Creando cuenta...'
 
-  const emailRedirectTo = getAuthRedirectUrl('/onboarding.html')
+  const redirectPath = invitationToken ? '/onboarding.html?invitation=' + encodeURIComponent(invitationToken) : '/onboarding.html'
+  const emailRedirectTo = getAuthRedirectUrl(redirectPath)
 
   const { data, error } =
     await supabase.auth.signUp({
@@ -241,23 +250,6 @@ registerForm.addEventListener('submit', async (event) => {
   }
 
   if (data?.session?.user) {
-    try {
-      await supabase.from('profiles').upsert({
-        id: data.session.user.id,
-        name: name || data.session.user.email?.split('@')[0] || 'Estudiante',
-        language: 'English',
-        level: 'A1',
-        level_name: 'Beginner',
-        progress: 0,
-        lessons_completed: 0,
-        total_lessons: null,
-        current_module: 'Getting Started',
-        next_step: 'Complete your onboarding'
-      }, { onConflict: 'id' })
-    } catch (e) {
-      console.warn('Could not seed initial profile on register:', e)
-    }
-
     registerSuccess.textContent =
       '¡Cuenta creada! Redirigiéndote a tu bienvenida...'
 

@@ -1,0 +1,12 @@
+{
+  "format": "vera-orbis-additive-migration-v1",
+  "target": "duinvkphfnugoyvvlbbq",
+  "approval_required": true,
+  "entry": {
+    "version": "0023",
+    "name": "legacy_exercise_feedback",
+    "file": "supabase/migrations/0023_legacy_exercise_feedback.sql",
+    "bytes": 5616,
+    "sha256": "fee211a3060aa20422704579d445ded136a9b4e273f12d968d9113b78e02f02b"
+  }
+}

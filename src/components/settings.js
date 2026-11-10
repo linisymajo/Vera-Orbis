@@ -1,3 +1,4 @@
+import { getAcademicAIConsent, setAcademicAIConsent } from '../lib/academicAI.js'
 import { escapeHtml } from '../lib/auth.js'
 import {
   SUPPORTED_INTERFACE_LANGUAGES,
@@ -36,6 +37,13 @@ export function renderSettings(student = {}) {
       </div>
 
       <div class="settings-cards-grid">
+        <article class="settings-card" data-ai-consent-card>
+          <h3>Academic AI privacy</h3>
+          <p>When enabled and approved by your teacher, the configured external AI provider may process your learning goals, progress, exercise answers and teacher feedback to suggest activities. Consent is optional and can be withdrawn. Your teacher reviews all suggestions. For minors, guardian authorization must be arranged with Vera Orbis before enabling this setting.</p>
+          <label><input type="checkbox" data-ai-consent disabled> Allow this use of my academic information</label>
+          <button type="button" data-save-ai-consent disabled>Save privacy choice</button>
+          <p data-ai-consent-status role="status">Loading saved privacy choice...</p>
+        </article>
 
         <!-- INTERFACE LANGUAGE SELECTOR CARD -->
         <article class="settings-card">
@@ -102,4 +110,32 @@ export function renderSettings(student = {}) {
 
     </section>
   `
+}
+
+export async function setupAcademicAIConsent(client, root = document) {
+  const card = root.querySelector('[data-ai-consent-card]')
+  if (!card || card.dataset.bound) return
+  card.dataset.bound = 'true'
+  const checkbox = card.querySelector('[data-ai-consent]')
+  const button = card.querySelector('[data-save-ai-consent]')
+  const status = card.querySelector('[data-ai-consent-status]')
+  try {
+    const saved = await getAcademicAIConsent(client)
+    checkbox.checked = saved.allowed === true
+    checkbox.disabled = false
+    button.disabled = false
+    status.textContent = saved.allowed ? 'Academic AI processing is allowed.' : 'Academic AI processing is disabled.'
+  } catch {
+    status.textContent = 'Privacy controls are unavailable. AI processing remains unavailable until consent can be verified.'
+    return
+  }
+  button.onclick = async () => {
+    button.disabled = true
+    try {
+      const saved = await setAcademicAIConsent(client, checkbox.checked)
+      if (saved.allowed !== checkbox.checked) throw new Error('Privacy choice was not confirmed.')
+      status.textContent = checkbox.checked ? 'Privacy choice saved: academic AI processing allowed.' : 'Privacy choice saved: academic AI processing disabled.'
+    } catch (error) { status.textContent = error.message || 'Could not save privacy choice.' }
+    finally { button.disabled = false }
+  }
 }

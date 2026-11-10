@@ -1,11 +1,14 @@
 import './style.css'
+import './home-redesign.css'
+import { renderSiteFooter } from './components/siteFooter.js'
+import { renderConversionModals, initConversionModals } from './components/conversionModals.js'
 
 const VO_LOGO = '/logo/Logo%20Vera%20Orbis%20recoloreado.png'
 
 document.querySelector('#app').innerHTML = `
 
   <!-- =========================================
-       HEADER & NAVEGACIÓN FLOTANTE
+       HEADER & NAVEGACIÓN GLOBAL
   ========================================== -->
 
   <header class="navbar" id="site-navbar">
@@ -14,14 +17,13 @@ document.querySelector('#app').innerHTML = `
       <img src="${VO_LOGO}" alt="Vera Orbis" class="navbar-logo-img" />
     </a>
 
-    <!-- Enlaces de navegación de escritorio -->
     <nav class="nav-links" id="primary-nav" aria-label="Navegación principal">
-      <a href="#metodo" class="nav-link">Cómo enseñamos</a>
+      <a href="/" class="nav-link is-active" aria-current="page">Inicio</a>
+      <a href="/who-we-are" class="nav-link">Quiénes somos</a>
 
-      <!-- Selector / Menú de Idiomas -->
       <div class="nav-dropdown-wrap" id="languages-dropdown-wrap">
-        <button
-          type="button"
+        <a
+          href="/languages"
           class="nav-link nav-dropdown-btn"
           id="languages-menu-btn"
           aria-haspopup="true"
@@ -30,43 +32,41 @@ document.querySelector('#app').innerHTML = `
         >
           <span>Idiomas</span>
           <span class="dropdown-arrow" aria-hidden="true">▾</span>
-        </button>
+        </a>
         <div class="nav-dropdown-menu" id="languages-dropdown-menu" role="menu">
-          <a href="#ingles" class="nav-dropdown-item" role="menuitem">
+          <a href="#ingles" data-page="/languages#ingles" class="nav-dropdown-item" role="menuitem">
             <span class="item-lang-name">Inglés</span>
-            <span class="item-lang-sub">Global Commerce &amp; Communication</span>
+            <span class="item-lang-sub">EN — English</span>
           </a>
-          <a href="#frances" class="nav-dropdown-item" role="menuitem">
+          <a href="#frances" data-page="/languages#frances" class="nav-dropdown-item" role="menuitem">
             <span class="item-lang-name">Francés</span>
-            <span class="item-lang-sub">Diplomatie, Culture &amp; Société</span>
+            <span class="item-lang-sub">FR — Français</span>
           </a>
-          <a href="#mandarin" class="nav-dropdown-item" role="menuitem">
+          <a href="#mandarin" data-page="/languages#mandarin" class="nav-dropdown-item" role="menuitem">
             <span class="item-lang-name">Mandarín</span>
-            <span class="item-lang-sub">Comunicación, Cultura &amp; Negocios</span>
+            <span class="item-lang-sub">中文 — Zhōngwén</span>
           </a>
         </div>
       </div>
 
-      <a href="#empresas" class="nav-link nav-link-b2b">
-        <span>Para empresas</span>
+      <a href="/method" class="nav-link">Cómo enseñamos</a>
+      <a href="/experiences" class="nav-link">Experiencias</a>
+      <a href="/contact" class="nav-link nav-link-b2b">
+        <span>Let's Connect</span>
         <span class="badge-b2b" aria-hidden="true">B2B</span>
       </a>
-      <a href="#ecosistema" class="nav-link">Tu espacio</a>
-      <a href="#newsletter" class="nav-link">Living Connections</a>
     </nav>
 
-    <!-- Acciones de navegación -->
     <div class="nav-actions">
       <a href="/platform.html" class="platform-button" aria-label="Acceso a la plataforma de estudiantes">
         <span class="btn-text">Acceso Estudiantes</span>
         <span class="platform-btn-arrow" aria-hidden="true">→</span>
       </a>
 
-      <a href="#contacto" class="nav-cta-button" id="nav-cta-btn">
+      <button type="button" class="nav-cta-button" id="nav-cta-btn" aria-haspopup="dialog">
         <span>Agendar diagnóstico</span>
-      </a>
+      </button>
 
-      <!-- Botón menú móvil -->
       <button type="button" class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="mobile-nav-drawer">
         <span class="hamburger-bar"></span>
         <span class="hamburger-bar"></span>
@@ -85,7 +85,6 @@ document.querySelector('#app').innerHTML = `
         <button type="button" class="mobile-nav-close" id="mobile-nav-close" aria-label="Cerrar menú">&times;</button>
       </div>
 
-      <!-- Selector de idiomas en móvil -->
       <div class="mobile-languages-box">
         <span class="mobile-languages-heading">Idiomas disponibles</span>
         <div class="mobile-languages-list">
@@ -96,15 +95,15 @@ document.querySelector('#app').innerHTML = `
       </div>
 
       <nav class="mobile-nav-links" aria-label="Navegación móvil">
-        <a href="#metodo" class="mobile-nav-link">Cómo enseñamos</a>
-        <a href="#programas" class="mobile-nav-link">Clases personales</a>
-        <a href="#empresas" class="mobile-nav-link mobile-link-b2b">
-          <span>Para empresas</span>
+        <a href="/" class="mobile-nav-link is-active">Inicio</a>
+        <a href="/who-we-are" class="mobile-nav-link">Quiénes somos</a>
+        <a href="/languages" class="mobile-nav-link">Nuestros idiomas</a>
+        <a href="/method" class="mobile-nav-link">Cómo enseñamos</a>
+        <a href="/experiences" class="mobile-nav-link">Experiencias &amp; Ecosistema</a>
+        <a href="/contact" class="mobile-nav-link mobile-link-b2b">
+          <span>Let's Connect</span>
           <span class="badge-b2b">B2B</span>
         </a>
-        <a href="#ecosistema" class="mobile-nav-link">Tu espacio &amp; Vera Voice</a>
-        <a href="#newsletter" class="mobile-nav-link">Carta Living Connections</a>
-        <a href="#contacto" class="mobile-nav-link">Contacto</a>
       </nav>
 
       <div class="mobile-nav-footer">
@@ -118,1736 +117,1212 @@ document.querySelector('#app').innerHTML = `
   </div>
 
 
-  <main id="main-content">
+  <main id="main-content" class="vo-world-home">
 
-    <!-- =========================================
-         HERO SECTION
-    ========================================== -->
+    <!-- =================================================================
+         01. HERO + LANGUAGE PASSPORT INTERACTIVO (MARFIL SÓLIDO #FFF9F0)
+         Conserva EXACTAMENTE la composición derecha aprobada (.hero-art-canvas)
+    ================================================================== -->
 
     <section id="inicio" class="hero">
 
       <div class="hero-ambient-glow" aria-hidden="true"></div>
 
-      <div class="hero-content">
+      <div class="hero-main-layout">
 
-        <!-- Kicker -->
-        <div class="hero-kicker-wrap">
-          <span class="hero-kicker">
-            LANGUAGE, CULTURE &amp; CONNECTION · WE SPEAK THE WORLD
-          </span>
-        </div>
+        <div class="hero-content">
 
-        <!-- Titular principal -->
-        <h1 class="hero-title">
-          <span class="hero-line hero-line-1">Aprende un idioma para vivirlo,</span>
-          <em class="hero-line hero-line-2">no solo para estudiarlo.</em>
-        </h1>
-
-        <!-- Subtítulo con mención explícita a los tres idiomas -->
-        <p class="hero-description">
-          Acompañamiento personalizado en inglés, francés y mandarín para personas y equipos que necesitan comunicarse con soltura, rigor y contexto cultural real.
-        </p>
-
-        <!-- =========================================
-             SELECTOR DE PÚBLICO (TABS SIN EMOTICONES)
-        ========================================== -->
-        <div class="hero-audience-card" id="audience-selector">
-
-          <!-- Botones de selección -->
-          <div class="audience-toggle-bar" role="tablist" aria-label="Selecciona cómo te gustaría aprender">
-            <button
-              type="button"
-              class="audience-tab is-active"
-              id="tab-b2c"
-              role="tab"
-              aria-selected="true"
-              aria-controls="panel-audience"
-              data-target="b2c"
-            >
-              <span class="tab-label">Para personas y profesionales</span>
-            </button>
-
-            <button
-              type="button"
-              class="audience-tab"
-              id="tab-b2b"
-              role="tab"
-              aria-selected="false"
-              aria-controls="panel-audience"
-              data-target="b2b"
-            >
-              <span class="tab-label">Para empresas y equipos</span>
-              <span class="tab-pill">B2B</span>
-            </button>
+          <div class="vo-hero-coord-pill">
+            <span class="vo-coord-live-dot" aria-hidden="true"></span>
+            <span>BOGOTÁ · 4°42′N · 74°04′W · WE SPEAK THE WORLD</span>
           </div>
 
-          <!-- Contenido dinámico del panel -->
-          <div class="audience-panel-content" id="panel-audience" role="tabpanel" aria-labelledby="tab-b2c">
+          <h1 class="hero-title">
+            <span class="hero-line hero-line-1">El mundo es más grande</span>
+            <em class="hero-line hero-line-2">cuando puedes hablar con él.</em>
+          </h1>
 
-            <!-- Estado Personas (B2C) -->
-            <div class="audience-mode-wrap audience-mode-b2c" id="mode-b2c">
-              <div class="mode-badge">
-                <span class="badge-dot"></span>
-                <span>APRENDIZAJE PERSONALIZADO 1 A 1</span>
-              </div>
-              <h2 class="mode-headline">
-                Habla con tranquilidad y olvídate del miedo a equivocarte.
-              </h2>
-              <p class="mode-desc">
-                Todos hemos sentido ese bloqueo al hablar en una reunión o durante un viaje. Diseñamos un camino pensado para ti, tus metas y tus tiempos en inglés, francés o mandarín, con mucha práctica y acompañamiento constante.
-              </p>
-              <div class="mode-actions">
-                <a
-                  href="https://wa.me/573123035708?text=Hola%20Vera%20Orbis.%20Quiero%20agendar%20mi%20sesi%C3%B3n%20de%20diagn%C3%B3stico%20individual."
-                  class="btn-primary-action"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  id="b2c-primary-cta"
-                >
-                  <span class="btn-text">Agendar mi diagnóstico sin costo</span>
-                  <span class="btn-arrow" aria-hidden="true">→</span>
-                  <span class="btn-shimmer" aria-hidden="true"></span>
-                </a>
-                <a href="#metodo" class="btn-secondary-action">
-                  <span>Conocer cómo funciona</span>
-                  <span class="btn-secondary-arrow" aria-hidden="true">↓</span>
-                </a>
-              </div>
-            </div>
-
-            <!-- Estado Empresas (B2B) -->
-            <div class="audience-mode-wrap audience-mode-b2b" id="mode-b2b" hidden>
-              <div class="mode-badge mode-badge-b2b">
-                <span class="badge-dot badge-dot-b2b"></span>
-                <span>EQUIPOS Y EMPRESAS</span>
-              </div>
-              <h2 class="mode-headline">
-                Ayuda a tu equipo a comunicarse con soltura ante cualquier cliente.
-              </h2>
-              <p class="mode-desc">
-                Tus colaboradores son excelentes en lo técnico, pero en llamadas con clientes del exterior, negociaciones con Asia o demos internacionales a veces se sienten inseguros. Trabajamos con situaciones reales de su trabajo para que ganen confianza en inglés, francés y mandarín comercial.
-              </p>
-              <div class="mode-actions">
-                <a
-                  href="https://wa.me/573123035708?text=Hola%20Vera%20Orbis.%20Me%20interesa%20pedir%20un%20diagn%C3%B3stico%20de%20comunicaci%C3%B3n%20para%20mi%20equipo."
-                  class="btn-primary-action btn-b2b-action"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  id="b2b-primary-cta"
-                >
-                  <span class="btn-text">Pedir diagnóstico para mi equipo (15 min)</span>
-                  <span class="btn-arrow" aria-hidden="true">→</span>
-                  <span class="btn-shimmer" aria-hidden="true"></span>
-                </a>
-                <a href="#empresas" class="btn-secondary-action">
-                  <span>Ver programas para empresas</span>
-                  <span class="btn-secondary-arrow" aria-hidden="true">↓</span>
-                </a>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <!-- COMPOSICIÓN VISUAL EDITORIAL -->
-      <div class="hero-art-canvas" aria-hidden="true">
-        <div class="hero-orbit orbit-one"></div>
-        <div class="hero-orbit orbit-two"></div>
-        <div class="hero-orbit orbit-three"></div>
-
-        <div class="hero-dot dot-violet"></div>
-        <div class="hero-dot dot-orange"></div>
-        <div class="hero-dot dot-yellow"></div>
-        <div class="hero-dot dot-turquoise"></div>
-
-        <div class="photo photo-one">
-          <div class="photo-inner">
-            <span class="photo-tag">01 · INMERSIÓN</span>
-            <span class="photo-title">CULTURA</span>
-          </div>
-          <span class="photo-stamp">VO</span>
-        </div>
-
-        <div class="photo photo-two">
-          <div class="photo-inner">
-            <span class="photo-tag">02 · DIÁLOGO</span>
-            <span class="photo-title">PERSONAS</span>
-          </div>
-          <span class="photo-stamp">VO</span>
-        </div>
-
-        <div class="photo photo-three">
-          <div class="photo-inner">
-            <span class="photo-tag">03 · HORIZONTES</span>
-            <span class="photo-title">LUGARES</span>
-          </div>
-          <span class="photo-stamp">VO</span>
-        </div>
-
-        <svg class="route-line" viewBox="0 0 600 400" fill="none">
-          <path d="M40 330 C150 80, 280 350, 390 130 S520 90, 580 40" stroke="url(#routeGradientHero)" stroke-width="2.5" stroke-dasharray="8 8" />
-          <defs>
-            <linearGradient id="routeGradientHero" x1="0%" y1="100%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#FF6B35" />
-              <stop offset="50%" stop-color="#FFC83D" />
-              <stop offset="100%" stop-color="#6C3BFF" />
-            </linearGradient>
-          </defs>
-        </svg>
-      </div>
-
-
-      <!-- 3 PILARES (LIMPIOS, CERO EMOTICONES) -->
-      <div class="hero-pillars-row" aria-label="Tres pilares de aprendizaje en Vera Orbis">
-
-        <div class="hero-pillar-card">
-          <div class="pillar-header">
-            <span class="pillar-num">01</span>
-            <span class="pillar-badge badge-orange">CONVERSACIÓN REAL</span>
-          </div>
-          <h3 class="pillar-title">Hablas desde el primer día</h3>
-          <p class="pillar-text">
-            La única forma de soltarse es practicando. Conversamos contigo desde el primer minuto en un espacio seguro donde equivocarse es parte del proceso.
-          </p>
-        </div>
-
-        <div class="hero-pillar-card">
-          <div class="pillar-header">
-            <span class="pillar-num">02</span>
-            <span class="pillar-badge badge-violet">PRÁCTICA CONSTANTE</span>
-          </div>
-          <h3 class="pillar-title">Vera Voice siempre disponible</h3>
-          <p class="pillar-text">
-            Tu compañera de conversación con inteligencia artificial dentro de la plataforma para practicar pronunciación y repasar a tu propio ritmo.
-          </p>
-        </div>
-
-        <div class="hero-pillar-card">
-          <div class="pillar-header">
-            <span class="pillar-num">03</span>
-            <span class="pillar-badge badge-turquoise">A TU MEDIDA</span>
-          </div>
-          <h3 class="pillar-title">A tu ritmo y con tus metas</h3>
-          <p class="pillar-text">
-            No seguimos un libro genérico. Adaptamos los temas y el vocabulario en inglés, francés o mandarín a lo que realmente necesitas para tu trabajo o tus viajes.
-          </p>
-        </div>
-
-      </div>
-
-
-      <!-- COORDENADAS DEL ESTUDIO -->
-      <div class="coordinates-badge" role="note" aria-label="Sede: Bogotá">
-        <span class="coord-city">BOGOTÁ</span>
-        <span class="coord-divider" aria-hidden="true">·</span>
-        <span class="coord-digits">4°42′N · 74°04′W</span>
-        <span class="coord-divider" aria-hidden="true">·</span>
-        <span class="coord-tagline">WE SPEAK THE WORLD</span>
-        <span class="coord-beacon" aria-hidden="true"></span>
-      </div>
-
-    </section>
-
-
-    <!-- =========================================
-         SECCIÓN 01 — CÓMO ENSEÑAMOS
-    ========================================== -->
-
-    <section id="metodo" class="philosophy-section reveal-on-scroll">
-
-      <div class="section-container">
-
-        <div class="section-head text-center">
-          <p class="section-label">
-            <span class="label-number">01</span>
-            <span class="label-dash">—</span>
-            <span>CÓMO ENSEÑAMOS</span>
+          <p class="hero-description">
+            Acompañamiento personalizado en inglés, francés y mandarín para personas y equipos que necesitan comunicarse con soltura, rigor y contexto cultural real.
           </p>
 
-          <h2 class="editorial-title">
-            Aprender un idioma es aprender <span class="highlight-violet">a conectar.</span><br>
-            <em class="highlight-serif">Every Person Matters.</em>
-          </h2>
-
-          <p class="section-lead max-lead-760">
-            Aprender no se trata de memorizar listas que olvidas al día siguiente. Se trata de entender la cultura, de poder reírte, opinar y sentirte tú mismo cuando hablas con alguien de otro lugar.
-          </p>
-        </div>
-
-        <!-- PASOS MANTRA -->
-        <div class="mantra-cards-grid">
-          <div class="mantra-step-card">
-            <div class="mantra-tag">PASO 01</div>
-            <h3 class="mantra-word">LEARN IT.</h3>
-            <p class="mantra-desc">
-              Comprende cómo funciona el idioma con explicaciones claras, útiles y aterrizadas a situaciones de la vida real.
-            </p>
-          </div>
-          <div class="mantra-step-card">
-            <div class="mantra-tag">PASO 02</div>
-            <h3 class="mantra-word">LIVE IT.</h3>
-            <p class="mantra-desc">
-              Vívelo a través de temas de actualidad, anécdotas culturales, música y conversaciones sobre lo que a ti te interesa.
-            </p>
-          </div>
-          <div class="mantra-step-card">
-            <div class="mantra-tag">PASO 03</div>
-            <h3 class="mantra-word">SPEAK IT.</h3>
-            <p class="mantra-desc">
-              Suelta la voz. Practicamos la conversación de forma constante para que hablar en otro idioma se sienta natural y espontáneo.
-            </p>
-          </div>
-        </div>
-
-        <!-- COMPARATIVA CON LA ACADEMIA TRADICIONAL -->
-        <div class="contrast-container">
-
-          <div class="contrast-header">
-            <span class="contrast-kicker">NUESTRA DIFERENCIA</span>
-            <h3 class="contrast-title">Por qué el modelo tradicional aburre y cómo lo hacemos diferente</h3>
-          </div>
-
-          <div class="contrast-grid">
-
-            <!-- Columna Tradicional -->
-            <div class="contrast-card card-traditional">
-              <div class="contrast-col-top">
-                <span class="contrast-badge badge-traditional">ACADEMIA TRADICIONAL</span>
-                <h4>El método de siempre</h4>
-              </div>
-
-              <ul class="contrast-list">
-                <li>
-                  <span class="icon-fail" aria-hidden="true">&times;</span>
-                  <div>
-                    <strong>Reglas de memoria y ejercicios repetitivos:</strong>
-                    <p>Horas rellenando fotocopias que poco te ayudan a la hora de tener una conversación real.</p>
-                  </div>
-                </li>
-                <li>
-                  <span class="icon-fail" aria-hidden="true">&times;</span>
-                  <div>
-                    <strong>Salones llenos donde casi nadie habla:</strong>
-                    <p>Grupos grandes donde el profesor habla la mayor parte del tiempo y da pena equivocarse.</p>
-                  </div>
-                </li>
-                <li>
-                  <span class="icon-fail" aria-hidden="true">&times;</span>
-                  <div>
-                    <strong>Hablar después de meses de teoría:</strong>
-                    <p>Se pospone la conversación hasta que "sepas suficiente", creando más inseguridad.</p>
-                  </div>
-                </li>
-                <li>
-                  <span class="icon-fail" aria-hidden="true">&times;</span>
-                  <div>
-                    <strong>Exámenes que te juzgan por cada error:</strong>
-                    <p>Se evalúa el error gramatical en vez de celebrar que logres comunicarte con éxito.</p>
-                  </div>
-                </li>
-              </ul>
-            </div>
-
-            <!-- Columna Vera Orbis -->
-            <div class="contrast-card card-vera-orbis">
-              <div class="contrast-col-top">
-                <span class="contrast-badge badge-vera">EXPERIENCIA VERA ORBIS</span>
-                <h4>Acompañamiento cercano y real</h4>
-              </div>
-
-              <ul class="contrast-list">
-                <li>
-                  <span class="icon-success" aria-hidden="true">•</span>
-                  <div>
-                    <strong>Temas y conversaciones que te interesan:</strong>
-                    <p>Materiales actuales seleccionados para tu vida personal, tus gustos y tu carrera profesional.</p>
-                  </div>
-                </li>
-                <li>
-                  <span class="icon-success" aria-hidden="true">•</span>
-                  <div>
-                    <strong>Acompañamiento 1 a 1 y grupos pequeños:</strong>
-                    <p>Atención directa de tu profesor. Aquí cada persona cuenta (Every Person Matters).</p>
-                  </div>
-                </li>
-                <li>
-                  <span class="icon-success" aria-hidden="true">•</span>
-                  <div>
-                    <strong>Hablas desde tu primera sesión:</strong>
-                    <p>La conversación es el centro de todo. Pierdes el miedo a hablar desde el primer día.</p>
-                  </div>
-                </li>
-                <li>
-                  <span class="icon-success" aria-hidden="true">•</span>
-                  <div>
-                    <strong>Progreso claro y apoyo constante:</strong>
-                    <p>Seguimiento semanal constructivo, metas alcanzables y práctica cuando quieras con Vera Voice.</p>
-                  </div>
-                </li>
-              </ul>
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- =========================================
-         SECCIÓN 02 — EMPRESAS & EQUIPOS (B2B)
-    ========================================== -->
-
-    <section id="empresas" class="b2b-section reveal-on-scroll">
-
-      <div class="section-container">
-
-        <div class="b2b-badge-row">
-          <span class="b2b-pill">EMPRESAS Y EQUIPOS</span>
-          <span class="b2b-sublabel">COMUNICACIÓN GLOBAL</span>
-        </div>
-
-        <div class="b2b-header-grid">
-          <div>
-            <h2 class="editorial-title b2b-title">
-              La confianza que tu equipo necesita para <span class="highlight-orange">hablar con el mundo.</span>
-            </h2>
-          </div>
-          <div>
-            <p class="section-lead b2b-lead">
-              Muchas veces las barreras de un equipo en videollamadas con clientes internacionales o negociaciones con Asia no tienen que ver con su talento técnico, sino con la inseguridad de no encontrar la palabra adecuada en el momento justo.
-            </p>
-          </div>
-        </div>
-
-        <!-- SITUACIONES QUE RESOLVEMOS (SIN EMOTICONES) -->
-        <div class="frictions-panel">
-          <h3 class="frictions-heading">Situaciones del día a día que ayudamos a resolver:</h3>
-
-          <div class="frictions-grid">
-
-            <div class="friction-card">
-              <span class="friction-num">01</span>
-              <h4>Llamadas con sedes globales y socios en Asia</h4>
-              <p>
-                Profesionales brillantes que dominan su área pero dudan al intervenir en videollamadas en inglés, francés o coordinar acuerdos comerciales con proveedores internacionales.
-              </p>
-            </div>
-
-            <div class="friction-card">
-              <span class="friction-num">02</span>
-              <h4>Presentaciones y demostraciones de producto</h4>
-              <p>
-                Equipos que necesitan explicar demos técnicas, presentar propuestas comerciales o liderar talleres con claridad, buen tono y tranquilidad.
-              </p>
-            </div>
-
-            <div class="friction-card">
-              <span class="friction-num">03</span>
-              <h4>Tono y protocolo de negocios</h4>
-              <p>
-                Redacción de correos claros, etiqueta comercial y negociación cotidiana con personas de diferentes culturas sin caer en malentendidos.
-              </p>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- 3 FORMATOS DESTACADOS PARA EMPRESAS -->
-        <div class="b2b-formats-grid">
-
-          <!-- Formato 1: Bootcamp para equipos -->
-          <article class="format-card format-bootcamp">
-            <div class="format-glow" aria-hidden="true"></div>
-            <div class="format-meta">
-              <span class="format-tag">PARA EQUIPOS DE TRABAJO</span>
-              <span class="format-duration">8 SEMANAS · 16 SESIONES</span>
-            </div>
-
-            <div class="format-body">
-              <h3 class="format-title">Bootcamp de Fluidez en Equipo</h3>
-              <p class="format-audience">
-                <strong>Para:</strong> Equipos de tecnología, producto, ventas internacionales, operaciones y soporte al cliente.
-              </p>
-              <p class="format-description">
-                Práctica en grupos reducidos de máximo 6 personas en inglés o francés. Simulamos reuniones reales, standups, manejo de preguntas difíciles y redacción de minutas de trabajo para que ganen seguridad juntos.
-              </p>
-
-              <div class="format-deliverables">
-                <span class="deliverable-item">• Diagnóstico inicial de nivel para cada colaborador</span>
-                <span class="deliverable-item">• Simulaciones con retroalimentación personalizada de pronunciación</span>
-                <span class="deliverable-item">• Acceso 24/7 a Vera Voice para que practiquen en cualquier momento</span>
-                <span class="deliverable-item">• Reportes claros de avance para líderes de equipo y People</span>
-              </div>
-            </div>
-
-            <div class="format-footer">
-              <a
-                href="https://wa.me/573123035708?text=Hola%20Vera%20Orbis.%20Quiero%20conocer%20m%C3%A1s%20sobre%20el%20Bootcamp%20para%20equipos."
-                class="format-cta-btn"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span>Preguntar por el Bootcamp para equipos</span>
-                <span class="cta-arrow" aria-hidden="true">→</span>
-              </a>
-            </div>
-          </article>
-
-
-          <!-- Formato 2: Aceleración 1 a 1 para Líderes -->
-          <article class="format-card format-executive">
-            <div class="format-glow" aria-hidden="true"></div>
-            <div class="format-meta">
-              <span class="format-tag format-tag-gold">LÍDERES Y FOUNDERS</span>
-              <span class="format-duration">INDIVIDUAL Y PRIVADO</span>
-            </div>
-
-            <div class="format-body">
-              <h3 class="format-title">Aceleración 1 a 1 para Líderes</h3>
-              <p class="format-audience">
-                <strong>Para:</strong> Founders, directores, CEOs y líderes que representan a su empresa ante audiencias de otros países.
-              </p>
-              <p class="format-description">
-                Acompañamiento individual, confidencial y flexible. Trabajamos directamente sobre tus presentaciones reales, preparación para rondas de inversión, conferencias y negociaciones estratégicas en inglés o francés.
-              </p>
-
-              <div class="format-deliverables">
-                <span class="deliverable-item">• Práctica directa sobre tus presentaciones y discursos reales</span>
-                <span class="deliverable-item">• Preparación para responder preguntas imprevistas con soltura</span>
-                <span class="deliverable-item">• Pulido de pronunciación y entonación ejecutiva natural</span>
-                <span class="deliverable-item">• Horarios flexibles adaptados a tu agenda</span>
-              </div>
-            </div>
-
-            <div class="format-footer">
-              <a
-                href="https://wa.me/573123035708?text=Hola%20Vera%20Orbis.%20Quiero%20informaci%C3%B3n%20sobre%20las%20sesiones%201%20a%201%20para%20liderazgo."
-                class="format-cta-btn format-cta-gold"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span>Consultar sobre sesiones individuales</span>
-                <span class="cta-arrow" aria-hidden="true">→</span>
-              </a>
-            </div>
-          </article>
-
-
-          <!-- Formato 3: Mandarín Comercial & Protocolo de Negocios -->
-          <article class="format-card format-mandarin-b2b">
-            <div class="format-glow" aria-hidden="true"></div>
-            <div class="format-meta">
-              <span class="format-tag format-tag-orange">COMERCIO EXTERIOR &amp; ASIA</span>
-              <span class="format-duration">PROGRAMA A LA MEDIDA</span>
-            </div>
-
-            <div class="format-body">
-              <h3 class="format-title">Mandarín Comercial &amp; Protocolo</h3>
-              <p class="format-audience">
-                <strong>Para:</strong> Empresas, equipos de compras, logística, comercio exterior y profesionales con socios en Asia o cadenas de suministro globales.
-              </p>
-              <p class="format-description">
-                Desarrolla soltura en el trato directo con proveedores y fabricantes en Asia. Combinamos vocabulario comercial y logístico con comprensión del protocolo cultural de negocios (guanxi, etiqueta en reuniones y resolución de contingencias).
-              </p>
-
-              <div class="format-deliverables">
-                <span class="deliverable-item">• Vocabulario práctico de compras, negociación y comercio internacional</span>
-                <span class="deliverable-item">• Protocolo cultural para reuniones de negocios y visitas a fábricas</span>
-                <span class="deliverable-item">• Expresiones clave para evitar malentendidos en la cadena de suministro</span>
-                <span class="deliverable-item">• Sesiones grupales o individuales adaptadas a la operación de tu empresa</span>
-              </div>
-            </div>
-
-            <div class="format-footer">
-              <a
-                href="https://wa.me/573123035708?text=Hola%20Vera%20Orbis.%20Quiero%20informaci%C3%B3n%20sobre%20el%20programa%20de%20Mandar%C3%ADn%20Comercial%20para%20empresas."
-                class="format-cta-btn format-cta-orange"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span>Consultar sobre Mandarín Comercial</span>
-                <span class="cta-arrow" aria-hidden="true">→</span>
-              </a>
-            </div>
-          </article>
-
-        </div>
-
-        <!-- BANNER DE CONTACTO EMPRESARIAL -->
-        <div class="b2b-action-banner">
-          <div class="banner-text">
-            <h3>¿Quieres que hablemos sobre tu equipo?</h3>
-            <p>
-              Cuéntanos qué necesita tu empresa en inglés, francés o mandarín comercial y te mostramos cómo podemos armar un programa práctico en una llamada corta de 15 minutos.
-            </p>
-          </div>
-          <div class="banner-action">
-            <a
-              href="https://wa.me/573123035708?text=Hola%20Vera%20Orbis.%20Quiero%20agendar%20una%20llamada%20de%2015%20minutos%20para%20mi%20equipo."
-              class="banner-btn"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <span>Agendar llamada de 15 minutos</span>
+          <div class="vo-hero-cta-cluster">
+            <button type="button" class="vo-btn-solid vo-btn-orange" id="b2c-primary-cta" aria-haspopup="dialog">
+              <span>Empezar mi viaje</span>
               <span aria-hidden="true">→</span>
+            </button>
+
+            <button type="button" class="vo-btn-solid vo-btn-violet" id="b2c-pathfinder-trigger" aria-haspopup="dialog">
+              <span>Mi ruta en 3 pasos</span>
+            </button>
+
+            <button type="button" class="vo-hero-b2b-pill" id="b2b-primary-cta" aria-haspopup="dialog">
+              <span>Equipos B2B</span>
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
+
+        </div>
+
+
+        <!-- COMPOSICIÓN VISUAL EDITORIAL APROBADA — CONSERVADA EXACTAMENTE -->
+        <div class="hero-art-canvas" aria-hidden="true">
+          <div class="hero-orbit orbit-one"></div>
+          <div class="hero-orbit orbit-two"></div>
+          <div class="hero-orbit orbit-three"></div>
+
+          <div class="hero-dot dot-violet"></div>
+          <div class="hero-dot dot-orange"></div>
+          <div class="hero-dot dot-yellow"></div>
+          <div class="hero-dot dot-turquoise"></div>
+
+          <div class="photo photo-one">
+            <div class="photo-inner">
+              <span class="photo-tag">01 · INMERSIÓN</span>
+              <span class="photo-title">CULTURA</span>
+            </div>
+            <span class="photo-stamp">VO</span>
+          </div>
+
+          <div class="photo photo-two">
+            <div class="photo-inner">
+              <span class="photo-tag">02 · DIÁLOGO</span>
+              <span class="photo-title">PERSONAS</span>
+            </div>
+            <span class="photo-stamp">VO</span>
+          </div>
+
+          <div class="photo photo-three">
+            <div class="photo-inner">
+              <span class="photo-tag">03 · HORIZONTES</span>
+              <span class="photo-title">LUGARES</span>
+            </div>
+            <span class="photo-stamp">VO</span>
+          </div>
+
+          <svg class="route-line" viewBox="0 0 600 400" fill="none">
+            <path d="M40 330 C150 80, 280 350, 390 130 S520 90, 580 40" stroke="url(#routeGradientHero)" stroke-width="2.5" stroke-dasharray="8 8" />
+            <defs>
+              <linearGradient id="routeGradientHero" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#FF6B35" />
+                <stop offset="50%" stop-color="#FFC83D" />
+                <stop offset="100%" stop-color="#6C3BFF" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+
+      </div>
+
+
+      <!-- OBJETO ESPECIAL EN HERO: EL LANGUAGE PASSPORT INTERACTIVO -->
+      <div class="vo-passport-dock" id="vo-passport-dock">
+
+        <div class="vo-passport-stage">
+
+          <!-- PASAPORTE CERRADO (LIBRETA FÍSICA 3D) -->
+          <div
+            class="vo-passport-closed"
+            id="vo-passport-cover"
+            role="button"
+            tabindex="0"
+            aria-expanded="false"
+            aria-controls="vo-passport-open"
+            aria-label="Abrir Language Passport interactivo de Vera Orbis"
+          >
+            <div class="vo-passport-spine" aria-hidden="true"></div>
+            <div class="vo-passport-foil-frame">
+              <div>
+                <span class="vo-passport-top-label">VERA ORBIS</span>
+                <span class="vo-passport-sub-label">LANGUAGE PASSPORT</span>
+              </div>
+
+              <div class="vo-passport-crest" aria-hidden="true">
+                <svg viewBox="0 0 120 120" width="92" height="92" fill="none">
+                  <circle cx="60" cy="60" r="50" stroke="#FFC83D" stroke-width="2" stroke-dasharray="4 3" />
+                  <circle cx="60" cy="60" r="38" stroke="#FFC83D" stroke-width="1.6" />
+                  <ellipse cx="60" cy="60" rx="38" ry="16" stroke="#FFC83D" stroke-width="1.3" transform="rotate(-24 60 60)" />
+                  <ellipse cx="60" cy="60" rx="38" ry="16" stroke="#FFC83D" stroke-width="1.3" transform="rotate(24 60 60)" />
+                  <path d="M60 32 L66 54 L88 60 L66 66 L60 88 L54 66 L32 60 L54 54 Z" fill="#FFC83D" />
+                  <circle cx="60" cy="60" r="4" fill="#183B66" />
+                </svg>
+              </div>
+
+              <div class="vo-passport-chip-gold" aria-hidden="true"></div>
+              <span class="vo-passport-motto">LEARN · LIVE · SPEAK</span>
+            </div>
+            <span class="vo-passport-ribbon-tab">ABRIR →</span>
+          </div>
+
+          <!-- PASAPORTE ABIERTO (DOBLE PÁGINA CON SELLOS EN VIVO) -->
+          <div class="vo-passport-open-book" id="vo-passport-open" hidden>
+            <div class="vo-passport-pages-grid">
+
+              <div class="vo-passport-leaf vo-leaf-left">
+                <div>
+                  <span class="vo-leaf-kicker">PASAPORTE OFICIAL · VERA ORBIS</span>
+                  <div class="vo-passport-id-row">
+                    <div class="vo-passport-avatar-seal" aria-hidden="true">VO</div>
+                    <div class="vo-passport-holder-meta">
+                      <strong>EXPLORADOR/A GLOBAL</strong>
+                      <span id="vo-passport-counter">1 / 3 SELLOS ACTIVOS</span>
+                    </div>
+                  </div>
+                  <div class="vo-passport-data-pair">
+                    <div class="vo-passport-data-cell">
+                      <small>ORIGEN</small>
+                      <strong>BOG · 4°42′N</strong>
+                    </div>
+                    <div class="vo-passport-data-cell">
+                      <small>FILOSOFÍA</small>
+                      <strong>SPEAK IT</strong>
+                    </div>
+                  </div>
+                </div>
+                <div class="vo-passport-mrz" aria-hidden="true">
+                  P&lt;VORBIS&lt;&lt;WE&lt;SPEAK&lt;THE&lt;WORLD&lt;&lt;&lt;&lt;&lt;&lt;<br>
+                  VO2026BOG442N7404W&lt;&lt;EN&lt;FR&lt;ZH&lt;&lt;01
+                </div>
+              </div>
+
+              <div class="vo-passport-leaf vo-leaf-right">
+                <div>
+                  <div class="vo-leaf-right-top">
+                    <span class="vo-leaf-kicker">VISAS &amp; SELLOS VIVOS</span>
+                    <button type="button" class="vo-passport-close-btn" id="vo-passport-close">Cerrar &times;</button>
+                  </div>
+
+                  <div class="vo-stamp-picker-row" role="group" aria-label="Estampar idioma en el pasaporte">
+                    <button type="button" class="vo-stamp-ink-btn" data-stamp="en">+ Sello EN</button>
+                    <button type="button" class="vo-stamp-ink-btn" data-stamp="fr">+ Sello FR</button>
+                    <button type="button" class="vo-stamp-ink-btn" data-stamp="zh">+ Sello 中文</button>
+                  </div>
+
+                  <div class="vo-stamps-canvas" id="vo-stamps-canvas">
+                    <div class="vo-visa-seal seal-en">
+                      <strong>EN · LONDON / NYC</strong>
+                      <small>VISA ACTIVA · VO</small>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="vo-stamp-phrase-bar">
+                  <span id="vo-stamp-greeting">«Let's speak the world together.»</span>
+                  <a href="#ingles" class="vo-stamp-jump-link" id="vo-stamp-jump">Ir a EN ↓</a>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <div class="vo-passport-companion">
+          <span class="vo-dock-kicker">TU OBJETO DE VIAJE · LANGUAGE PASSPORT</span>
+          <h2 class="vo-dock-title">Abre tu Language Passport.</h2>
+          <p class="vo-dock-micro">
+            Cada conversación real y cada cultura que exploras suma sellos vivos a tu recorrido. Tócalo para abrirlo y estampar tu primer destino.
+          </p>
+          <div class="vo-dock-quick-stamps">
+            <button type="button" class="vo-quick-stamp-pill" data-open-stamp="en">Estampar EN · English</button>
+            <button type="button" class="vo-quick-stamp-pill" data-open-stamp="fr">Estampar FR · Français</button>
+            <button type="button" class="vo-quick-stamp-pill" data-open-stamp="zh">Estampar 中文 · Zhōngwén</button>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================================
+         02. EL VIDEO REAL (VIOLETA ORBIS SÓLIDO #6C3BFF)
+         Reproducción real en página, sin póster falso ni imagen de Vera
+    ================================================================== -->
+
+    <section class="vo-video-world" id="vision">
+      <div class="vo-video-grid">
+
+        <div class="vo-video-copy">
+          <span class="vo-solid-tag tag-yellow">VIDEO REAL · 0:45 MIN</span>
+          <h2 class="vo-display-h2">
+            Vera Orbis es el mundo. <br>
+            <span class="vo-accent-yellow">Las personas le dan vida.</span>
+          </h2>
+          <p class="vo-micro-lead">
+            Lina Celedón, Founder &amp; Director, te cuenta en 45 segundos por qué aquí los idiomas se viven hablando.
+          </p>
+          <div class="vo-video-cta-row">
+            <button type="button" class="vo-btn-solid vo-btn-yellow" id="vo-unmute-restart-btn">
+              <span>Escuchar con voz</span>
+              <span aria-hidden="true">→</span>
+            </button>
+            <a href="/who-we-are" class="vo-btn-solid vo-btn-ivory">
+              <span>Quiénes somos</span>
             </a>
           </div>
         </div>
 
-      </div>
-
-    </section>
-
-
-    <!-- =========================================
-         SECCIÓN 03 — CLASES PERSONALES (B2C)
-    ========================================== -->
-
-    <section id="programas" class="programs-section reveal-on-scroll">
-
-      <div class="section-container">
-
-        <div class="section-head text-center">
-          <p class="section-label">
-            <span class="label-number">03</span>
-            <span class="label-dash">—</span>
-            <span>CLASES PERSONALES</span>
-          </p>
-
-          <h2 class="editorial-title">
-            Inglés, Francés y Mandarín <br>
-            <span class="highlight-turquoise">hechos a tu medida.</span>
-          </h2>
-
-          <p class="section-lead max-lead-760">
-            Aprender no tiene por qué ser aburrido ni rígido. Diseñamos cada clase según lo que quieras lograr: viajar con tranquilidad, conseguir un mejor empleo o desenvolverte en los negocios internacionales.
-          </p>
-        </div>
-
-        <!-- REJILLA DE 3 IDIOMAS PRINCIPALES -->
-        <div class="languages-three-grid">
-
-          <!-- INGLÉS -->
-          <article class="lang-showcase-card english-theme" id="ingles">
-            <div class="lang-watermark" aria-hidden="true">EN</div>
-            <div class="lang-card-header">
-              <span class="lang-code-pill">01 / GLOBAL</span>
-              <span class="lang-standard">A1 A C2</span>
-            </div>
-
-            <div class="lang-card-body">
-              <h3 class="lang-card-title">English for the World</h3>
-              <p class="lang-card-summary">
-                Para desenvolverte en el trabajo, viajar con tranquilidad, entender contenidos sin subtítulos y hablar con personas de cualquier lugar con naturalidad.
-              </p>
-
-              <div class="lang-features-list">
-                <div class="lang-feature">
-                  <strong>Conversación cotidiana:</strong> Habla de forma espontánea y sin temor a quedarte en blanco.
-                </div>
-                <div class="lang-feature">
-                  <strong>Trabajo y entrevistas:</strong> Prepárate para reuniones laborales y procesos de selección.
-                </div>
-                <div class="lang-feature">
-                  <strong>Preparación para pruebas internacionales:</strong> Entrenamiento intensivo de habilidades y simulacros prácticos para que rindas con éxito exámenes como IELTS o TOEFL ante las entidades examinadoras oficiales.
-                </div>
-              </div>
-            </div>
-
-            <div class="lang-card-footer">
-              <a
-                href="https://wa.me/573123035708?text=Hola%20Vera%20Orbis.%20Quiero%20aprender%20ingl%C3%A9s."
-                class="lang-cta-link"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span>Quiero aprender inglés</span>
-                <span aria-hidden="true">→</span>
-              </a>
-            </div>
-          </article>
-
-
-          <!-- FRANCÉS -->
-          <article class="lang-showcase-card french-theme" id="frances">
-            <div class="lang-watermark" aria-hidden="true">FR</div>
-            <div class="lang-card-header">
-              <span class="lang-code-pill">02 / FRANCOFONÍA</span>
-              <span class="lang-standard">DELF Y DALF</span>
-            </div>
-
-            <div class="lang-card-body">
-              <h3 class="lang-card-title">Le Parcours Français</h3>
-              <p class="lang-card-summary">
-                Descubre la belleza y la precisión del francés. Te ayudamos con la pronunciación, la comprensión cultural y la confianza para viajar, estudiar o mudarte a Francia o Canadá.
-              </p>
-
-              <div class="lang-features-list">
-                <div class="lang-feature">
-                  <strong>Pronunciación y fonética:</strong> Pierde el miedo a los sonidos nasales con ejercicios sencillos.
-                </div>
-                <div class="lang-feature">
-                  <strong>Cultura y conversación:</strong> Aprende a expresar tus puntos de vista con soltura y elegancia.
-                </div>
-                <div class="lang-feature">
-                  <strong>Preparación estratégica para exámenes oficiales (DELF, DALF):</strong> Te preparamos con rigor para que alcances el puntaje o nivel que necesitas al presentar tus pruebas ante las entidades oficiales.
-                </div>
-              </div>
-            </div>
-
-            <div class="lang-card-footer">
-              <a
-                href="https://wa.me/573123035708?text=Hola%20Vera%20Orbis.%20Quiero%20aprender%20franc%C3%A9s."
-                class="lang-cta-link"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span>Quiero aprender francés</span>
-                <span aria-hidden="true">→</span>
-              </a>
-            </div>
-          </article>
-
-
-          <!-- MANDARÍN -->
-          <article class="lang-showcase-card mandarin-theme" id="mandarin">
-            <div class="lang-watermark" aria-hidden="true">中</div>
-            <div class="lang-card-header">
-              <span class="lang-code-pill">03 / ASIA &amp; NEGOCIOS</span>
-              <span class="lang-standard">HSK 1 A 6</span>
-            </div>
-
-            <div class="lang-card-body">
-              <h3 class="lang-card-title">Mandarín: Comunicación, Cultura &amp; Negocios</h3>
-              <p class="lang-card-summary">
-                Pensamiento directo y soltura comunicativa desde las primeras sesiones. Comprensión fonética (pinyin), estructuras reales de conversación e inmersión cultural.
-              </p>
-
-              <div class="lang-features-list">
-                <div class="lang-feature">
-                  <strong>Comunicación cotidiana:</strong> Pronunciación precisa (tonos y pinyin) y frases esenciales para desenvolverte con naturalidad.
-                </div>
-                <div class="lang-feature">
-                  <strong>Cultura y relaciones comerciales:</strong> Protocolo de negocios, costumbres de cortesía y negociación efectiva con socios de Asia.
-                </div>
-                <div class="lang-feature">
-                  <strong>Preparación estratégica para exámenes oficiales (HSK):</strong> Te preparamos con rigor para que alcances el puntaje o nivel que necesitas al presentar tus pruebas HSK ante las entidades oficiales (sin emitir certificados propios).
-                </div>
-              </div>
-            </div>
-
-            <div class="lang-card-footer">
-              <a
-                href="https://wa.me/573123035708?text=Hola%20Vera%20Orbis.%20Quiero%20aprender%20mandar%C3%ADn."
-                class="lang-cta-link lang-cta-orange"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span>Quiero aprender mandarín</span>
-                <span aria-hidden="true">→</span>
-              </a>
-            </div>
-          </article>
-
-        </div>
-
-
-        <!-- RUTAS SEGÚN TU META -->
-        <div class="objectives-section">
-          <div class="objectives-head">
-            <span class="objectives-kicker">RUTAS CLARAS</span>
-            <h3 class="objectives-title">Elige el enfoque que mejor se adapte a ti</h3>
+        <div class="vo-real-video-card">
+          <div class="vo-video-viewport">
+            <video
+              id="home-founder-video"
+              class="vo-live-video"
+              autoplay
+              muted
+              loop
+              playsinline
+              preload="auto"
+              aria-label="Video real de bienvenida a Vera Orbis por Lina Celedón"
+            >
+              <source src="/videos/vera-orbis-intro-web.mp4" type="video/mp4" />
+              <source src="/videos/vera-orbis-intro.mov" type="video/quicktime" />
+            </video>
+            <span class="vo-video-live-pill" id="vo-video-status-pill">TOCA PARA AUDIO</span>
           </div>
 
-          <div class="objectives-grid">
-
-            <div class="objective-card">
-              <div class="objective-num">01</div>
-              <h4>Fluidez cotidiana y social</h4>
-              <p>Para hablar sin pena, viajar con tranquilidad y hacer amigos en cualquier país.</p>
+          <div class="vo-video-controls-bar">
+            <button type="button" class="vo-vid-ctrl-btn" id="vo-vid-playpause" aria-label="Pausar o reproducir video">
+              Pausar
+            </button>
+            <div class="vo-vid-scrubber" id="vo-vid-scrubber" role="slider" tabindex="0" aria-label="Progreso del video" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <div class="vo-vid-scrubber-fill" id="vo-vid-scrubber-fill"></div>
             </div>
-
-            <div class="objective-card">
-              <div class="objective-num">02</div>
-              <h4>Crecimiento profesional</h4>
-              <p>Prepárate para entrevistas laborales, ascensos y reuniones de trabajo internacionales.</p>
-            </div>
-
-            <div class="objective-card">
-              <div class="objective-num">03</div>
-              <h4>Preparación para exámenes oficiales</h4>
-              <p>Entrenamiento intensivo de habilidades y acompañamiento estratégico para que rindas y apruebes pruebas oficiales como DELF, DALF, HSK, IELTS o TOEFL ante las entidades correspondientes.</p>
-            </div>
-
-            <div class="objective-card">
-              <div class="objective-num">04</div>
-              <h4>Viajes y mudanzas</h4>
-              <p>Todo lo necesario para desenvolverte en tu nuevo destino si vas a estudiar o vivir afuera.</p>
-            </div>
-
-          </div>
-
-          <!-- NOTA DE TRANSPARENCIA PEDAGÓGICA -->
-          <div class="transparency-note">
-            <p>
-              <strong>Transparencia pedagógica:</strong> En Vera Orbis no emitimos ni otorgamos certificaciones oficiales directas. Nuestra labor es el entrenamiento intensivo, la preparación estratégica y el acompañamiento riguroso para que alcances el puntaje y nivel que necesitas al rendir tus exámenes ante las entidades examinadoras oficiales (DELF, DALF, HSK, IELTS, TOEFL).
-            </p>
+            <span class="vo-vid-time" id="vo-vid-time">0:00 / 0:45</span>
+            <button type="button" class="vo-vid-ctrl-btn" id="vo-vid-sound" aria-label="Activar o silenciar sonido">
+              Activar audio
+            </button>
           </div>
         </div>
 
       </div>
-
     </section>
 
 
-    <!-- =========================================
-         SECCIÓN 04 — TU ESPACIO EN VERA ORBIS
-    ========================================== -->
+    <!-- =================================================================
+         03. IDIOMAS: COMPOSICIONES TIPOGRÁFICAS PURAS (AZUL ÍNDIGO #183B66)
+         CERO FOTOGRAFÍAS · EN / FR / 中文 · TARJETAS 3D VIVAS QUE GIRAN
+    ================================================================== -->
 
-    <section id="ecosistema" class="ecosystem-section reveal-on-scroll">
+    <section class="vo-typo-languages-world" id="idiomas">
 
-      <div class="section-container">
-
-        <div class="section-head text-center">
-          <p class="section-label">
-            <span class="label-number">04</span>
-            <span class="label-dash">—</span>
-            <span>CÓMO APRENDES CON NOSOTROS</span>
-          </p>
-
-          <h2 class="editorial-title">
-            Todo lo que necesitas para avanzar, <br>
-            <span class="highlight-violet">en un solo lugar.</span>
-          </h2>
-
-          <p class="section-lead max-lead-760">
-            No te dejamos solo entre una clase y otra. Cuentas con un profesor dedicado, herramientas para practicar cuando quieras y una plataforma donde ves tu progreso día a día.
-          </p>
-        </div>
-
-
-        <!-- TRES PILARES -->
-        <div class="ecosystem-pillars-grid">
-
-          <!-- Pilar 1 -->
-          <div class="ecosystem-pillar-card">
-            <div class="eco-pillar-num">01 / ACOMPAÑAMIENTO</div>
-            <h3>Tu profesor personal</h3>
-            <p>
-              Profesores cercanos, pacientes y con experiencia que preparan cada sesión pensando en ti y te corrigen de forma positiva para que nunca sientas pena de hablar.
-            </p>
-            <span class="eco-highlight">Atención individual que de verdad te escucha</span>
-          </div>
-
-          <!-- Pilar 2 -->
-          <div class="ecosystem-pillar-card eco-card-featured">
-            <div class="eco-pillar-num">02 / PRÁCTICA 24/7</div>
-            <h3>Vera Voice (IA conversacional)</h3>
-            <p>
-              Una compañera de práctica disponible las 24 horas en tu plataforma. Puedes hablar con ella para repasar y pulir tu pronunciación sin ninguna presión.
-            </p>
-            <span class="eco-highlight">Practica cuando quieras y a tu ritmo</span>
-          </div>
-
-          <!-- Pilar 3 -->
-          <div class="ecosystem-pillar-card">
-            <div class="eco-pillar-num">03 / PLATAFORMA</div>
-            <h3>Tu plataforma de estudiante</h3>
-            <p>
-              Revisa tus horarios de clase, consulta los comentarios de tu profesor, accede a tus lecturas y mira cómo vas avanzando con tu Language Passport.
-            </p>
-            <span class="eco-highlight">Control total de tu aprendizaje</span>
-          </div>
-
-        </div>
-
-
-        <!-- MUESTRA DEL PASAPORTE LINGÜÍSTICO -->
-        <div class="passport-showcase-wrap">
-
-          <div class="passport-intro">
-            <span class="passport-kicker">TU PROGRESO VISIBLE</span>
-            <h3 class="passport-heading">Language Passport · VO Edition</h3>
-            <p class="passport-lead">
-              Tu credencial digital donde se registran tus avances, horas de conversación, sellos académicos y los niveles que vas alcanzando a lo largo del camino.
-            </p>
-          </div>
-
-          <div class="passport-tilt-container" id="passport-tilt-wrap">
-
-            <div class="experience-main-card passport-3d-card" id="passport-card" tabindex="0" role="region" aria-label="Language Passport Credencial interactiva">
-
-              <div class="passport-glare" id="passport-glare" aria-hidden="true"></div>
-
-              <div class="card-top">
-                <span class="passport-authority">
-                  <span class="passport-crest">VO</span>
-                  VERA ORBIS
-                </span>
-                <span class="passport-id-badge">ESTUDIANTE Nº 001</span>
-              </div>
-
-              <!-- CHIP LINGÜÍSTICO -->
-              <div class="passport-chip-row" aria-hidden="true">
-                <svg class="biometric-chip" viewBox="0 0 44 32" width="44" height="32" fill="none">
-                  <rect x="1" y="1" width="42" height="30" rx="4" stroke="#FFC83D" stroke-width="1.5" fill="rgba(255, 200, 61, 0.1)"/>
-                  <path d="M1 11 H16 M1 21 H16 M28 11 H43 M28 21 H43 M16 6 V26 M28 6 V26" stroke="#FFC83D" stroke-width="1.2" stroke-linecap="round"/>
-                  <rect x="16" y="9" width="12" height="14" rx="2" stroke="#FFC83D" stroke-width="1.2" fill="rgba(255, 200, 61, 0.25)"/>
-                </svg>
-                <span class="passport-doc-type">CREDENCIAL DE APRENDIZAJE</span>
-              </div>
-
-              <div class="passport-center-emblem" aria-hidden="true">
-                <div class="emblem-inner">
-                  <span>VO</span>
-                </div>
-              </div>
-
-              <div class="passport-content">
-                <p class="passport-label">
-                  PASAPORTE LINGÜÍSTICO · VO EDITION
-                </p>
-                <h3>
-                  Tu progreso.<br>
-                  <span>A tu ritmo.</span>
-                </h3>
-                <p>
-                  Un documento digital que acompaña cada avance, tus sesiones completadas y tus hitos de conversación.
-                </p>
-
-                <!-- SELLOS DE PRÁCTICA -->
-                <div class="passport-stamps-preview" aria-hidden="true">
-                  <div class="visa-stamp stamp-turquoise">
-                    <span class="stamp-arch">VERA ORBIS</span>
-                    <span class="stamp-core">APRENDE</span>
-                    <span class="stamp-sub">DISCE</span>
-                  </div>
-                  <div class="visa-stamp stamp-purple">
-                    <span class="stamp-arch">NIVEL</span>
-                    <span class="stamp-core">CEFR B2</span>
-                    <span class="stamp-sub">VIVE</span>
-                  </div>
-                  <div class="visa-stamp stamp-gold">
-                    <span class="stamp-arch">FLUÍDEZ</span>
-                    <span class="stamp-core">HABLA</span>
-                    <span class="stamp-sub">LOQUERE</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- BOTÓN PARA ABRIR LA DEMO -->
-              <div class="passport-action-bar">
-                <button type="button" class="passport-demo-btn" id="passport-preview-trigger" aria-haspopup="dialog" aria-expanded="false">
-                  <span>Ver credencial de ejemplo</span>
-                  <span class="btn-micro-arrow" aria-hidden="true">→</span>
-                </button>
-              </div>
-
-              <!-- FRANJA MRZ -->
-              <div class="passport-mrz-strip" aria-hidden="true">
-                <p>P&lt;VORBIS&lt;&lt;STUDENT&lt;001&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</p>
-                <p>VO001COL8510206M2610207ENG&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;04</p>
-              </div>
-
-              <div class="card-bottom">
-                <span>LEARN IT</span>
-                <span class="bullet" aria-hidden="true">·</span>
-                <span>LIVE IT</span>
-                <span class="bullet" aria-hidden="true">·</span>
-                <span>SPEAK IT</span>
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- =========================================
-         SECCIÓN 05 — LIVING CONNECTIONS
-    ========================================== -->
-
-    <section id="newsletter" class="newsletter-section reveal-on-scroll">
-
-      <div class="section-container">
-
-        <div class="newsletter-editorial-card">
-
-          <div class="newsletter-decor-glow" aria-hidden="true"></div>
-
-          <div class="newsletter-grid">
-
-            <div class="newsletter-left">
-              <div class="newsletter-meta">
-                <span class="newsletter-edition">CARTA SEMANAL</span>
-                <span class="newsletter-freq">CADA JUEVES</span>
-              </div>
-
-              <h2 class="newsletter-headline">
-                Living Connections.
-              </h2>
-              <p class="newsletter-subheadline">
-                Una reflexión breve y cercana sobre el idioma, la cultura y cómo expresarte mejor.
-              </p>
-
-              <p class="newsletter-text">
-                Cada semana te compartimos ideas sencillas sobre comunicación, cómo cambia tu forma de pensar cuando aprendes otro idioma y consejos prácticos para hablar con más soltura.
-              </p>
-
-              <div class="newsletter-themes">
-                <div class="theme-pill">• Curiosidades reales sobre cómo pensamos en otro idioma</div>
-                <div class="theme-pill">• Cómo sonar natural en correos en inglés sin parecer frío</div>
-                <div class="theme-pill">• Anécdotas culturales y consejos para comunicarte mejor</div>
-              </div>
-            </div>
-
-            <div class="newsletter-right">
-
-              <div class="newsletter-form-container" id="newsletter-form-box">
-                <div class="form-header">
-                  <span class="form-seal" aria-hidden="true">VO</span>
-                  <h3>Recibe Living Connections</h3>
-                  <p>Déjanos tu correo y acompáñanos cada semana.</p>
-                </div>
-
-                <form class="newsletter-form" id="newsletter-subscription-form" novalidate>
-                  <div class="form-group">
-                    <label for="newsletter-email" class="visually-hidden">Tu correo electrónico</label>
-                    <div class="input-wrap">
-                      <input
-                        type="email"
-                        id="newsletter-email"
-                        name="email"
-                        class="newsletter-input"
-                        placeholder="tu.correo@ejemplo.com"
-                        required
-                        autocomplete="email"
-                      />
-                    </div>
-                    <span class="input-error-msg" id="newsletter-error" hidden>Por favor ingresa un correo válido.</span>
-                  </div>
-
-                  <button type="submit" class="newsletter-submit-btn" id="newsletter-submit-btn">
-                    <span class="btn-text">Quiero suscribirme</span>
-                    <span class="btn-arrow" aria-hidden="true">→</span>
-                  </button>
-
-                  <p class="form-privacy-note">
-                    Sin spam. Puedes cancelar tu suscripción con un solo clic cuando quieras.
-                  </p>
-                </form>
-
-                <!-- Estado de confirmación humano -->
-                <div class="newsletter-success-state" id="newsletter-success" hidden>
-                  <h4>¡Qué bueno tenerte aquí!</h4>
-                  <p>
-                    Ya registramos tu correo. Cada jueves recibirás nuestra carta semanal para seguir aprendiendo juntos.
-                  </p>
-                  <div class="success-quote">
-                    <em>«Language is culture in motion. Gracias por acompañarnos.»</em>
-                  </div>
-                  <button type="button" class="btn-success-reset" id="newsletter-reset-btn">
-                    Suscribir otro correo
-                  </button>
-                </div>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- =========================================
-         SECCIÓN 06 — CONTACTO
-    ========================================== -->
-
-    <section id="contacto" class="contact-section reveal-on-scroll">
-
-      <div class="contact-ambient" aria-hidden="true"></div>
-
-      <div class="contact-inner">
-
-        <p class="section-label">
-          <span class="label-number">06</span>
-          <span class="label-dash">—</span>
-          <span>EMPECEMOS A CONVERSAR</span>
-        </p>
-
-        <h2 class="contact-title">
-          El primer paso es tener<br>
-          <span>una buena conversación.</span>
+      <div class="vo-section-header-compact">
+        <span class="vo-solid-tag tag-turquoise">TOCA CADA TARJETA PARA GIRARLA</span>
+        <h2 class="vo-display-h2">
+          Tres idiomas. <span class="vo-accent-yellow">Tres personalidades.</span>
         </h2>
-
-        <p class="contact-intro">
-          Cuéntanos qué quieres lograr. Ya sea que busques clases para ti o para tu equipo de trabajo en inglés, francés o mandarín, estamos aquí para escucharte y encontrar la mejor opción juntos.
+        <p class="vo-micro-lead">
+          Toca, inclina y gira cada tarjeta para descubrir su mundo.
         </p>
+      </div>
 
-        <div class="contact-actions-group">
+      <div class="languages-three-grid">
 
-          <!-- Botón Personas -->
-          <a
-            href="https://wa.me/573123035708?text=Hola%20Vera%20Orbis.%20Quiero%20conocer%20las%20opciones%20de%20clases%20personales."
-            class="contact-primary-btn"
-            target="_blank"
-            rel="noopener noreferrer"
-            id="start-journey-btn"
-          >
-            <span class="btn-badge">CLASES PERSONALES</span>
-            <span class="btn-text">Hablar con un asesor</span>
-            <span class="btn-arrow" aria-hidden="true">→</span>
-            <span class="btn-glow" aria-hidden="true"></span>
-          </a>
+        <!-- 01. EN — ENGLISH (NARANJA VIVO #FF6B35) -->
+        <article class="lang-showcase-card english-theme vo-kinetic-card float-a" id="ingles" tabindex="0" role="button" aria-expanded="false" aria-label="EN — English. Pulsa para girar tarjeta">
+          <div class="lang-card-inner">
 
-          <!-- Botón Empresas -->
-          <a
-            href="https://wa.me/573123035708?text=Hola%20Vera%20Orbis.%20Quiero%20pedir%20informaci%C3%B3n%20para%20mi%20empresa%20o%20equipo."
-            class="contact-b2b-btn"
-            target="_blank"
-            rel="noopener noreferrer"
-            id="contact-b2b-cta"
-          >
-            <span class="btn-badge btn-badge-orange">EMPRESAS</span>
-            <span class="btn-text">Información para equipos</span>
-            <span class="btn-arrow" aria-hidden="true">→</span>
-          </a>
+            <div class="vo-typo-lang-face vo-typo-front">
+              <span class="vo-typo-watermark" aria-hidden="true">EN</span>
+              <div class="vo-typo-top-row">
+                <span class="vo-typo-level-pill">A1 — C2</span>
+                <span class="vo-typo-flip-hint">Gira ↺</span>
+              </div>
 
-          <!-- Enlace directo WhatsApp -->
-          <a
-            href="https://wa.me/573123035708?text=Hola.%20Quiero%20hablar%20con%20un%20asesor%20acad%C3%A9mico%20de%20Vera%20Orbis."
-            class="contact-whatsapp-btn"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Escríbenos por WhatsApp"
-          >
-            <svg class="whatsapp-icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
-              <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2ZM12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.16 12.04 20.16C10.56 20.16 9.11 19.76 7.85 19.02L7.55 18.84L4.44 19.66L5.27 16.63L5.07 16.31C4.26 15.02 3.81 13.49 3.81 11.91C3.81 7.37 7.5 3.67 12.05 3.67ZM8.83 7.35C8.63 7.35 8.44 7.36 8.28 7.64C8.07 7.99 7.49 8.54 7.49 9.65C7.49 10.76 8.3 11.83 8.41 11.98C8.53 12.14 9.99 14.38 12.23 15.35C12.76 15.58 13.18 15.72 13.5 15.82C14.03 15.99 14.52 15.96 14.9 15.91C15.33 15.84 16.22 15.37 16.41 14.84C16.6 14.31 16.6 13.86 16.54 13.76C16.48 13.66 16.34 13.6 16.1 13.48C15.86 13.36 14.68 12.78 14.46 12.7C14.24 12.62 14.08 12.58 13.92 12.82C13.76 13.06 13.3 13.6 13.16 13.76C13.02 13.92 12.88 13.94 12.64 13.82C12.4 13.7 11.63 13.45 10.72 12.64C10.01 12.01 9.53 11.23 9.39 10.99C9.25 10.75 9.37 10.62 9.49 10.5C9.6 10.39 9.74 10.21 9.86 10.07C9.98 9.93 10.02 9.83 10.1 9.67C10.18 9.51 10.14 9.37 10.08 9.25C10.02 9.13 9.56 8 9.37 7.53C9.18 7.07 8.99 7.13 8.83 7.35Z"/>
-            </svg>
-            <span>Escríbenos directamente por WhatsApp: +57 312 303 5708</span>
-          </a>
+              <div class="vo-typo-centerpiece">
+                <span class="vo-monumental-code">EN</span>
+                <h3 class="vo-typo-lang-name">EN — English</h3>
+                <p class="vo-typo-subline">Soltura global para trabajar, viajar y crear sin barreras.</p>
+              </div>
 
+              <div class="vo-typo-bottom-bar">
+                <span>Descubrir por dentro</span>
+                <span aria-hidden="true">→</span>
+              </div>
+            </div>
+
+            <div class="vo-typo-lang-face vo-typo-back">
+              <div class="vo-back-header-row">
+                <span class="vo-back-lang-pill pill-bg-orange">EN — ENGLISH</span>
+                <button type="button" class="vo-back-return-btn" data-flip-close>← Volver</button>
+              </div>
+
+              <div class="vo-back-idiom-box">
+                <blockquote>«Cut to the chase»</blockquote>
+                <p>Ir directo a lo esencial: claridad real al conversar y negociar.</p>
+              </div>
+
+              <ul class="vo-back-points">
+                <li>Conversación 1 a 1 activa desde el primer día</li>
+                <li>Trabajo global, viajes y presentaciones reales</li>
+                <li>Preparación IELTS, TOEFL &amp; Duolingo</li>
+              </ul>
+
+              <div class="vo-back-cta-pair">
+                <button type="button" class="vo-back-diag-btn" data-open-orient="ingles">Agendar diagnóstico</button>
+                <a href="/languages#ingles" class="vo-back-more-link">Ver más →</a>
+              </div>
+            </div>
+
+          </div>
+        </article>
+
+
+        <!-- 02. FR — FRANÇAIS (VIOLETA ORBIS #6C3BFF) -->
+        <article class="lang-showcase-card french-theme vo-kinetic-card float-b" id="frances" tabindex="0" role="button" aria-expanded="false" aria-label="FR — Français. Pulsa para girar tarjeta">
+          <div class="lang-card-inner">
+
+            <div class="vo-typo-lang-face vo-typo-front">
+              <span class="vo-typo-watermark" aria-hidden="true">FR</span>
+              <div class="vo-typo-top-row">
+                <span class="vo-typo-level-pill">A1 — C1</span>
+                <span class="vo-typo-flip-hint">Gira ↺</span>
+              </div>
+
+              <div class="vo-typo-centerpiece">
+                <span class="vo-monumental-code">FR</span>
+                <h3 class="vo-typo-lang-name">FR — Français</h3>
+                <p class="vo-typo-subline">Matiz, cultura viva, diplomacia y placer por la conversación.</p>
+              </div>
+
+              <div class="vo-typo-bottom-bar">
+                <span>Descubrir por dentro</span>
+                <span aria-hidden="true">→</span>
+              </div>
+            </div>
+
+            <div class="vo-typo-lang-face vo-typo-back">
+              <div class="vo-back-header-row">
+                <span class="vo-back-lang-pill pill-bg-violet">FR — FRANÇAIS</span>
+                <button type="button" class="vo-back-return-btn" data-flip-close>← Volver</button>
+              </div>
+
+              <div class="vo-back-idiom-box">
+                <blockquote>«L'esprit de l'escalier»</blockquote>
+                <p>El arte francés del ingenio, el debate y la expresión precisa.</p>
+              </div>
+
+              <ul class="vo-back-points">
+                <li>Fonética natural y oído real desde cero</li>
+                <li>Cultura francófona, cine y actualidad</li>
+                <li>Preparación oficial DELF &amp; DALF</li>
+              </ul>
+
+              <div class="vo-back-cta-pair">
+                <button type="button" class="vo-back-diag-btn" data-open-orient="frances">Agendar diagnóstico</button>
+                <a href="/languages#frances" class="vo-back-more-link">Ver más →</a>
+              </div>
+            </div>
+
+          </div>
+        </article>
+
+
+        <!-- 03. 中文 — 中文 (zhōngwén) (TURQUESA SÓLIDO #20C7B5) -->
+        <article class="lang-showcase-card mandarin-theme vo-kinetic-card float-c" id="mandarin" tabindex="0" role="button" aria-expanded="false" aria-label="中文 (zhōngwén). Pulsa para girar tarjeta">
+          <div class="lang-card-inner">
+
+            <div class="vo-typo-lang-face vo-typo-front">
+              <span class="vo-typo-watermark" aria-hidden="true">中文</span>
+              <div class="vo-typo-top-row">
+                <span class="vo-typo-level-pill">HSK 1 A 6</span>
+                <span class="vo-typo-flip-hint">Gira ↺</span>
+              </div>
+
+              <div class="vo-typo-centerpiece">
+                <span class="vo-monumental-code">中文</span>
+                <span class="vo-typo-mandarin-tag">Mandarín: Comunicación, Cultura &amp; Negocios</span>
+                <h3 class="vo-typo-lang-name">中文 — 中文 (zhōngwén)</h3>
+                <p class="vo-typo-subline">Pensamiento directo y soltura comunicativa desde las primeras sesiones</p>
+              </div>
+
+              <div class="vo-typo-bottom-bar">
+                <span>Descubrir por dentro</span>
+                <span aria-hidden="true">→</span>
+              </div>
+            </div>
+
+            <div class="vo-typo-lang-face vo-typo-back">
+              <div class="vo-back-header-row">
+                <span class="vo-back-lang-pill pill-bg-turquoise">中文 — ZHŌNGWÉN</span>
+                <button type="button" class="vo-back-return-btn" data-flip-close>← Volver</button>
+              </div>
+
+              <div class="vo-back-idiom-box">
+                <blockquote>«Jiā yóu! · 加油»</blockquote>
+                <p>Energía compartida, confianza mutua (Guanxi) y visión de futuro.</p>
+              </div>
+
+              <ul class="vo-back-points">
+                <li>Comprensión fonética (pinyin) y tonos vivos</li>
+                <li>Protocolo cultural y negocios con Asia</li>
+                <li>Preparación estratégica para exámenes oficiales (HSK 1 a 6)</li>
+              </ul>
+
+              <div class="vo-back-cta-pair">
+                <button type="button" class="vo-back-diag-btn" data-open-orient="mandarin">Agendar diagnóstico</button>
+                <a href="/languages#mandarin" class="vo-back-more-link">Ver más →</a>
+              </div>
+            </div>
+
+          </div>
+        </article>
+
+      </div>
+
+      <!-- Franja compacta B2B + Sello de Transparencia -->
+      <div class="vo-b2b-compact-strip">
+        <div class="format-card format-mandarin-b2b" id="empresas">
+          <div>
+            <span class="vo-b2b-strip-kicker">COMERCIO EXTERIOR &amp; ASIA · B2B</span>
+            <h3 class="vo-b2b-strip-title">Mandarín Comercial &amp; Protocolo + Equipos Globales</h3>
+            <p class="vo-b2b-strip-micro">Entrenamiento a medida en inglés, francés y mandarín para líderes y empresas.</p>
+          </div>
+          <button type="button" class="vo-btn-solid vo-btn-orange" id="home-b2b-card-btn">
+            <span>Propuesta B2B</span>
+            <span aria-hidden="true">→</span>
+          </button>
         </div>
 
+        <div class="vo-honesty-pill-card">
+          <strong>Transparencia pedagógica</strong>
+          <p>Práctica humana real y preparación rigurosa para exámenes internacionales, sin promesas mágicas.</p>
+        </div>
       </div>
 
     </section>
 
-  </main>
 
+    <!-- =================================================================
+         04. LEARN IT · LIVE IT · SPEAK IT (AMARILLO SOL SÓLIDO #FFC83D)
+         Tres tarjetas cinéticas 3D que giran al tocarlas
+    ================================================================== -->
 
-  <!-- =========================================
-       MODAL DEMO DEL PASAPORTE (LIGHTBOX)
-  ========================================== -->
+    <section class="vo-method-sun-world" id="metodologia">
 
-  <div id="passport-modal" class="passport-modal" role="dialog" aria-modal="true" aria-labelledby="modal-student-name" hidden>
-    <div class="passport-modal-backdrop" id="passport-modal-close-backdrop"></div>
-    <div class="passport-modal-card">
-
-      <button type="button" class="passport-modal-close" id="passport-modal-close-btn" aria-label="Cerrar credencial">&times;</button>
-
-      <div class="modal-card-header">
-        <div class="modal-seal" aria-hidden="true">VO</div>
-        <div>
-          <span class="modal-kicker">VERA ORBIS · DOCUMENTO DE IDENTIDAD LINGÜÍSTICA</span>
-          <h3 id="modal-student-name">Alex Mercer <span class="modal-id">/ Estudiante Nº 001</span></h3>
-        </div>
-      </div>
-
-      <div class="modal-card-body">
-
-        <div class="modal-data-grid">
-          <div class="modal-data-item">
-            <span class="modal-data-label">IDIOMA DE ESTUDIO</span>
-            <strong class="modal-data-value">Inglés (Fluidez Avanzada)</strong>
-          </div>
-          <div class="modal-data-item">
-            <span class="modal-data-label">NIVEL ALCANZADO</span>
-            <strong class="modal-data-value highlight-level">B2 — Operativo / Vantage</strong>
-          </div>
-          <div class="modal-data-item">
-            <span class="modal-data-label">EXPEDIENTE</span>
-            <span class="modal-data-value monospace-val">VO-2026-BOG-001</span>
-          </div>
-          <div class="modal-data-item">
-            <span class="modal-data-label">ESTADO ACADÉMICO</span>
-            <span class="modal-data-value status-active-pill">• En trayecto activo</span>
-          </div>
-        </div>
-
-        <div class="modal-stamps-row" aria-hidden="true">
-          <div class="modal-stamp stamp-turquoise">
-            <span>VERA ORBIS</span>
-            <strong>APRENDE</strong>
-            <small>BOGOTÁ</small>
-          </div>
-          <div class="modal-stamp stamp-purple">
-            <span>NIVEL</span>
-            <strong>VIVE</strong>
-            <small>CEFR B2</small>
-          </div>
-          <div class="modal-stamp stamp-gold">
-            <span>COMUNICACIÓN</span>
-            <strong>HABLA</strong>
-            <small>FLUIDEZ</small>
-          </div>
-        </div>
-
-        <p class="modal-footnote">
-          El Language Passport es una herramienta pedagógica interna de seguimiento de progreso y práctica continua de Vera Orbis. Refleja tus avances formativos hacia el marco CEFR y tu preparación para exámenes oficiales ante las entidades correspondientes.
+      <div class="vo-section-header-compact">
+        <span class="vo-solid-tag tag-indigo">FILOSOFÍA EN MOVIMIENTO · TOCA PARA GIRAR</span>
+        <h2 class="vo-display-h2">
+          Learn It. Live It. <span class="vo-accent-violet">Speak It.</span>
+        </h2>
+        <p class="vo-micro-lead">
+          No vienes a llenar huecos en un libro. Vienes a usar tu voz.
         </p>
+      </div>
+
+      <div class="vo-method-deck">
+
+        <article class="vo-kinetic-card vo-method-card step-learn float-a" tabindex="0" role="button" aria-expanded="false" aria-label="01 Learn It. Pulsa para girar">
+          <div class="vo-kinetic-inner">
+            <div class="vo-kinetic-face vo-kinetic-front">
+              <span class="vo-method-num-watermark" aria-hidden="true">01</span>
+              <span class="vo-method-step-pill">PASO 01</span>
+              <div>
+                <h3 class="vo-method-front-title">Learn It</h3>
+                <p class="vo-method-front-hook">Comprende con sentido real.</p>
+              </div>
+              <span class="vo-method-flip-cue">Girar tarjeta ↺</span>
+            </div>
+            <div class="vo-kinetic-face vo-kinetic-back">
+              <span class="vo-method-step-pill">01 · LEARN IT</span>
+              <p class="vo-method-back-quote">
+                «Descubres cómo suena y funciona el idioma dentro de conversaciones reales, nunca aislado.»
+              </p>
+              <button type="button" class="vo-back-return-btn" data-flip-close>← Volver</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="vo-kinetic-card vo-method-card step-live float-b" tabindex="0" role="button" aria-expanded="false" aria-label="02 Live It. Pulsa para girar">
+          <div class="vo-kinetic-inner">
+            <div class="vo-kinetic-face vo-kinetic-front">
+              <span class="vo-method-num-watermark" aria-hidden="true">02</span>
+              <span class="vo-method-step-pill">PASO 02</span>
+              <div>
+                <h3 class="vo-method-front-title">Live It</h3>
+                <p class="vo-method-front-hook">Habita la cultura viva.</p>
+              </div>
+              <span class="vo-method-flip-cue">Girar tarjeta ↺</span>
+            </div>
+            <div class="vo-kinetic-face vo-kinetic-back">
+              <span class="vo-method-step-pill">02 · LIVE IT</span>
+              <p class="vo-method-back-quote">
+                «Humor, cine, café, acuerdos y códigos cotidianos que ningún traductor te explica.»
+              </p>
+              <button type="button" class="vo-back-return-btn" data-flip-close>← Volver</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="vo-kinetic-card vo-method-card step-speak float-c" tabindex="0" role="button" aria-expanded="false" aria-label="03 Speak It. Pulsa para girar">
+          <div class="vo-kinetic-inner">
+            <div class="vo-kinetic-face vo-kinetic-front">
+              <span class="vo-method-num-watermark" aria-hidden="true">03</span>
+              <span class="vo-method-step-pill">PASO 03</span>
+              <div>
+                <h3 class="vo-method-front-title">Speak It</h3>
+                <p class="vo-method-front-hook">Habla desde el día uno.</p>
+              </div>
+              <span class="vo-method-flip-cue">Girar tarjeta ↺</span>
+            </div>
+            <div class="vo-kinetic-face vo-kinetic-back">
+              <span class="vo-method-step-pill">03 · SPEAK IT</span>
+              <p class="vo-method-back-quote">
+                «Un espacio cálido y humano donde equivocarse sin miedo desbloquea tu fluidez.»
+              </p>
+              <button type="button" class="vo-back-return-btn" data-flip-close>← Volver</button>
+            </div>
+          </div>
+        </article>
 
       </div>
 
-      <div class="modal-card-footer">
-        <a href="/platform.html" class="modal-portal-btn">
-          <span>Ir a la plataforma de estudiantes</span>
+      <div class="vo-method-cta-center">
+        <a href="/method" class="vo-btn-solid vo-btn-indigo">
+          <span>Explorar cómo enseñamos</span>
           <span aria-hidden="true">→</span>
         </a>
       </div>
 
-    </div>
-  </div>
+    </section>
 
 
-  <!-- =========================================
-       FOOTER INSTITUCIONAL
-  ========================================== -->
+    <!-- =================================================================
+         05. LOS CINCO UNIVERSOS (TURQUESA SÓLIDO #20C7B5)
+    ================================================================== -->
 
-  <footer class="site-footer">
+    <section class="vo-universes-turquoise-world" id="universos">
 
-    <div class="footer-top-grid">
+      <div class="vo-section-header-compact">
+        <span class="vo-solid-tag tag-ivory">CINCO DIMENSIONES INTERACTIVAS</span>
+        <h2 class="vo-display-h2">
+          Un mundo vivo por <span class="vo-accent-ivory">explorar.</span>
+        </h2>
+      </div>
 
-      <!-- Columna 1: Marca y logo -->
-      <div class="footer-col footer-col-brand">
-        <img src="${VO_LOGO}" alt="Vera Orbis" class="footer-logo-img" />
-        <p class="footer-tagline">WE SPEAK THE WORLD.</p>
-        <p class="footer-category">Language, Culture &amp; Connection Center</p>
-        <p class="footer-manifesto">
-          «Every Person Matters. Creemos en un mundo conectado a través del diálogo sincero, la cultura y la empatía al hablar.»
+      <div class="universes-five-grid">
+
+        <div class="vo-kinetic-card vo-universe-kinetic u-1 float-a" tabindex="0" role="button" aria-expanded="false">
+          <div class="vo-kinetic-inner">
+            <div class="vo-kinetic-face vo-kinetic-front">
+              <span class="vo-u-roman">I</span>
+              <div>
+                <h3>Language</h3>
+                <p class="vo-u-front-micro">EN · FR · 中文 con voz propia.</p>
+              </div>
+              <span class="vo-u-tap">Girar ↺</span>
+            </div>
+            <div class="vo-kinetic-face vo-kinetic-back">
+              <p class="vo-u-back-text">Tres idiomas diseñados alrededor de tus metas reales.</p>
+              <a href="/languages" class="vo-u-portal-link">Ir a Idiomas →</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="vo-kinetic-card vo-universe-kinetic u-2 float-b" tabindex="0" role="button" aria-expanded="false">
+          <div class="vo-kinetic-inner">
+            <div class="vo-kinetic-face vo-kinetic-front">
+              <span class="vo-u-roman">II</span>
+              <div>
+                <h3>Culture</h3>
+                <p class="vo-u-front-micro">Cómo siente cada sociedad.</p>
+              </div>
+              <span class="vo-u-tap">Girar ↺</span>
+            </div>
+            <div class="vo-kinetic-face vo-kinetic-back">
+              <p class="vo-u-back-text">Expresiones reales, miradas y matices culturales vivos.</p>
+              <a href="/method" class="vo-u-portal-link">Ver método →</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="vo-kinetic-card vo-universe-kinetic u-3 float-c" tabindex="0" role="button" aria-expanded="false">
+          <div class="vo-kinetic-inner">
+            <div class="vo-kinetic-face vo-kinetic-front">
+              <span class="vo-u-roman">III</span>
+              <div>
+                <h3>People</h3>
+                <p class="vo-u-front-micro">Cada persona importa.</p>
+              </div>
+              <span class="vo-u-tap">Girar ↺</span>
+            </div>
+            <div class="vo-kinetic-face vo-kinetic-back">
+              <p class="vo-u-back-text">Acompañamiento cercano, cálido y 100% humano.</p>
+              <a href="/who-we-are" class="vo-u-portal-link">Quiénes somos →</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="vo-kinetic-card vo-universe-kinetic u-4 float-a" tabindex="0" role="button" aria-expanded="false">
+          <div class="vo-kinetic-inner">
+            <div class="vo-kinetic-face vo-kinetic-front">
+              <span class="vo-u-roman">IV</span>
+              <div>
+                <h3>Places</h3>
+                <p class="vo-u-front-micro">Bogotá 4°42′N hacia el mundo.</p>
+              </div>
+              <span class="vo-u-tap">Girar ↺</span>
+            </div>
+            <div class="vo-kinetic-face vo-kinetic-back">
+              <p class="vo-u-back-text">De nuestro estudio en Bogotá a cualquier ciudad global.</p>
+              <a href="/contact" class="vo-u-portal-link">Conectar →</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="vo-kinetic-card vo-universe-kinetic u-5 float-b" tabindex="0" role="button" aria-expanded="false">
+          <div class="vo-kinetic-inner">
+            <div class="vo-kinetic-face vo-kinetic-front">
+              <span class="vo-u-roman">V</span>
+              <div>
+                <h3>Experiences</h3>
+                <p class="vo-u-front-micro">Living Connections activas.</p>
+              </div>
+              <span class="vo-u-tap">Girar ↺</span>
+            </div>
+            <div class="vo-kinetic-face vo-kinetic-back">
+              <p class="vo-u-back-text">Sesiones 1 a 1, programas B2B y experiencias culturales.</p>
+              <a href="/experiences" class="vo-u-portal-link">Experiencias →</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================================
+         PUERTAS DEL UNIVERSO VERA ORBIS (MARFIL SÓLIDO #FFF9F0)
+    ================================================================== -->
+
+    <section class="vo-portals-doors-world" id="portales">
+      <div class="vo-section-header-compact">
+        <span class="vo-solid-tag tag-orange">ELIGE TU PUERTA</span>
+        <h2 class="vo-display-h2">
+          Sigue explorando <span class="vo-accent-violet">Vera Orbis.</span>
+        </h2>
+      </div>
+
+      <div class="home-portals-grid">
+        <a href="/who-we-are" class="vo-door-card door-1" id="quienes-somos">
+          <span class="vo-door-num">PUERTA 01</span>
+          <div>
+            <h3 class="vo-door-title">Quiénes somos</h3>
+            <p class="vo-door-sub">Historia, esencia y liderazgo.</p>
+          </div>
+          <span class="vo-door-enter">Entrar →</span>
+        </a>
+
+        <a href="/languages" class="vo-door-card door-2">
+          <span class="vo-door-num">PUERTA 02</span>
+          <div>
+            <h3 class="vo-door-title">Idiomas</h3>
+            <p class="vo-door-sub">EN · FR · 中文 en detalle.</p>
+          </div>
+          <span class="vo-door-enter">Entrar →</span>
+        </a>
+
+        <a href="/method" class="vo-door-card door-3" id="metodo">
+          <span class="vo-door-num">PUERTA 03</span>
+          <div>
+            <h3 class="vo-door-title">Cómo enseñamos</h3>
+            <p class="vo-door-sub">Learn · Live · Speak.</p>
+          </div>
+          <span class="vo-door-enter">Entrar →</span>
+        </a>
+
+        <a href="/experiences" class="vo-door-card door-4" id="ecosistema">
+          <span class="vo-door-num">PUERTA 04</span>
+          <div>
+            <h3 class="vo-door-title">Experiencias</h3>
+            <p class="vo-door-sub">1 a 1, equipos y ecosistema.</p>
+          </div>
+          <span class="vo-door-enter">Entrar →</span>
+        </a>
+
+        <a href="/contact" class="vo-door-card door-5">
+          <span class="vo-door-num">PUERTA 05</span>
+          <div>
+            <h3 class="vo-door-title">Let's Connect</h3>
+            <p class="vo-door-sub">Conversa hoy con nosotros.</p>
+          </div>
+          <span class="vo-door-enter">Entrar →</span>
+        </a>
+      </div>
+    </section>
+
+
+    <!-- =================================================================
+         06. GRAN CIERRE — ABRE LA PUERTA (NARANJA VIVO SÓLIDO #FF6B35)
+    ================================================================== -->
+
+    <section class="vo-finale-orange-world" id="contacto">
+      <div class="vo-finale-inner">
+        <span class="vo-solid-tag tag-yellow">WE SPEAK THE WORLD</span>
+        <h2 class="vo-finale-title">
+          ¿Qué idioma quieres habitar hoy?
+        </h2>
+        <p class="vo-finale-micro">
+          15 minutos de diagnóstico gratuito y cálido para trazar tu ruta personal o de equipo.
         </p>
-        <div class="footer-lang-focus">
-          <span class="lang-pill">Inglés</span>
-          <span class="lang-pill">Francés</span>
-          <span class="lang-pill">Mandarín</span>
+
+        <div class="vo-finale-actions">
+          <button type="button" class="vo-btn-solid vo-btn-indigo" id="home-diag-cta" aria-haspopup="dialog">
+            <span>Agendar diagnóstico sin costo</span>
+            <span aria-hidden="true">→</span>
+          </button>
+
+          <button type="button" class="vo-btn-solid vo-btn-ivory" id="home-pathfinder-cta" aria-haspopup="dialog">
+            <span>Ruta en 3 preguntas</span>
+            <span aria-hidden="true">→</span>
+          </button>
+
+          <a
+            href="https://wa.me/573123035708?text=Hola%20Vera%20Orbis.%20Quiero%20conocer%20m%C3%A1s%20sobre%20sus%20programas."
+            class="vo-btn-solid vo-btn-yellow"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Hablar por WhatsApp con Vera Orbis"
+          >
+            <span>WhatsApp directo</span>
+            <span aria-hidden="true">→</span>
+          </a>
         </div>
       </div>
+    </section>
 
-      <!-- Columna 2: Cómo enseñamos -->
-      <div class="footer-col">
-        <h4 class="footer-col-title">Cómo enseñamos</h4>
-        <ul class="footer-links">
-          <li><a href="#metodo">Nuestra forma de enseñar</a></li>
-          <li><a href="#ingles">Clases de Inglés</a></li>
-          <li><a href="#frances">Clases de Francés</a></li>
-          <li><a href="#mandarin">Clases de Mandarín</a></li>
-          <li><a href="#empresas">Mandarín Comercial (B2B)</a></li>
-          <li><a href="#ecosistema">Vera Voice (IA 24/7)</a></li>
-        </ul>
-      </div>
+  </main>
 
-      <!-- Columna 3: Living Connections -->
-      <div class="footer-col">
-        <h4 class="footer-col-title">Living Connections</h4>
-        <ul class="footer-links">
-          <li><a href="#newsletter">Carta semanal</a></li>
-          <li><a href="#metodo">Filosofía de enseñanza</a></li>
-          <li><a href="#programas">Preparación para exámenes oficiales</a></li>
-          <li><a href="#contacto">Pedir diagnóstico</a></li>
-        </ul>
-      </div>
-
-      <!-- Columna 4: Accesos y contacto -->
-      <div class="footer-col">
-        <h4 class="footer-col-title">Accesos directos</h4>
-        <ul class="footer-links">
-          <li><a href="/platform.html" class="footer-link-highlight">Acceso Estudiantes →</a></li>
-          <li><a href="/login.html">Iniciar sesión</a></li>
-          <li><a href="/register.html">Registro de estudiantes</a></li>
-          <li>
-            <a href="https://wa.me/573123035708" target="_blank" rel="noopener noreferrer">
-              WhatsApp: +57 312 303 5708
-            </a>
-          </li>
-        </ul>
-        <div class="footer-campus-badge">
-          <span>BOGOTÁ · 4°42′N · 74°04′W</span>
-        </div>
-      </div>
-
-    </div>
-
-    <div class="footer-bottom-bar">
-      <div class="footer-motto-row">
-        <span>LEARN IT</span>
-        <span class="bullet" aria-hidden="true">·</span>
-        <span>LIVE IT</span>
-        <span class="bullet" aria-hidden="true">·</span>
-        <span>SPEAK IT</span>
-      </div>
-
-      <div class="footer-copy">
-        © 2026 VERA ORBIS. TODOS LOS DERECHOS RESERVADOS.
-      </div>
-    </div>
-
-  </footer>
-
+  ${renderSiteFooter()}
+  ${renderConversionModals()}
 `
 
-/* =========================================================
-   VANILLA JS: LÓGICA MODULAR & MICRO-INTERACCIONES
-   ========================================================= */
+// =========================================================================
+// INICIALIZACIÓN INTERACTIVA VIVA (ESCRITORIO + TÁCTIL MÓVIL)
+// =========================================================================
 
-function initApp() {
-  initNavbarElevation()
-  initMobileMenu()
-  initLanguagesDropdown()
-  initHeroAudienceToggle()
-  initScrollReveal()
-  initPassport3DTilt()
-  initPassportModal()
-  initNewsletterForm()
-  initButtonMicroInteractions()
-  initSmoothScroll()
-}
+initConversionModals()
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initApp)
-} else {
-  initApp()
-}
-
-/**
- * 1. ELEVACIÓN DE NAVBAR AL HACER SCROLL
- */
-function initNavbarElevation() {
-  const navbar = document.querySelector('#site-navbar')
-  if (!navbar) return
-
+// 1. Elevación de Navbar al hacer scroll
+const navbar = document.querySelector('#site-navbar')
+if (navbar) {
   let ticking = false
-  const onScroll = () => {
+  window.addEventListener('scroll', () => {
     if (!ticking) {
       window.requestAnimationFrame(() => {
-        if (window.scrollY > 30) {
-          navbar.classList.add('navbar-scrolled')
-        } else {
-          navbar.classList.remove('navbar-scrolled')
-        }
+        navbar.classList.toggle('navbar-scrolled', window.scrollY > 25)
         ticking = false
       })
       ticking = true
     }
-  }
-
-  window.addEventListener('scroll', onScroll, { passive: true })
-  onScroll()
+  }, { passive: true })
 }
 
-/**
- * 2. SELECTOR / MENÚ DE IDIOMAS EN NAVBAR
- */
-function initLanguagesDropdown() {
-  const wrap = document.querySelector('#languages-dropdown-wrap')
-  const btn = document.querySelector('#languages-menu-btn')
-  const menu = document.querySelector('#languages-dropdown-menu')
-  if (!wrap || !btn || !menu) return
+// 2. Menú de navegación móvil (con transición .is-open)
+const mobileToggle = document.querySelector('#mobile-menu-toggle')
+const mobileDrawer = document.querySelector('#mobile-nav-drawer')
+const mobileClose = document.querySelector('#mobile-nav-close')
+const mobileBackdrop = document.querySelector('#mobile-nav-backdrop')
 
-  const toggle = () => {
-    const isOpen = wrap.classList.toggle('is-open')
-    btn.setAttribute('aria-expanded', String(isOpen))
-  }
+const openDrawer = () => {
+  if (!mobileDrawer) return
+  mobileDrawer.hidden = false
+  window.requestAnimationFrame(() => {
+    mobileDrawer.classList.add('is-open')
+  })
+  mobileToggle?.setAttribute('aria-expanded', 'true')
+  document.body.classList.add('menu-open')
+}
 
-  btn.addEventListener('click', (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    toggle()
+const closeDrawer = () => {
+  if (!mobileDrawer) return
+  mobileDrawer.classList.remove('is-open')
+  mobileToggle?.setAttribute('aria-expanded', 'false')
+  document.body.classList.remove('menu-open')
+  window.setTimeout(() => {
+    if (!mobileDrawer.classList.contains('is-open')) {
+      mobileDrawer.hidden = true
+    }
+  }, 320)
+}
+
+mobileToggle?.addEventListener('click', openDrawer)
+mobileClose?.addEventListener('click', closeDrawer)
+mobileBackdrop?.addEventListener('click', closeDrawer)
+
+document.querySelectorAll('.mobile-nav-link, .mobile-lang-chip').forEach(link => {
+  link.addEventListener('click', closeDrawer)
+})
+
+// 3. Dropdown de idiomas en escritorio
+const langBtn = document.querySelector('#languages-menu-btn')
+const langWrap = document.querySelector('#languages-dropdown-wrap')
+
+if (langBtn && langWrap) {
+  langBtn.addEventListener('click', (e) => {
+    if (window.innerWidth > 900) {
+      e.preventDefault()
+      const isOpen = langWrap.classList.toggle('is-open')
+      langBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false')
+    }
   })
 
   document.addEventListener('click', (e) => {
-    if (!wrap.contains(e.target)) {
-      wrap.classList.remove('is-open')
-      btn.setAttribute('aria-expanded', 'false')
+    if (!langWrap.contains(e.target)) {
+      langWrap.classList.remove('is-open')
+      langBtn.setAttribute('aria-expanded', 'false')
     }
   })
+}
 
-  menu.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', () => {
-      wrap.classList.remove('is-open')
-      btn.setAttribute('aria-expanded', 'false')
+// 4. Parallax vivo en la composición derecha aprobada del Hero (.hero-art-canvas)
+if (typeof window !== 'undefined') {
+  const isFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  if (isFinePointer && !prefersReducedMotion) {
+    const hero = document.querySelector('#inicio')
+    const card1 = document.querySelector('.photo-one')
+    const card2 = document.querySelector('.photo-two')
+    const card3 = document.querySelector('.photo-three')
+
+    if (hero && card1) {
+      let ticking = false
+      hero.addEventListener('mousemove', (e) => {
+        if (!ticking) {
+          window.requestAnimationFrame(() => {
+            const rect = hero.getBoundingClientRect()
+            const x = (e.clientX - rect.left - rect.width / 2) / rect.width
+            const y = (e.clientY - rect.top - rect.height / 2) / rect.height
+
+            if (card1) card1.style.transform = `rotate(-5deg) translate3d(${(x * -18).toFixed(1)}px, ${(y * -14).toFixed(1)}px, 0)`
+            if (card2) card2.style.transform = `rotate(4deg) translate3d(${(x * 18).toFixed(1)}px, ${(y * -16).toFixed(1)}px, 0)`
+            if (card3) card3.style.transform = `rotate(-3deg) translate3d(${(x * -14).toFixed(1)}px, ${(y * 14).toFixed(1)}px, 0)`
+            ticking = false
+          })
+          ticking = true
+        }
+      })
+
+      hero.addEventListener('mouseleave', () => {
+        if (card1) card1.style.transform = 'rotate(-5deg)'
+        if (card2) card2.style.transform = 'rotate(4deg)'
+        if (card3) card3.style.transform = 'rotate(-3deg)'
+      })
+    }
+  }
+}
+
+// 5. LANGUAGE PASSPORT INTERACTIVO EN HERO (Apertura 3D + Estampado de Visas + Tilt)
+const passportDock = document.querySelector('#vo-passport-dock')
+const passportCover = document.querySelector('#vo-passport-cover')
+const passportOpenBook = document.querySelector('#vo-passport-open')
+const passportCloseBtn = document.querySelector('#vo-passport-close')
+const stampsCanvas = document.querySelector('#vo-stamps-canvas')
+const passportCounter = document.querySelector('#vo-passport-counter')
+const stampGreeting = document.querySelector('#vo-stamp-greeting')
+const stampJump = document.querySelector('#vo-stamp-jump')
+
+const STAMP_DATA = {
+  en: {
+    cls: 'seal-en',
+    title: 'EN · LONDON / NYC',
+    sub: 'VISA ACTIVA · VO',
+    greeting: '«Let\'s speak the world together.»',
+    href: '#ingles',
+    jumpText: 'Ir a EN ↓'
+  },
+  fr: {
+    cls: 'seal-fr',
+    title: 'FR · PARIS / MONTRÉAL',
+    sub: 'VISA ACTIF · VO',
+    greeting: '«Le monde s\'ouvre quand on le parle.»',
+    href: '#frances',
+    jumpText: 'Ir a FR ↓'
+  },
+  zh: {
+    cls: 'seal-zh',
+    title: '中文 · SHANGHAI / BEIJING',
+    sub: '签证激活 · VO',
+    greeting: '«世界因交流而更广阔 · Nǐ hǎo!»',
+    href: '#mandarin',
+    jumpText: 'Ir a 中文 ↓'
+  }
+}
+
+const activeStamps = new Set(['en'])
+
+function renderPassportStamps(latestKey = 'en') {
+  if (!stampsCanvas) return
+  stampsCanvas.innerHTML = Array.from(activeStamps).map((key) => {
+    const info = STAMP_DATA[key]
+    return `
+      <div class="vo-visa-seal ${info.cls}">
+        <strong>${info.title}</strong>
+        <small>${info.sub}</small>
+      </div>
+    `
+  }).join('')
+
+  if (passportCounter) {
+    passportCounter.textContent = `${activeStamps.size} / 3 SELLOS ACTIVOS`
+  }
+
+  const current = STAMP_DATA[latestKey] || STAMP_DATA.en
+  if (stampGreeting) stampGreeting.textContent = current.greeting
+  if (stampJump) {
+    stampJump.setAttribute('href', current.href)
+    stampJump.textContent = current.jumpText
+  }
+}
+
+function openPassport(stampKey) {
+  if (!passportCover || !passportOpenBook) return
+  passportCover.hidden = true
+  passportCover.setAttribute('aria-expanded', 'true')
+  passportOpenBook.hidden = false
+  passportDock?.classList.add('is-expanded')
+  if (stampKey && STAMP_DATA[stampKey]) {
+    activeStamps.add(stampKey)
+    renderPassportStamps(stampKey)
+  }
+}
+
+function closePassport() {
+  if (!passportCover || !passportOpenBook) return
+  passportOpenBook.hidden = true
+  passportCover.hidden = false
+  passportCover.setAttribute('aria-expanded', 'false')
+  passportDock?.classList.remove('is-expanded')
+}
+
+passportCover?.addEventListener('click', () => openPassport())
+passportCover?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault()
+    openPassport()
+  }
+})
+passportCloseBtn?.addEventListener('click', closePassport)
+
+document.querySelectorAll('[data-stamp]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const key = btn.getAttribute('data-stamp')
+    if (key && STAMP_DATA[key]) {
+      activeStamps.add(key)
+      renderPassportStamps(key)
+    }
+  })
+})
+
+document.querySelectorAll('[data-open-stamp]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const key = btn.getAttribute('data-open-stamp')
+    openPassport(key)
+  })
+})
+
+// Tilt 3D para la portada física del Pasaporte
+if (typeof window !== 'undefined' && passportCover) {
+  const isFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  if (isFinePointer && !prefersReducedMotion) {
+    passportCover.addEventListener('mousemove', (e) => {
+      const rect = passportCover.getBoundingClientRect()
+      const rx = (((e.clientY - rect.top) / rect.height) - 0.5) * -18
+      const ry = (((e.clientX - rect.left) / rect.width) - 0.5) * 20
+      passportCover.style.transform = `translateY(-10px) rotateX(${rx.toFixed(1)}deg) rotateY(${ry.toFixed(1)}deg) scale(1.03)`
     })
-  })
-}
-
-/**
- * 3. MENÚ MÓVIL
- */
-function initMobileMenu() {
-  const toggleBtn = document.querySelector('#mobile-menu-toggle')
-  const drawer = document.querySelector('#mobile-nav-drawer')
-  const closeBtn = document.querySelector('#mobile-nav-close')
-  const backdrop = document.querySelector('#mobile-nav-backdrop')
-  const navLinks = document.querySelectorAll('.mobile-nav-link, .mobile-lang-chip')
-
-  if (!toggleBtn || !drawer) return
-
-  const openDrawer = () => {
-    drawer.hidden = false
-    toggleBtn.setAttribute('aria-expanded', 'true')
-    document.body.classList.add('modal-open')
-    setTimeout(() => {
-      drawer.classList.add('is-open')
-      closeBtn?.focus()
-    }, 10)
-  }
-
-  const closeDrawer = () => {
-    drawer.classList.remove('is-open')
-    toggleBtn.setAttribute('aria-expanded', 'false')
-    document.body.classList.remove('modal-open')
-    setTimeout(() => {
-      drawer.hidden = true
-    }, 350)
-    toggleBtn.focus()
-  }
-
-  toggleBtn.addEventListener('click', () => {
-    if (drawer.hidden) {
-      openDrawer()
-    } else {
-      closeDrawer()
-    }
-  })
-
-  closeBtn?.addEventListener('click', closeDrawer)
-  backdrop?.addEventListener('click', closeDrawer)
-
-  navLinks.forEach(link => {
-    link.addEventListener('click', closeDrawer)
-  })
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !drawer.hidden) {
-      closeDrawer()
-    }
-  })
-}
-
-/**
- * 4. SELECTOR INTERACTIVO EN EL HERO (PERSONAS / EMPRESAS)
- */
-function initHeroAudienceToggle() {
-  const tabB2C = document.querySelector('#tab-b2c')
-  const tabB2B = document.querySelector('#tab-b2b')
-  const modeB2C = document.querySelector('#mode-b2c')
-  const modeB2B = document.querySelector('#mode-b2b')
-
-  if (!tabB2C || !tabB2B || !modeB2C || !modeB2B) return
-
-  const switchMode = (mode) => {
-    if (mode === 'b2b') {
-      tabB2C.classList.remove('is-active')
-      tabB2C.setAttribute('aria-selected', 'false')
-
-      tabB2B.classList.add('is-active')
-      tabB2B.setAttribute('aria-selected', 'true')
-
-      modeB2C.hidden = true
-      modeB2C.classList.remove('fade-in')
-
-      modeB2B.hidden = false
-      modeB2B.classList.add('fade-in')
-    } else {
-      tabB2B.classList.remove('is-active')
-      tabB2B.setAttribute('aria-selected', 'false')
-
-      tabB2C.classList.add('is-active')
-      tabB2C.setAttribute('aria-selected', 'true')
-
-      modeB2B.hidden = true
-      modeB2B.classList.remove('fade-in')
-
-      modeB2C.hidden = false
-      modeB2C.classList.add('fade-in')
-    }
-  }
-
-  tabB2C.addEventListener('click', () => switchMode('b2c'))
-  tabB2B.addEventListener('click', () => switchMode('b2b'))
-}
-
-/**
- * 5. ANIMACIÓN AL HACER SCROLL
- */
-function initScrollReveal() {
-  const revealElements = document.querySelectorAll('.reveal-on-scroll')
-  if (!revealElements.length || typeof IntersectionObserver === 'undefined') {
-    revealElements.forEach(el => el.classList.add('is-revealed'))
-    return
-  }
-
-  const observer = new IntersectionObserver((entries, obs) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('is-revealed')
-        obs.unobserve(entry.target)
-      }
+    passportCover.addEventListener('mouseleave', () => {
+      passportCover.style.transform = ''
     })
-  }, {
-    threshold: 0.1,
-    rootMargin: '0px 0px -40px 0px'
-  })
-
-  revealElements.forEach(el => observer.observe(el))
+  }
 }
 
-/**
- * 6. EFECTO 3D EN LA TARJETA DEL PASAPORTE
- */
-function initPassport3DTilt() {
-  const tiltWrap = document.querySelector('#passport-tilt-wrap')
-  const card = document.querySelector('#passport-card')
-  const glare = document.querySelector('#passport-glare')
+// 6. REPRODUCTOR DE VIDEO REAL (Sin póster sustituto, con control de audio y barra)
+const founderVideo = document.querySelector('#home-founder-video')
+const playPauseBtn = document.querySelector('#vo-vid-playpause')
+const soundBtn = document.querySelector('#vo-vid-sound')
+const unmuteRestartBtn = document.querySelector('#vo-unmute-restart-btn')
+const scrubber = document.querySelector('#vo-vid-scrubber')
+const scrubberFill = document.querySelector('#vo-vid-scrubber-fill')
+const vidTime = document.querySelector('#vo-vid-time')
+const statusPill = document.querySelector('#vo-video-status-pill')
 
-  if (!tiltWrap || !card) return
-
-  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches
-
-  if (prefersReduced || isTouchDevice) return
-
-  let rafId = null
-  let mouseX = 0
-  let mouseY = 0
-  let isHovered = false
-
-  const handlePointerMove = (e) => {
-    const rect = tiltWrap.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-
-    mouseX = (x / rect.width) * 2 - 1
-    mouseY = (y / rect.height) * 2 - 1
-
-    if (!isHovered) {
-      isHovered = true
-      card.classList.add('is-tilting')
-    }
-
-    if (glare) {
-      const glareX = (x / rect.width) * 100
-      const glareY = (y / rect.height) * 100
-      glare.style.background = `radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255, 249, 240, 0.22) 0%, rgba(255, 249, 240, 0) 65%)`
-      glare.style.opacity = '1'
-    }
-
-    if (!rafId) {
-      rafId = window.requestAnimationFrame(updateTilt)
-    }
-  }
-
-  const updateTilt = () => {
-    const maxRotX = 7
-    const maxRotY = 9
-    const rotX = -mouseY * maxRotX
-    const rotY = mouseX * maxRotY
-
-    card.style.transform = `perspective(1200px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) translateY(-8px)`
-    rafId = null
-  }
-
-  const handlePointerLeave = () => {
-    isHovered = false
-    card.classList.remove('is-tilting')
-    card.style.transform = ''
-    if (glare) glare.style.opacity = '0'
-    if (rafId) {
-      window.cancelAnimationFrame(rafId)
-      rafId = null
-    }
-  }
-
-  tiltWrap.addEventListener('pointermove', handlePointerMove, { passive: true })
-  tiltWrap.addEventListener('pointerleave', handlePointerLeave)
+function formatSec(sec) {
+  if (!Number.isFinite(sec) || sec < 0) return '0:00'
+  const m = Math.floor(sec / 60)
+  const s = Math.floor(sec % 60)
+  return `${m}:${String(s).padStart(2, '0')}`
 }
 
-/**
- * 7. MODAL DEMO DEL PASAPORTE (CON CIERRE DEFENSIVO GARANTIZADO)
- */
-function initPassportModal() {
-  const modal = document.querySelector('#passport-modal')
-  const trigger = document.querySelector('#passport-preview-trigger')
-  const closeBtn = document.querySelector('#passport-modal-close-btn')
-  const closeBackdrop = document.querySelector('#passport-modal-close-backdrop')
-
-  if (!modal) return
-
-  const openModal = () => {
-    modal.removeAttribute('hidden')
-    modal.classList.add('is-active')
-    modal.style.display = 'flex'
-    trigger?.setAttribute('aria-expanded', 'true')
-    document.body.classList.add('modal-open')
-    setTimeout(() => {
-      closeBtn?.focus()
-    }, 50)
+function syncVideoUi() {
+  if (!founderVideo) return
+  if (playPauseBtn) {
+    playPauseBtn.textContent = founderVideo.paused ? 'Reproducir' : 'Pausar'
   }
-
-  const closeModal = () => {
-    modal.setAttribute('hidden', '')
-    modal.classList.remove('is-active')
-    modal.style.display = 'none'
-    trigger?.setAttribute('aria-expanded', 'false')
-    document.body.classList.remove('modal-open')
-    trigger?.focus()
+  if (soundBtn) {
+    soundBtn.textContent = founderVideo.muted ? 'Activar audio' : 'Silenciar'
+    soundBtn.classList.toggle('is-sound-on', !founderVideo.muted)
   }
+  if (statusPill) {
+    statusPill.textContent = founderVideo.muted
+      ? 'TOCA PARA AUDIO'
+      : 'AUDIO ACTIVO'
+  }
+}
 
-  trigger?.addEventListener('click', (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    openModal()
+if (founderVideo) {
+  founderVideo.addEventListener('timeupdate', () => {
+    const dur = founderVideo.duration || 45.8
+    const pct = Math.min(100, Math.max(0, (founderVideo.currentTime / dur) * 100))
+    if (scrubberFill) scrubberFill.style.width = `${pct.toFixed(1)}%`
+    if (scrubber) scrubber.setAttribute('aria-valuenow', String(Math.round(pct)))
+    if (vidTime) vidTime.textContent = `${formatSec(founderVideo.currentTime)} / ${formatSec(dur)}`
   })
 
-  closeBtn?.addEventListener('click', (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    closeModal()
+  founderVideo.addEventListener('loadedmetadata', syncVideoUi)
+  founderVideo.addEventListener('play', syncVideoUi)
+  founderVideo.addEventListener('pause', syncVideoUi)
+  founderVideo.addEventListener('volumechange', syncVideoUi)
+
+  // Clic directo en el video: si está silenciado, activa audio; si ya tiene audio, pausa/reproduce
+  founderVideo.addEventListener('click', () => {
+    if (founderVideo.muted) {
+      founderVideo.muted = false
+      founderVideo.play().catch(() => {})
+    } else if (founderVideo.paused) {
+      founderVideo.play().catch(() => {})
+    } else {
+      founderVideo.pause()
+    }
+    syncVideoUi()
   })
 
-  closeBackdrop?.addEventListener('click', (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    closeModal()
+  playPauseBtn?.addEventListener('click', () => {
+    if (founderVideo.paused) {
+      founderVideo.play().catch(() => {})
+    } else {
+      founderVideo.pause()
+    }
+    syncVideoUi()
   })
 
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      const isOpen = modal.classList.contains('is-active') || !modal.hasAttribute('hidden') || modal.style.display === 'flex'
-      if (isOpen) {
-        closeModal()
-      }
+  soundBtn?.addEventListener('click', () => {
+    founderVideo.muted = !founderVideo.muted
+    if (!founderVideo.muted && founderVideo.paused) {
+      founderVideo.play().catch(() => {})
+    }
+    syncVideoUi()
+  })
+
+  unmuteRestartBtn?.addEventListener('click', () => {
+    founderVideo.currentTime = 0
+    founderVideo.muted = false
+    founderVideo.play().catch(() => {})
+    syncVideoUi()
+  })
+
+  scrubber?.addEventListener('click', (e) => {
+    const rect = scrubber.getBoundingClientRect()
+    const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width))
+    if (Number.isFinite(founderVideo.duration)) {
+      founderVideo.currentTime = ratio * founderVideo.duration
     }
   })
 }
 
-/**
- * 8. FORMULARIO LIVING CONNECTIONS
- */
-function initNewsletterForm() {
-  const form = document.querySelector('#newsletter-subscription-form')
-  const emailInput = document.querySelector('#newsletter-email')
-  const errorMsg = document.querySelector('#newsletter-error')
-  const submitBtn = document.querySelector('#newsletter-submit-btn')
-  const successState = document.querySelector('#newsletter-success')
-  const resetBtn = document.querySelector('#newsletter-reset-btn')
+// 7. MOTOR DE TARJETAS CINÉTICAS 3D (Elevación, Inclinación con Cursor y Giro 180° Táctil/Clic)
+const kineticCards = document.querySelectorAll('.vo-kinetic-card')
+const canHoverFine = typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches
+const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-  if (!form || !emailInput || !submitBtn || !successState) return
+kineticCards.forEach((card) => {
+  const inner = card.querySelector('.lang-card-inner, .vo-kinetic-inner')
 
-  const validateEmail = (email) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  const toggleFlip = (forceState) => {
+    const next = typeof forceState === 'boolean' ? forceState : !card.classList.contains('is-flipped')
+    card.classList.toggle('is-flipped', next)
+    card.setAttribute('aria-expanded', next ? 'true' : 'false')
+    if (inner) {
+      inner.style.transform = next ? 'rotateY(180deg)' : ''
+    }
   }
 
-  form.addEventListener('submit', (e) => {
-    e.preventDefault()
-    const email = emailInput.value.trim()
-
-    if (!validateEmail(email)) {
-      if (errorMsg) errorMsg.hidden = false
-      emailInput.setAttribute('aria-invalid', 'true')
-      emailInput.focus()
+  // Clic o tap en cualquier parte de la tarjeta (excepto enlaces o botones de modal) gira la tarjeta
+  card.addEventListener('click', (e) => {
+    if (e.target.closest('a, [data-open-orient]')) return
+    if (e.target.closest('[data-flip-close]')) {
+      e.stopPropagation()
+      toggleFlip(false)
       return
     }
-
-    if (errorMsg) errorMsg.hidden = true
-    emailInput.removeAttribute('aria-invalid')
-
-    submitBtn.classList.add('is-submitting')
-    submitBtn.disabled = true
-
-    try {
-      const stored = JSON.parse(localStorage.getItem('vo_newsletter_subscribers') || '[]')
-      if (!stored.includes(email)) {
-        stored.push(email)
-        localStorage.setItem('vo_newsletter_subscribers', JSON.stringify(stored))
-      }
-    } catch (_) {}
-
-    setTimeout(() => {
-      submitBtn.classList.remove('is-submitting')
-      submitBtn.disabled = false
-      form.hidden = true
-      successState.hidden = false
-      successState.classList.add('fade-in')
-    }, 450)
+    toggleFlip()
   })
 
-  resetBtn?.addEventListener('click', () => {
-    emailInput.value = ''
-    form.hidden = false
-    successState.hidden = true
-    successState.classList.remove('fade-in')
-    emailInput.focus()
-  })
-
-  emailInput.addEventListener('input', () => {
-    if (errorMsg && !errorMsg.hidden && validateEmail(emailInput.value.trim())) {
-      errorMsg.hidden = true
-      emailInput.removeAttribute('aria-invalid')
+  // Accesibilidad por teclado
+  card.addEventListener('keydown', (e) => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target === card) {
+      e.preventDefault()
+      toggleFlip()
     }
   })
-}
 
-/**
- * 9. MICRO-INTERACCIONES EN BOTONES
- */
-function initButtonMicroInteractions() {
-  const primaryButtons = document.querySelectorAll('.btn-primary-action, .contact-primary-btn')
-  primaryButtons.forEach(btn => {
-    btn.addEventListener('pointerenter', () => {
-      const shimmer = btn.querySelector('.btn-shimmer')
-      if (shimmer) {
-        shimmer.style.animation = 'none'
-        void shimmer.offsetWidth
-        shimmer.style.animation = 'shimmerSweep 0.85s cubic-bezier(0.16, 1, 0.3, 1)'
+  // Inclinación y elevación 3D en tiempo real al mover el cursor
+  if (canHoverFine && !reducedMotion && inner) {
+    card.addEventListener('mousemove', (e) => {
+      if (card.classList.contains('is-flipped')) return
+      const rect = card.getBoundingClientRect()
+      const nx = ((e.clientX - rect.left) / rect.width) - 0.5
+      const ny = ((e.clientY - rect.top) / rect.height) - 0.5
+      const rotateX = (ny * -16).toFixed(2)
+      const rotateY = (nx * 18).toFixed(2)
+      inner.style.transform = `translateY(-12px) scale(1.025) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`
+    })
+
+    card.addEventListener('mouseleave', () => {
+      if (!card.classList.contains('is-flipped')) {
+        inner.style.transform = ''
       }
     })
-  })
-}
+  }
+})
 
-/**
- * 10. DESPLAZAMIENTO SUAVE
- */
-function initSmoothScroll() {
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function(e) {
-      const targetId = this.getAttribute('href')
-      if (targetId === '#' || targetId === '#!') return
-
-      const targetEl = document.querySelector(targetId)
-      if (targetEl) {
-        e.preventDefault()
-        targetEl.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        })
-      }
-    })
+// Botones de diagnóstico directo dentro del reverso de cada idioma
+document.querySelectorAll('[data-open-orient]').forEach((btn) => {
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation()
+    const lang = btn.getAttribute('data-open-orient')
+    window.__voOpenOrientationModal?.({ lang })
   })
-}
+})
+
+// 8. Conexión de todos los CTAs con los modales de conversión y Sales Engine
+document.querySelector('#nav-cta-btn')?.addEventListener('click', () => {
+  window.__voOpenOrientationModal?.()
+})
+
+document.querySelector('#b2c-primary-cta')?.addEventListener('click', () => {
+  window.__voOpenOrientationModal?.()
+})
+
+document.querySelector('#b2c-pathfinder-trigger')?.addEventListener('click', () => {
+  window.__voOpenPathfinderModal?.()
+})
+
+document.querySelector('#b2b-primary-cta')?.addEventListener('click', () => {
+  window.__voOpenCorporateModal?.()
+})
+
+document.querySelector('#home-b2b-card-btn')?.addEventListener('click', () => {
+  window.__voOpenCorporateModal?.()
+})
+
+document.querySelector('#home-diag-cta')?.addEventListener('click', () => {
+  window.__voOpenOrientationModal?.()
+})
+
+document.querySelector('#home-pathfinder-cta')?.addEventListener('click', () => {
+  window.__voOpenPathfinderModal?.()
+})

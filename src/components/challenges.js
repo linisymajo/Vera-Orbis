@@ -1,3 +1,5 @@
+const esc = value => String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;')
+
 export function renderChallenges(challenges = [], submissions = []) {
 
   if (!challenges || challenges.length === 0) {
@@ -92,7 +94,7 @@ export function renderChallenges(challenges = [], submissions = []) {
                   <span class="challenge-points">
                     ${
                       points
-                        ? `${points} POINTS`
+                        ? `${esc(points)} POINTS`
                         : 'CHALLENGE'
                     }
                   </span>
@@ -112,7 +114,7 @@ export function renderChallenges(challenges = [], submissions = []) {
 
 
                 <h3>
-                  ${title}
+                  ${esc(title)}
                 </h3>
 
 
@@ -120,7 +122,7 @@ export function renderChallenges(challenges = [], submissions = []) {
                   description
                     ? `
                       <p class="challenge-desc">
-                        ${description}
+                        ${esc(description)}
                       </p>
                     `
                     : ''
@@ -133,7 +135,7 @@ export function renderChallenges(challenges = [], submissions = []) {
                       <div class="challenge-instructions">
                         <strong>Instructions:</strong>
                         <br>
-                        ${instructions.replace(
+                        ${esc(instructions).replace(
                           /\n/g,
                           '<br>'
                         )}
@@ -158,7 +160,7 @@ export function renderChallenges(challenges = [], submissions = []) {
 
                         <p>
                           Status:
-                          ${submission.status || 'Submitted'}
+                          ${esc(submission.status || 'Submitted')}
                         </p>
 
                         ${
@@ -172,7 +174,7 @@ export function renderChallenges(challenges = [], submissions = []) {
 
                                 <br>
 
-                                ${String(submission.teacher_feedback).replace(
+                                ${esc(submission.teacher_feedback).replace(
                                   /\n/g,
                                   '<br>'
                                 )}
@@ -187,11 +189,13 @@ export function renderChallenges(challenges = [], submissions = []) {
                     : `
                       <div
                         class="challenge-submit-form"
-                        id="challenge-form-${challenge.id}"
+                        id="challenge-form-${esc(challenge.id)}"
                       >
 
                         <textarea
-                          id="response-${challenge.id}"
+                          id="response-${esc(challenge.id)}"
+                          aria-label="Your response to ${esc(title)}"
+                          maxlength="12000"
                           placeholder="Type your response or completion notes here..."
                           rows="3"
                         ></textarea>
@@ -199,14 +203,16 @@ export function renderChallenges(challenges = [], submissions = []) {
                         <button
                           type="button"
                           class="next-step-button"
-                          onclick="window.voPlatform.submitChallenge('${challenge.id}')"
+                          data-challenge-id="${esc(challenge.id)}"
+                          onclick="window.voPlatform.submitChallenge(this.dataset.challengeId, this)"
                         >
                           Submit Challenge ↗
                         </button>
 
                         <p
-                          id="challenge-error-${challenge.id}"
+                          id="challenge-error-${esc(challenge.id)}"
                           class="error-text"
+                          role="status"
                         ></p>
 
                       </div>

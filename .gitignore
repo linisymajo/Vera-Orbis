@@ -33,3 +33,6 @@ dist-ssr
 *.local
 supabase/.temp/
 .temp/
+# Local browser verification artifacts
+test-results/
+playwright-report/

@@ -1,5 +1,6 @@
 import './onboarding.css'
 import { supabase } from './lib/supabase.js'
+import { captureEnrollmentInvitation, acceptPendingInvitation, readEnrollmentAccess, renderEnrollmentGate, initializeEnrollmentProfile, EnrollmentServiceError, renderEnrollmentServiceError } from './lib/enrollment.js'
 import {
   SUPPORTED_INTERFACE_LANGUAGES,
   DEFAULT_INTERFACE_LANGUAGE,
@@ -362,72 +363,37 @@ const app = document.querySelector('#app')
    AUTHENTICATION / STUDENT
 ========================================================= */
 
-async function getCurrentStudent() {
-  const {
-    data: { user },
-    error
-  } = await supabase.auth.getUser()
-
-  if (error || !user) {
-    console.error('No se pudo leer la sesión de onboarding.')
-    return null
+async function getCurrentStudent({ retryEnrollment = false } = {}) {
+  const { data: { user }, error } = await supabase.auth.getUser()
+  if (error || !user) return null
+  let access = await readEnrollmentAccess(supabase, { retry: retryEnrollment })
+  if (access.student_id !== user.id) {
+    throw new EnrollmentServiceError('Your account changed during enrollment verification.', { reason: 'session', code: 'ENROLLMENT_SESSION_CHANGED' })
   }
-
-  let {
-    data: profile,
-    error: profileError
-  } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .maybeSingle()
-
-  if (!profile) {
-    const defaultName =
-      user.user_metadata?.name ||
-      user.email?.split('@')[0] ||
-      'Estudiante'
-
-    const { data: createdProfile } = await supabase
-      .from('profiles')
-      .upsert({
-        id: user.id,
-        name: defaultName,
-        language: 'English',
-        level: 'A1',
-        level_name: 'Beginner',
-        progress: 0,
-        lessons_completed: 0,
-        total_lessons: null,
-        current_module: 'Getting Started',
-        next_step: 'Completa tu onboarding',
-        interface_language: 'es'
-      }, { onConflict: 'id' })
-      .select('*')
-      .maybeSingle()
-
-    if (createdProfile) {
-      profile = createdProfile
-    } else {
-      console.error('No se pudo cargar o crear el perfil de onboarding.')
-      return null
+  const invitation = captureEnrollmentInvitation()
+  if (invitation && access.email_verified && access.role === 'student') {
+    await acceptPendingInvitation(supabase, invitation)
+    access = await readEnrollmentAccess(supabase)
+    if (access.student_id !== user.id) {
+      throw new EnrollmentServiceError('Your account changed during enrollment verification.', { reason: 'session', code: 'ENROLLMENT_SESSION_CHANGED' })
     }
   }
-
-  // Load existing interface language preference if saved
-  if (profile.interface_language) {
-    selectedInterfaceLanguage = normalizeInterfaceLanguage(profile.interface_language)
-  } else {
-    const cached = localStorage.getItem('vo_interface_language')
-    if (cached) {
-      selectedInterfaceLanguage = normalizeInterfaceLanguage(cached)
-    }
+  if (!access.email_verified || ['rejected', 'suspended'].includes(access.status)) {
+    renderEnrollmentGate(access, { app, client: supabase })
+    return { blocked: true }
   }
-
-  return {
-    user,
-    profile
+  if (['teacher', 'admin'].includes(access.role)) {
+    window.location.replace('/teacher.html')
+    return { blocked: true }
   }
+  await initializeEnrollmentProfile(supabase)
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles').select('*').eq('id', user.id).single()
+  if (profileError || !profile) throw new Error('No se pudo cargar tu perfil.')
+  selectedInterfaceLanguage = normalizeInterfaceLanguage(
+    profile.interface_language || localStorage.getItem('vo_interface_language')
+  )
+  return { user, profile, access }
 }
 
 
@@ -525,7 +491,7 @@ function renderShell() {
           <a
             href="/platform.html?from=onboarding"
             class="onboarding-skip-link"
-            title="Ir a mi plataforma"
+            title="Revisar mi acceso"
           >
             Omitir por ahora →
           </a>
@@ -1173,7 +1139,7 @@ function renderCompletion() {
         class="primary-button completion-button"
         id="enter-platform-link"
       >
-        Ingresar a mi plataforma
+        Revisar mi acceso
         <span>↗</span>
       </a>
 
@@ -1195,7 +1161,7 @@ function renderCompletion() {
    INITIALIZE
 ========================================================= */
 
-async function initialize() {
+async function initialize({ retryEnrollment = false } = {}) {
 
   if (!app) {
     console.error('No se encontró el elemento raíz de onboarding.')
@@ -1224,12 +1190,14 @@ async function initialize() {
     /*
      * 1. Get authenticated student
      */
-    student = await getCurrentStudent()
+    student = await getCurrentStudent({ retryEnrollment })
 
     if (!student) {
       window.location.href = '/login.html'
       return
     }
+
+    if (student.blocked) return
 
     /*
      * 2. Load existing onboarding
@@ -1250,7 +1218,10 @@ async function initialize() {
     renderShell()
 
   } catch (error) {
-
+    if (error instanceof EnrollmentServiceError) {
+      renderEnrollmentServiceError(error, { app, client: supabase, onRetry: () => initialize({ retryEnrollment: true }) })
+      return
+    }
     console.error('No se pudo inicializar el onboarding.', error)
 
     app.innerHTML = `

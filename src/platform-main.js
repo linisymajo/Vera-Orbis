@@ -1,4 +1,7 @@
+import { setupAcademicAIConsent } from './components/settings.js'
+import { readEnrollmentAccess, renderEnrollmentGate, initializeEnrollmentProfile, EnrollmentServiceError, renderEnrollmentServiceError } from './lib/enrollment.js'
 import './platform.css'
+import './academic.css'
 
 import { getCurrentUser, getStudentProfile } from './lib/auth.js'
 import {
@@ -7,15 +10,33 @@ import {
 } from './pages/platform.js'
 import { supabase } from './lib/supabase.js'
 import { setupExerciseForms } from './components/exercises.js'
+import { mountLearningPlans } from './components/learningPlans.js'
+import { mountNotifications } from './components/notifications.js'
+import { renderFinals, setupFinals } from './components/finals.js'
+import { submitAcademicChallenge } from './lib/academicChallenges.js'
+import { getUnreadNotificationCount } from './lib/notifications.js'
 import { setupInboxHandlers } from './components/inbox.js'
 import { setupPassportBook } from './components/passportBook.js'
 import { normalizeInterfaceLanguage, t } from './lib/i18n.js'
+import { isStudentView, readStudentRoute, watchAcademicLocation, writeStudentRoute } from './lib/academicRoutes.js'
 
 let currentStudent = null
+let platformNavigationId = 0
+let activePlatformView = 'home'
+let stopPlatformRoutes = () => {}
+const IS_STAGING_PREVIEW = import.meta.env.MODE === 'staging'
 export const VERA_VOICE_URL =
-  import.meta.env.VITE_VERA_VOICE_URL || 'http://localhost:3000/'
+  import.meta.env.VITE_VERA_VOICE_URL || (IS_STAGING_PREVIEW ? '' : 'http://localhost:3000/')
 
 export function getEffectiveVeraVoiceUrl() {
+  if (IS_STAGING_PREVIEW) {
+    // Staging never borrows a browser override or the production Voice service.
+    try {
+      const configured = new URL(VERA_VOICE_URL)
+      if (configured.protocol !== 'https:' || ['vera-orbis.onrender.com', 'localhost', '127.0.0.1', '[::1]'].includes(configured.hostname)) return ''
+      return configured.href
+    } catch { return '' }
+  }
   if (typeof window !== 'undefined') {
     try {
       const custom =
@@ -39,6 +60,7 @@ export function getEffectiveVeraVoiceUrl() {
 }
 
 export function isVeraVoiceConfiguredForEnv(testUrl) {
+  if (IS_STAGING_PREVIEW) return Boolean(getEffectiveVeraVoiceUrl())
   const url = testUrl || getEffectiveVeraVoiceUrl()
   if (typeof window !== 'undefined' && window.location?.protocol === 'https:') {
     const isLocalhostOrHttp =
@@ -55,7 +77,77 @@ let platformData = {
   feedback: [],
   challenges: [],
   submissions: [],
-  exercises: []
+  exercises: [],
+  finals: []
+}
+
+async function refreshNotificationBadge() {
+  try {
+    const count = await getUnreadNotificationCount(supabase)
+    document.querySelectorAll('[data-academic-unread]').forEach(badge => { badge.textContent = count ? String(count) : ''; badge.hidden = !count })
+  } catch {
+    document.querySelectorAll('[data-academic-unread]').forEach(badge => { badge.textContent = ''; badge.hidden = true })
+  }
+}
+
+async function setupStudentAcademicView(view, host) {
+  if (!host) return
+  if (platformData.viewErrors?.[view]) {
+    host.innerHTML = '<p role="alert">Your current learning information could not be loaded. Your saved work is safe.</p><button type="button" data-academic-retry>Try again</button>'
+    host.querySelector('[data-academic-retry]').onclick = () => openPlatformView(view)
+    return
+  }
+  const panel = host.querySelector('[data-student-academic-view]')
+  if (!panel) return
+  try {
+  if (view === 'learning-plans') await mountLearningPlans(panel, supabase, { studentView: true })
+  if (view === 'notifications') await mountNotifications(panel, supabase, { onNavigate: target => {
+    document.querySelector('.platform-floating-card')?.remove()
+    document.querySelector('#platform-home')?.classList.remove('card-is-open')
+    document.querySelector('.platform-nav')?.classList.remove('platform-nav-behind')
+    openPlatformView(target)
+  }, onCountChange: refreshNotificationBadge })
+  if (view === 'finals') {
+    if (platformData.finalsError) { panel.textContent = 'Final assessments are unavailable. Please try again or contact your teacher.'; return }
+    panel.innerHTML = renderFinals(platformData.finals)
+    setupFinals(supabase, panel)
+  }
+  } catch {
+    panel.textContent = 'Your learning information is unavailable. Try opening this view again.'
+  }
+}
+
+async function refreshStudentView(view) {
+  const tables = { materials: 'materials', feedback: 'feedback', calendar: 'classes', inbox: 'inbox_messages', challenges: 'weekly_challenges', finals: 'student_finals', exercises: 'student_exercises' }
+  if (!tables[view]) return
+  platformData.viewErrors ||= {}
+  try {
+    const main = await withTimeout(supabase.from(tables[view]).select('*'), 12000)
+    if (main.error) throw new Error('Learning information unavailable')
+    const data = main.data || []
+    if (view === 'challenges') {
+      const responses = await supabase.from('student_challenge_submissions').select('*')
+      if (responses.error) throw new Error('Responses unavailable')
+      platformData.challenges = data.filter(item => !item.status || item.status === 'active')
+      platformData.submissions = responses.data || []
+    } else if (view === 'exercises') {
+      const finals = await supabase.from('student_finals').select('exercise_id')
+      if (finals.error) throw new Error('Assessments unavailable')
+      const finalIds = new Set((finals.data || []).map(item => item.exercise_id))
+      platformData.exercises = data.filter(item => !finalIds.has(item.exercise_id))
+    } else if (view === 'calendar') {
+      const attendance = await supabase.from('class_attendance').select('*').eq('student_id', currentStudent.id)
+      if (attendance.error) throw new Error('Calendar unavailable')
+      platformData.classes = data
+      platformData.attendance = attendance.data || []
+    } else {
+      platformData[view === 'inbox' ? 'messages' : view] = data
+      if (view === 'finals') platformData.finalsError = false
+    }
+    delete platformData.viewErrors[view]
+  } catch {
+    platformData.viewErrors[view] = true
+  }
 }
 
 
@@ -237,16 +329,20 @@ export function renderPlatformErrorScreen(error) {
 
 let isInitializingPlatform = false
 let platformLoaded = false
+let enrollmentServiceBlocked = false
 
 /* =========================================================
    LOAD PLATFORM
 ========================================================= */
 
-export async function loadPlatform() {
-  if (isInitializingPlatform) {
+export async function loadPlatform({ retryEnrollment = false } = {}) {
+  if (isInitializingPlatform || (enrollmentServiceBlocked && !retryEnrollment)) {
     return
   }
   isInitializingPlatform = true
+  platformLoaded = false
+  platformNavigationId++
+  stopPlatformRoutes()
 
   try {
     const user = await getCurrentUser()
@@ -256,6 +352,17 @@ export async function loadPlatform() {
       isInitializingPlatform = false
       return
     }
+
+    const enrollmentAccess = await readEnrollmentAccess(supabase, { retry: retryEnrollment })
+    if (enrollmentAccess.student_id !== user.id) {
+      throw new EnrollmentServiceError('Your account changed during enrollment verification.', { reason: 'session', code: 'ENROLLMENT_SESSION_CHANGED' })
+    }
+    enrollmentServiceBlocked = false
+    if (!enrollmentAccess.academic_access) {
+      renderEnrollmentGate(enrollmentAccess, { app: document.querySelector('#app'), client: supabase })
+      return
+    }
+    if (enrollmentAccess.role === 'admin') { window.location.replace('/teacher.html'); return }
 
     const { data: teacherRecord } = await withTimeout(
       supabase
@@ -280,35 +387,8 @@ export async function loadPlatform() {
     )
 
     if (!profile) {
-      const defaultName =
-        user.user_metadata?.name ||
-        user.email?.split('@')[0] ||
-        'Student'
-
-      const { data: createdProfile } = await withTimeout(
-        supabase
-          .from('profiles')
-          .upsert({
-            id: user.id,
-            name: defaultName,
-            language: 'English',
-            level: 'A1',
-            level_name: 'Beginner',
-            progress: 0,
-            lessons_completed: 0,
-            total_lessons: null,
-            current_module: 'Getting Started',
-            next_step: 'Complete your onboarding'
-          }, { onConflict: 'id' })
-          .select('*')
-          .maybeSingle(),
-        10000,
-        'Profile creation timed out'
-      )
-
-      if (createdProfile) {
-        profile = createdProfile
-      }
+      await initializeEnrollmentProfile(supabase)
+      profile = await getStudentProfile(user.id)
     }
 
     if (!profile) {
@@ -398,7 +478,8 @@ export async function loadPlatform() {
       packagesRes,
       paymentsRes,
       cultureRes,
-      messagesRes
+      messagesRes,
+      finalsRes
     ] = await withTimeout(
       Promise.all([
         supabase
@@ -436,7 +517,7 @@ export async function loadPlatform() {
           ),
 
         supabase
-          .from('challenge_submissions')
+          .from('student_challenge_submissions')
           .select('*')
           .eq(
             'student_id',
@@ -478,7 +559,8 @@ export async function loadPlatform() {
           .from('inbox_messages')
           .select('*')
           .or(`recipient_id.eq.${student.id},sender_id.eq.${student.id}`)
-          .order('created_at', { ascending: false })
+          .order('created_at', { ascending: false }),
+        supabase.from('student_finals').select('*').order('due_at', { ascending: true })
       ]),
       12000,
       'Platform data load timed out'
@@ -512,7 +594,9 @@ export async function loadPlatform() {
       submissions:
         submissionsRes.data || [],
       exercises:
-        exercisesRes.error ? [] : (exercisesRes.data || []),
+        exercisesRes.error ? [] : (exercisesRes.data || []).filter(item => !(finalsRes.data || []).some(final => final.exercise_id === item.exercise_id)),
+      finals: finalsRes.data || [],
+      finalsError: Boolean(finalsRes.error),
       classes:
         classesRes.error ? [] : (classesRes.data || []),
       attendance:
@@ -549,10 +633,21 @@ export async function loadPlatform() {
     initializeDynamicPlatform()
     setupGlobalPlatformFunctions()
     setupExerciseForms(supabase)
+    setupAcademicAIConsent(supabase)
+    refreshNotificationBadge()
     setupPlatformNavigation()
 
     platformLoaded = true
+    await setupPlatformRoutes()
   } catch (error) {
+    if (error instanceof EnrollmentServiceError) {
+      enrollmentServiceBlocked = true
+      renderEnrollmentServiceError(error, {
+        app: document.querySelector('#app'), client: supabase,
+        onRetry: () => loadPlatform({ retryEnrollment: true })
+      })
+      return
+    }
     console.error('Error loading student platform:', error)
     renderPlatformErrorScreen(error)
   } finally {
@@ -598,7 +693,10 @@ export async function switchInterfaceLanguage(newLang) {
       platformData.exercises
     )
     setupExerciseForms(supabase)
+    setupAcademicAIConsent(supabase)
+    refreshNotificationBadge()
     setupGlobalPlatformFunctions()
+    await setupPlatformRoutes()
   }
 }
 
@@ -606,6 +704,19 @@ export async function switchInterfaceLanguage(newLang) {
    PLATFORM NAVIGATION
 ========================================================= */
 let platformNavigationReady = false
+
+async function setupPlatformRoutes() {
+  if (!platformLoaded || enrollmentServiceBlocked || !currentStudent) return
+  activePlatformView = 'home'
+  stopPlatformRoutes()
+  stopPlatformRoutes = watchAcademicLocation(() => {
+    if (!platformLoaded || enrollmentServiceBlocked) return
+    const view = readStudentRoute()
+    if (view !== activePlatformView) openPlatformView(view, null, null, { updateHistory: false })
+  })
+  const initialView = readStudentRoute()
+  if (initialView !== 'home') await openPlatformView(initialView, null, null, { updateHistory: false })
+}
 
 
 function setupPlatformNavigation() {
@@ -684,7 +795,8 @@ function setupPlatformNavigation() {
       url.includes('localhost') ||
       url.includes('127.0.0.1') ||
       url.startsWith('http://')
-    const isUnconfiguredInProduction = isHttpsEnv && isUnsafeLocalUrl
+    const isUnconfiguredStaging = IS_STAGING_PREVIEW && !rawUrl
+    const isUnconfiguredInProduction = isUnconfiguredStaging || (isHttpsEnv && isUnsafeLocalUrl)
 
     if (modal) {
       modal.hidden = false
@@ -702,15 +814,31 @@ function setupPlatformNavigation() {
       }
       if (notice) {
         notice.hidden = false
+        if (isUnconfiguredStaging) {
+          const stagingMsg = 'Vera Voice is disabled in this staging preview. A separate staging service has not been configured.'
+          const noticeTitle = document.querySelector('#vera-voice-notice-title')
+          const noticeDesc = document.querySelector('#vera-voice-notice-desc')
+          const noticeSetup = notice.querySelector?.('.vera-voice-notice-setup')
+          if (noticeDesc) {
+            if (noticeTitle) noticeTitle.textContent = 'Vera Voice — Staging Preview'
+            noticeDesc.textContent = stagingMsg
+            if (noticeSetup) noticeSetup.style.display = 'none'
+          } else {
+            notice.textContent = stagingMsg
+          }
+        }
       }
       if (externalLink) {
         externalLink.style.display = 'none'
+        if (isUnconfiguredStaging) externalLink.removeAttribute('href')
       }
       if (status) {
-        status.textContent =
-          'Vera Voice requiere configurar VITE_VERA_VOICE_URL con HTTPS en producción.'
+        status.textContent = isUnconfiguredStaging
+          ? 'Vera Voice is disabled in this staging preview. A separate staging service has not been configured.'
+          : 'Vera Voice requiere configurar VITE_VERA_VOICE_URL con HTTPS en producción.'
       }
-      trigger?.removeAttribute('aria-disabled')
+      if (isUnconfiguredStaging) trigger?.setAttribute('aria-disabled', 'true')
+      else trigger?.removeAttribute('aria-disabled')
       return
     }
 
@@ -956,6 +1084,10 @@ function setupPlatformNavigation() {
     const form = event.target.closest('#vera-voice-url-form')
     if (form) {
       event.preventDefault()
+      if (IS_STAGING_PREVIEW) {
+        launchVeraVoice(document.querySelector('[data-vera-voice-launch]'))
+        return
+      }
       const input = form.querySelector('#vera-voice-custom-url')
       const val = input?.value?.trim()
       if (val) {
@@ -1041,7 +1173,7 @@ function setupPlatformNavigation() {
           rawUrl.includes('localhost') ||
           rawUrl.includes('127.0.0.1') ||
           rawUrl.startsWith('http://')
-        if (isHttpsEnv && isUnsafeLocalUrl) {
+        if (IS_STAGING_PREVIEW || (isHttpsEnv && isUnsafeLocalUrl)) {
           event.preventDefault()
           launchVeraVoice(veraLink)
           return
@@ -1061,6 +1193,7 @@ function setupPlatformNavigation() {
 if (roadmapStep) {
 
   event.preventDefault()
+  event.stopPropagation()
 
   openRoadmapStepCard(
     roadmapStep
@@ -1117,11 +1250,36 @@ if (roadmapStep) {
   )
 
 }
-function openPlatformView(
+async function openPlatformView(
   view,
   filter = null,
-  sourceElement = null
+  sourceElement = null,
+  { updateHistory = true } = {}
 ) {
+  if (!platformLoaded || enrollmentServiceBlocked || !currentStudent || !isStudentView(view)) return
+  const requestedView = view
+  const navigationId = ++platformNavigationId
+  activePlatformView = view
+  if (updateHistory) writeStudentRoute(view)
+  document.querySelectorAll('.platform-floating-card, .roadmap-floating-card').forEach(card => card.remove())
+  document.querySelector('#platform-home')?.classList.remove('card-is-open')
+  document.querySelector('.platform-nav')?.classList.remove('platform-nav-behind')
+  document.querySelectorAll('.platform-nav [data-platform-view]').forEach(link => {
+    const active = link.dataset.platformView === view
+    link.classList.toggle('active', active)
+    if (active) link.setAttribute('aria-current', 'page')
+    else link.removeAttribute('aria-current')
+  })
+  if (view === 'home') {
+    closePlatformView({ updateHistory: false })
+    return
+  }
+  await refreshStudentView(requestedView)
+  if (platformNavigationId !== navigationId) return
+  if (document.querySelector('#platform-internal-view')?.classList.contains('is-active')) sourceElement = null
+  if (sourceElement?.closest('.platform-nav-more')) sourceElement = null
+  document.querySelector('.platform-nav-more')?.removeAttribute('open')
+  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) sourceElement = null
 
   /*
    * =======================================================
@@ -1318,14 +1476,17 @@ if (sourceElement) {
 
     floatingContent.innerHTML =
       floatingView
+    setupStudentAcademicView(view, floatingContent)
     setupExerciseForms(supabase)
+    setupAcademicAIConsent(supabase)
+    refreshNotificationBadge()
     if (view === 'inbox') {
       setupInboxHandlers(supabase, currentStudent, async () => {
         try {
           const mRes = await supabase.from('inbox_messages').select('*').or(`recipient_id.eq.${currentStudent.id},sender_id.eq.${currentStudent.id}`).order('created_at', { ascending: false })
           if (mRes.data) {
             platformData.messages = mRes.data
-            const unread = mRes.data.filter(m => !m.is_read).length
+            const unread = mRes.data.filter(m => !m.is_read && m.sender_id !== currentStudent.id).length
             document.querySelectorAll('.nav-unread-badge').forEach(b => {
               b.textContent = unread > 0 ? String(unread) : ''
               b.style.display = unread > 0 ? 'inline-block' : 'none'
@@ -1357,8 +1518,7 @@ if (sourceElement) {
     setupCardMovement(floatingContent)
     setupMaterialButtons(floatingContent)
 
-floatingContent.style.transform =
-  'rotateY(180deg)'
+    floatingContent.style.transform = 'none'
 
     /*
      * =====================================================
@@ -1388,8 +1548,7 @@ floatingContent.style.transform =
      * =====================================================
      * OPEN ANIMATION
      *
-     * The browser animates the REAL card from
-     * the clicked element to the final panel.
+     * Subtle perspective lift-and-expand without mirroring.
      * =====================================================
      */
 
@@ -1403,37 +1562,17 @@ floatingContent.style.transform =
       width: `${rect.width}px`,
       height: `${rect.height}px`,
       transform:
-        'perspective(1400px) translateY(0) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1)',
-      opacity: 1
+        'perspective(1400px) translateY(0) rotateX(0deg) rotateY(0deg) scale(0.98)',
+      opacity: 0.92
     },
 
     {
-      left: `${rect.left}px`,
-      top: `${rect.top - 18}px`,
-      width: `${rect.width}px`,
-      height: `${rect.height}px`,
+      left: `${finalLeft}px`,
+      top: `${Math.max(16, finalTop - 8)}px`,
+      width: `${finalWidth}px`,
+      height: `${finalHeight}px`,
       transform:
-        'perspective(1400px) translateY(-18px) rotateX(8deg) rotateY(-5deg) rotateZ(-1deg) scale(1.04)',
-      opacity: 1
-    },
-
-    {
-      left: `${rect.left}px`,
-      top: `${rect.top - 25}px`,
-      width: `${rect.width}px`,
-      height: `${rect.height}px`,
-      transform:
-        'perspective(1400px) translateY(-25px) rotateX(5deg) rotateY(35deg) rotateZ(1deg) scale(1.02)',
-      opacity: 1
-    },
-
-    {
-      left: `${rect.left}px`,
-      top: `${rect.top - 18}px`,
-      width: `${rect.width}px`,
-      height: `${rect.height}px`,
-      transform:
-        'perspective(1400px) translateY(-18px) rotateX(2deg) rotateY(90deg) rotateZ(0deg) scale(1)',
+        'perspective(1400px) translateY(-6px) rotateX(2.5deg) rotateY(0deg) scale(1.008)',
       opacity: 1
     },
 
@@ -1443,22 +1582,12 @@ floatingContent.style.transform =
       width: `${finalWidth}px`,
       height: `${finalHeight}px`,
       transform:
-        'perspective(1400px) translateY(-5px) rotateX(0deg) rotateY(150deg) rotateZ(0deg) scale(1.01)',
-      opacity: 1
-    },
-
-    {
-      left: `${finalLeft}px`,
-      top: `${finalTop}px`,
-      width: `${finalWidth}px`,
-      height: `${finalHeight}px`,
-      transform:
-        'perspective(1400px) translateY(0) rotateX(0deg) rotateY(180deg) rotateZ(0deg) scale(1)',
+        'perspective(1400px) translateY(0) rotateX(0deg) rotateY(0deg) scale(1)',
       opacity: 1
     }
   ],
   {
-    duration: 1350,
+    duration: 420,
     easing: 'cubic-bezier(0.22, 0.8, 0.22, 1)',
     fill: 'forwards'
   }
@@ -1474,14 +1603,7 @@ floatingContent.style.transform =
       floatingCard.querySelector(
         '.floating-back-button'
       )
-backButton.style.transform =
-  'rotateY(180deg)'
-
-backButton.style.left =
-  'auto'
-
-backButton.style.right =
-  '32px'
+    backButton.style.transform = 'none'
 
     backButton.addEventListener(
       'click',
@@ -1489,6 +1611,10 @@ backButton.style.right =
 
         event.preventDefault()
         event.stopPropagation()
+
+        const closingNavigationId = ++platformNavigationId
+        activePlatformView = 'home'
+        writeStudentRoute('home')
 
         /*
          * Reverse animation.
@@ -1502,27 +1628,7 @@ backButton.style.right =
               width: `${finalWidth}px`,
               height: `${finalHeight}px`,
               transform:
-                'perspective(1400px) translateY(0) rotateX(0deg) rotateY(360deg) scale(1)',
-              opacity: 1
-            },
-
-            {
-              left: `${finalLeft + finalWidth * 0.25}px`,
-              top: `${finalTop + finalHeight * 0.12}px`,
-              width: `${finalWidth * 0.6}px`,
-              height: `${finalHeight * 0.6}px`,
-              transform:
-                'perspective(1400px) translateY(-20px) rotateX(8deg) rotateY(450deg) scale(1)',
-              opacity: 1
-            },
-
-            {
-              left: `${rect.left}px`,
-              top: `${rect.top - 30}px`,
-              width: `${rect.width * 1.08}px`,
-              height: `${rect.height * 1.08}px`,
-              transform:
-                'perspective(1400px) translateY(-20px) rotateX(10deg) rotateY(620deg) scale(1.05)',
+                'perspective(1400px) translateY(0) rotateX(0deg) rotateY(0deg) scale(1)',
               opacity: 1
             },
 
@@ -1532,18 +1638,20 @@ backButton.style.right =
               width: `${rect.width}px`,
               height: `${rect.height}px`,
               transform:
-                'perspective(1400px) translateY(0) rotateX(0deg) rotateY(720deg) scale(1)',
+                'perspective(1400px) translateY(0) rotateX(0deg) rotateY(0deg) scale(0.96)',
               opacity: 0
             }
           ],
           {
-            duration: 850,
+            duration: 280,
             easing: 'cubic-bezier(0.22, 0.8, 0.22, 1)',
             fill: 'forwards'
           }
         ).finished.then(() => {
 
           floatingCard.remove()
+          if (platformNavigationId !== closingNavigationId) return
+          closePlatformView({ updateHistory: false })
 
           document
             .querySelector(
@@ -1645,6 +1753,18 @@ backButton.style.right =
       viewTitle = 'EXERCISES'
       break
 
+    case 'learning-plans':
+      viewTitle = 'LEARNING PLAN'
+      break
+
+    case 'finals':
+      viewTitle = 'FINAL ASSESSMENTS'
+      break
+
+    case 'notifications':
+      viewTitle = 'NOTIFICATIONS'
+      break
+
     case 'inbox':
       viewTitle = 'INBOX & MESSAGES'
       break
@@ -1742,14 +1862,17 @@ backButton.style.right =
 
   content.innerHTML =
     viewContent
+  setupStudentAcademicView(view, content)
   setupExerciseForms(supabase)
+    setupAcademicAIConsent(supabase)
+    refreshNotificationBadge()
   if (view === 'inbox') {
     setupInboxHandlers(supabase, currentStudent, async () => {
       try {
         const mRes = await supabase.from('inbox_messages').select('*').or(`recipient_id.eq.${currentStudent.id},sender_id.eq.${currentStudent.id}`).order('created_at', { ascending: false })
         if (mRes.data) {
           platformData.messages = mRes.data
-          const unread = mRes.data.filter(m => !m.is_read).length
+          const unread = mRes.data.filter(m => !m.is_read && m.sender_id !== currentStudent.id).length
           document.querySelectorAll('.nav-unread-badge').forEach(b => {
             b.textContent = unread > 0 ? String(unread) : ''
             b.style.display = unread > 0 ? 'inline-block' : 'none'
@@ -1808,370 +1931,24 @@ backButton.style.right =
 function openRoadmapStepCard(
   sourceElement
 ) {
-
-  const existingCard =
-    document.querySelector(
-      '.roadmap-floating-card'
-    )
-
-  if (existingCard) {
-    return
-  }
-
-
-  const rect =
-    sourceElement.getBoundingClientRect()
-
-
-  const finalWidth =
-    Math.min(
-      1180,
-      window.innerWidth - 100
-    )
-
-
-  const finalHeight =
-    Math.min(
-      760,
-      window.innerHeight - 140
-    )
-
-
-  const finalLeft =
-    (window.innerWidth - finalWidth) / 2
-
-
-  const finalTop =
-    (window.innerHeight - finalHeight) / 2
-
-
-  const step =
-    sourceElement.dataset.roadmapStep
-
-  const isGettingStartedDone = Boolean(
-    currentStudent?.onboardingCompleted ||
-    (currentStudent?.lessonsCompleted && currentStudent.lessonsCompleted > 0)
-  )
-
-  const roadmapStages = {
-    'getting-started': {
-      label: isGettingStartedDone ? '01 — COMPLETED' : '01 — CURRENT',
-      title: 'Getting Started',
-      subtitle: isGettingStartedDone ? 'Your assessment is complete.' : 'Your journey begins here.',
-      description: isGettingStartedDone
-        ? 'We discovered your current level, learning style and personal goals. This is the foundation of your personalized Vera Orbis journey.'
-        : 'Discover your current level, learning style and personal goals. Complete your onboarding assessment to build your path.'
-    },
-
-    'current': {
-      label: isGettingStartedDone ? '02 — CURRENT' : '02 — UPCOMING',
-      title: currentStudent?.currentModule || 'Speaking Foundations',
-      subtitle: isGettingStartedDone ? 'Where you are now.' : 'Unlocks after Getting Started.',
-      description:
-        'Strengthen your skills, build confidence and develop the communication abilities you need to use English more naturally.'
-    },
-
-    'next': {
-      label: '03 — NEXT',
-      title: 'Real-world conversations',
-      subtitle: 'Take the next step.',
-      description:
-        'Apply what you learn to everyday situations and develop the confidence to communicate in real conversations.'
-    },
-
-    'destination': {
-      label: '04 — DESTINATION',
-      title: currentStudent?.goal || 'Fluency Destination',
-      subtitle: 'Your destination.',
-      description:
-        'Your learning goal guides your journey. Each stage helps you move closer to using English the way you want to.'
-    }
-  }
-
-const content =
-  roadmapStages[step] || roadmapStages['getting-started']
-
-  const floatingCard =
-    document.createElement('div')
-
-
-  floatingCard.className =
-    'platform-floating-card roadmap-floating-card'
-
-
-  floatingCard.innerHTML = `
-
-  <button
-    type="button"
-    class="platform-back-button floating-back-button"
-  >
-    ← Back to Journey
-  </button>
-
-  <div
-    class="platform-floating-card-content"
-  >
-
-    <section class="platform-detail-section">
-
-      <div class="platform-section-heading">
-
-  <p class="platform-label">
-    ${content.label}
-  </p>
-
-  <h1>
-    ${content.title}
-    <span>${content.subtitle}</span>
-  </h1>
-
-  <p>
-    ${content.description}
-  </p>
-
-</div>
-
-    </section>
-
-  </div>
-
-`
-
-
-  document.body.appendChild(
-    floatingCard
-  )
-
-
-  Object.assign(
-    floatingCard.style,
-    {
-      position: 'fixed',
-      left: `${rect.left}px`,
-      top: `${rect.top}px`,
-      width: `${rect.width}px`,
-      height: `${rect.height}px`,
-      opacity: '1',
-      transform:
-        'perspective(1400px) rotateX(0deg) rotateY(0deg) scale(1)',
-      zIndex: '1000'
-    }
-  )
-
-
-  const floatingContent =
-    floatingCard.querySelector(
-      '.platform-floating-card-content'
-    )
-
-
-  floatingContent.style.transform =
-    'rotateY(180deg)'
-
-
-  document
-    .querySelector(
-      '#platform-home'
-    )
-    ?.classList.add(
-      'card-is-open'
-    )
-
-
-  document
-    .querySelector(
-      '.platform-nav'
-    )
-    ?.classList.add(
-      'platform-nav-behind'
-    )
-
-
-  requestAnimationFrame(() => {
-
-    floatingCard.animate(
-      [
-
-        {
-          left: `${rect.left}px`,
-          top: `${rect.top}px`,
-          width: `${rect.width}px`,
-          height: `${rect.height}px`,
-          transform:
-            'perspective(1400px) translateY(0) rotateX(0deg) rotateY(0deg) scale(1)',
-          opacity: 1
-        },
-
-        {
-          left: `${rect.left}px`,
-          top: `${rect.top - 18}px`,
-          width: `${rect.width}px`,
-          height: `${rect.height}px`,
-          transform:
-            'perspective(1400px) translateY(-18px) rotateX(8deg) rotateY(-5deg) rotateZ(-1deg) scale(1.04)',
-          opacity: 1
-        },
-
-        {
-          left: `${rect.left}px`,
-          top: `${rect.top - 25}px`,
-          width: `${rect.width}px`,
-          height: `${rect.height}px`,
-          transform:
-            'perspective(1400px) translateY(-25px) rotateX(5deg) rotateY(35deg) rotateZ(1deg) scale(1.02)',
-          opacity: 1
-        },
-
-        {
-          left: `${rect.left}px`,
-          top: `${rect.top - 18}px`,
-          width: `${rect.width}px`,
-          height: `${rect.height}px`,
-          transform:
-            'perspective(1400px) translateY(-18px) rotateX(2deg) rotateY(90deg) rotateZ(0deg) scale(1)',
-          opacity: 1
-        },
-
-        {
-          left: `${finalLeft}px`,
-          top: `${finalTop}px`,
-          width: `${finalWidth}px`,
-          height: `${finalHeight}px`,
-          transform:
-            'perspective(1400px) translateY(-5px) rotateX(0deg) rotateY(150deg) rotateZ(0deg) scale(1.01)',
-          opacity: 1
-        },
-
-        {
-          left: `${finalLeft}px`,
-          top: `${finalTop}px`,
-          width: `${finalWidth}px`,
-          height: `${finalHeight}px`,
-          transform:
-            'perspective(1400px) translateY(0) rotateX(0deg) rotateY(180deg) scale(1)',
-          opacity: 1
-        }
-
-      ],
-      {
-        duration: 1350,
-        easing:
-          'cubic-bezier(0.22, 0.8, 0.22, 1)',
-        fill: 'forwards'
-      }
-    )
-
-  })
-
-
-  const backButton =
-    floatingCard.querySelector(
-      '.floating-back-button'
-    )
-
-
-  backButton.style.transform =
-    'rotateY(180deg)'
-
-
-  backButton.style.left =
-    'auto'
-
-
-  backButton.style.right =
-    '32px'
-
-
-  backButton.addEventListener(
-    'click',
-    (event) => {
-
-      event.preventDefault()
-      event.stopPropagation()
-
-
-      floatingCard.animate(
-        [
-
-          {
-            left: `${finalLeft}px`,
-            top: `${finalTop}px`,
-            width: `${finalWidth}px`,
-            height: `${finalHeight}px`,
-            transform:
-              'perspective(1400px) rotateY(360deg) scale(1)',
-            opacity: 1
-          },
-
-          {
-            left: `${finalLeft + finalWidth * 0.25}px`,
-            top: `${finalTop + finalHeight * 0.12}px`,
-            width: `${finalWidth * 0.6}px`,
-            height: `${finalHeight * 0.6}px`,
-            transform:
-              'perspective(1400px) translateY(-20px) rotateX(8deg) rotateY(450deg) scale(1)',
-            opacity: 1
-          },
-
-          {
-            left: `${rect.left}px`,
-            top: `${rect.top - 30}px`,
-            width: `${rect.width * 1.08}px`,
-            height: `${rect.height * 1.08}px`,
-            transform:
-              'perspective(1400px) translateY(-20px) rotateX(10deg) rotateY(620deg) scale(1.05)',
-            opacity: 1
-          },
-
-          {
-            left: `${rect.left}px`,
-            top: `${rect.top}px`,
-            width: `${rect.width}px`,
-            height: `${rect.height}px`,
-            transform:
-              'perspective(1400px) rotateY(720deg) scale(1)',
-            opacity: 0
-          }
-
-        ],
-        {
-          duration: 850,
-          easing:
-            'cubic-bezier(0.22, 0.8, 0.22, 1)',
-          fill: 'forwards'
-        }
-
-      ).finished.then(() => {
-
-        floatingCard.remove()
-
-        document
-          .querySelector(
-            '#platform-home'
-          )
-          ?.classList.remove(
-            'card-is-open'
-          )
-
-        document
-          .querySelector(
-            '.platform-nav'
-          )
-          ?.classList.remove(
-            'platform-nav-behind'
-          )
-
-      })
-
-    }
-  )
-
+  if (!sourceElement) return
+  const flipped = sourceElement.classList.toggle('is-flipped')
+  sourceElement.setAttribute('aria-expanded', String(flipped))
+  sourceElement.setAttribute('aria-pressed', String(flipped))
+  const front = sourceElement.querySelector('.roadmap-card-front')
+  const back = sourceElement.querySelector('.roadmap-card-back')
+  if (front) front.setAttribute('aria-hidden', String(flipped))
+  if (back) back.setAttribute('aria-hidden', String(!flipped))
 }
 /* =========================================================
    CLOSE VIEW
 ========================================================= */
 
-function closePlatformView() {
+function closePlatformView({ updateHistory = true } = {}) {
+  if (!platformLoaded || !currentStudent) return
+  platformNavigationId++
+  activePlatformView = 'home'
+  if (updateHistory) writeStudentRoute('home')
 const floatingCard =
     document.querySelector(
       '.platform-floating-card'
@@ -2207,7 +1984,6 @@ const floatingCard =
       floatingCard.remove()
     }, 500)
 
-    return
   }
   const home =
     document.querySelector(
@@ -2255,6 +2031,8 @@ const floatingCard =
         'active',
         link.dataset.platformView === 'home'
       )
+      if (link.dataset.platformView === 'home') link.setAttribute('aria-current', 'page')
+      else link.removeAttribute('aria-current')
 
     })
 
@@ -2703,7 +2481,11 @@ function setupCardMovement(root = document) {
 
   const cards =
     root.querySelectorAll(`
+      .vo-student-priority-card,
+      .learning-access-card,
+      .home-module-card,
       .material-card,
+      .passport-book-closed,
       .passport-main,
       .progress-card,
       .vera-voice-card
@@ -2711,9 +2493,8 @@ function setupCardMovement(root = document) {
 
 
   if (
-    window.matchMedia(
-      '(pointer: fine)'
-    ).matches === false
+    window.matchMedia('(pointer: fine)').matches === false ||
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches === true
   ) {
     return
   }
@@ -2721,6 +2502,8 @@ function setupCardMovement(root = document) {
 
   cards.forEach(
     (card) => {
+      if (card.dataset.cardTiltBound === 'true') return
+      card.dataset.cardTiltBound = 'true'
 
       card.addEventListener(
         'mousemove',
@@ -2729,58 +2512,46 @@ function setupCardMovement(root = document) {
           const rect =
             card.getBoundingClientRect()
 
+          if (!rect.width || !rect.height) return
 
           const x =
             event.clientX - rect.left
 
-
           const y =
             event.clientY - rect.top
 
+          const isSubtleCard =
+            card.classList.contains('vera-voice-card') ||
+            card.classList.contains('passport-book-closed')
+
+          const maxTilt = isSubtleCard ? 4.5 : 6.5
 
           const rotateX =
-            ((y / rect.height) - 0.5) * -4
-
+            ((y / rect.height) - 0.5) * -maxTilt
 
           const rotateY =
-            ((x / rect.width) - 0.5) * 4
+            ((x / rect.width) - 0.5) * maxTilt
 
+          const glowX = Math.round((x / rect.width) * 100)
+          const glowY = Math.round((y / rect.height) * 100)
 
-          if (card.classList.contains('vera-voice-card')) {
-            card.style.setProperty(
-              '--card-tilt-x',
-              `${rotateX}deg`
-            )
-
-            card.style.setProperty(
-              '--card-tilt-y',
-              `${rotateY}deg`
-            )
-          } else {
-            card.style.transform =
-              `translateY(-8px)
-               perspective(900px)
-               rotateX(${rotateX}deg)
-               rotateY(${rotateY}deg)`
-          }
-
+          card.style.setProperty('--card-tilt-x', `${rotateX.toFixed(2)}deg`)
+          card.style.setProperty('--card-tilt-y', `${rotateY.toFixed(2)}deg`)
+          card.style.setProperty('--card-glow-x', `${glowX}%`)
+          card.style.setProperty('--card-glow-y', `${glowY}%`)
         }
       )
 
 
-      card.addEventListener(
-        'mouseleave',
-        () => {
+      const resetTilt = () => {
+        card.style.removeProperty('--card-tilt-x')
+        card.style.removeProperty('--card-tilt-y')
+        card.style.removeProperty('--card-glow-x')
+        card.style.removeProperty('--card-glow-y')
+      }
 
-          if (card.classList.contains('vera-voice-card')) {
-            card.style.removeProperty('--card-tilt-x')
-            card.style.removeProperty('--card-tilt-y')
-          } else {
-            card.style.transform = ''
-          }
-
-        }
-      )
+      card.addEventListener('mouseleave', resetTilt)
+      card.addEventListener('blur', resetTilt)
 
     }
   )
@@ -2869,26 +2640,17 @@ function setupGlobalPlatformFunctions() {
     },
 
     submitChallenge: async (
-      challengeId
+      challengeId,
+      sourceElement = null
     ) => {
-
-      const textarea =
-        document.querySelector(
-          `#response-${challengeId}`
-        )
-
-
-      const button =
-        document.querySelector(
-          `#challenge-form-${challengeId} button`
-        )
-
-
-      const errorLabel =
-        document.querySelector(
-          `#challenge-error-${challengeId}`
-        )
-
+      const selector = `#challenge-form-${challengeId}`
+      const form = sourceElement?.closest('.challenge-submit-form')
+        || document.querySelector('.platform-floating-card')?.querySelector(selector)
+        || document.querySelector('#platform-view-content')?.querySelector(selector)
+        || document.querySelector(selector)
+      const textarea = form?.querySelector('textarea')
+      const button = form?.querySelector('button')
+      const errorLabel = form?.querySelector('.error-text')
 
       if (!textarea) {
         return
@@ -2929,34 +2691,17 @@ function setupGlobalPlatformFunctions() {
         }
 
 
-        const { error } =
-          await supabase
-            .from(
-              'challenge_submissions'
-            )
-            .insert({
+        textarea.dataset.requestId ||= crypto.randomUUID()
+        await submitAcademicChallenge(supabase, {
+          challengeId,
+          response: responseText,
+          requestId: textarea.dataset.requestId
+        })
 
-              challenge_id:
-                challengeId,
-
-              student_id:
-                currentStudent.id,
-
-              response:
-                responseText,
-
-              status:
-                'submitted'
-
-            })
-
-
-        if (error) {
-          throw error
-        }
-
-
-        await loadPlatform()
+        document.querySelector('.platform-floating-card')?.remove()
+        document.querySelector('#platform-home')?.classList.remove('card-is-open')
+        document.querySelector('.platform-nav')?.classList.remove('platform-nav-behind')
+        await openPlatformView('challenges')
 
       } catch (error) {
 
@@ -3007,8 +2752,11 @@ setupGlobalPlatformFunctions()
 supabase.auth.onAuthStateChange((event) => {
   if (event === 'SIGNED_OUT') {
     platformLoaded = false
+    platformNavigationId++
+    stopPlatformRoutes()
+    enrollmentServiceBlocked = false
     window.location.replace('/login.html')
-  } else if (event === 'SIGNED_IN' && !platformLoaded && !isInitializingPlatform) {
+  } else if (event === 'SIGNED_IN' && !platformLoaded && !isInitializingPlatform && !enrollmentServiceBlocked) {
     loadPlatform()
   }
 })

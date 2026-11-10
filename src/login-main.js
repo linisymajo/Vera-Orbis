@@ -1,5 +1,7 @@
 import './login.css'
 import { supabase } from './lib/supabase.js'
+import { setupPasswordRecoveryRequest } from './components/passwordRecovery.js'
+import { captureEnrollmentInvitation, readEnrollmentAccess, renderEnrollmentGate, EnrollmentServiceError, renderEnrollmentServiceError } from './lib/enrollment.js'
 
 document.querySelector('#app').innerHTML = `
   <main class="login-page">
@@ -107,6 +109,19 @@ document.querySelector('#app').innerHTML = `
 
         </form>
 
+        <section class="password-recovery-request" aria-label="Password recovery">
+          <details>
+            <summary>Forgot your password?</summary>
+            <form id="password-reset-request-form" class="login-form">
+              <label for="recovery-email">Email</label>
+              <input id="recovery-email" type="email" autocomplete="email" maxlength="254" required>
+              <p role="status" aria-live="polite"></p>
+              <p role="alert"></p>
+              <button class="login-button" type="submit">Send reset link</button>
+            </form>
+          </details>
+        </section>
+
 
         <p class="login-note">
           New to Vera Orbis?
@@ -135,6 +150,35 @@ const loginButton =
 const buttonText =
   loginButton.querySelector('.button-text')
 
+setupPasswordRecoveryRequest(supabase)
+
+let enrollmentRedirecting = false
+async function continueAfterEnrollment({ retry = false } = {}) {
+  if (enrollmentRedirecting) return
+  const access = await readEnrollmentAccess(supabase, { retry })
+  if (enrollmentRedirecting) return
+  const invitation = access.role === 'student' ? captureEnrollmentInvitation() : null
+  if (!access.email_verified || (!access.academic_access && ['teacher', 'admin'].includes(access.role))) {
+    renderEnrollmentGate(access, { app: document.querySelector('#app'), client: supabase })
+    return
+  }
+  enrollmentRedirecting = true
+  window.location.replace(['teacher', 'admin'].includes(access.role) ? '/teacher.html' : invitation ? '/onboarding.html' : '/platform.html')
+}
+
+function showEnrollmentFailure(error) {
+  if (error instanceof EnrollmentServiceError) {
+    renderEnrollmentServiceError(error, {
+      app: document.querySelector('#app'), client: supabase,
+      onRetry: async () => {
+        try { await continueAfterEnrollment({ retry: true }) }
+        catch (retryError) { showEnrollmentFailure(retryError) }
+      }
+    })
+    return
+  }
+  loginError.textContent = error.message || 'Your enrollment could not be verified.'
+}
 
 loginForm.addEventListener('submit', async (event) => {
 
@@ -177,38 +221,17 @@ loginForm.addEventListener('submit', async (event) => {
   }
 
 
-  if (data?.user) {
-    const { data: teacher } = await supabase
-      .from('teachers')
-      .select('id')
-      .eq('id', data.user.id)
-      .maybeSingle()
-
-    if (teacher) {
-      window.location.href = '/teacher.html'
-      return
-    }
+  try {
+    await continueAfterEnrollment()
+  } catch (accessError) {
+    showEnrollmentFailure(accessError)
+    loginButton.disabled = false
+    buttonText.textContent = 'Sign in'
   }
-
-
-  window.location.href =
-    '/platform.html'
-
 })
 
-// If user already has an active session, send them to their dashboard
+// Confirm server-controlled enrollment before redirecting an existing session.
 supabase.auth.getUser().then(async ({ data: { user } }) => {
-  if (user) {
-    const { data: teacher } = await supabase
-      .from('teachers')
-      .select('id')
-      .eq('id', user.id)
-      .maybeSingle()
-
-    if (teacher) {
-      window.location.replace('/teacher.html')
-    } else {
-      window.location.replace('/platform.html')
-    }
-  }
-})
+  if (!user) return
+  await continueAfterEnrollment()
+}).catch(showEnrollmentFailure)

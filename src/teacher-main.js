@@ -1,14 +1,24 @@
+import { sendAcademicMessage } from './lib/messaging.js'
+import { mountLearningPlans } from './components/learningPlans.js'
 import './teacher.css'
+import './academic.css'
 
 import { getCurrentUser } from './lib/auth.js'
 import { supabase } from './lib/supabase.js'
 import { hasTeacherAccess } from './lib/access.js'
+import { readEnrollmentAccess, renderEnrollmentGate, EnrollmentServiceError, renderEnrollmentServiceError } from './lib/enrollment.js'
+import { renderEnrollmentPanel, setupEnrollmentPanel } from './components/enrollmentPanel.js'
+import { readTeacherRoute, watchAcademicLocation } from './lib/academicRoutes.js'
 import {
   renderTeacherWorkspace,
-  setupTeacherWorkspace
+  setupTeacherWorkspace,
+  loadTeacherModule
 } from './components/teacherWorkspace.js'
 
 let allStudentsCache = []
+let teacherViewGeneration = 0
+let activeStudentProfileId = null
+let stopTeacherRoutes = () => {}
 
 const LOGO = '/logo/Logo%20Vera%20Orbis%20recoloreado.png'
 
@@ -17,7 +27,7 @@ const LOGO = '/logo/Logo%20Vera%20Orbis%20recoloreado.png'
    INITIAL LOAD
    ========================================================= */
 
-async function loadTeacherDashboard() {
+async function loadTeacherDashboard({ retryEnrollment = false } = {}) {
   const user = await getCurrentUser()
 
   if (!user) {
@@ -26,6 +36,25 @@ async function loadTeacherDashboard() {
       'Please log in to access the Teacher Dashboard.'
     )
 
+    return
+  }
+
+  let access
+  try {
+    access = await readEnrollmentAccess(supabase, { retry: retryEnrollment })
+    if (access.student_id !== user.id) {
+      throw new EnrollmentServiceError('Your account changed during enrollment verification.', { reason: 'session', code: 'ENROLLMENT_SESSION_CHANGED' })
+    }
+  }
+  catch (accessError) {
+    if (accessError instanceof EnrollmentServiceError) {
+      renderEnrollmentServiceError(accessError, { app: document.querySelector('#app'), client: supabase, onRetry: () => loadTeacherDashboard({ retryEnrollment: true }) })
+    } else showAccessDenied('Access could not be verified.', accessError.message)
+    return
+  }
+
+  if (!access.academic_access) {
+    renderEnrollmentGate(access, { app: document.querySelector('#app'), client: supabase })
     return
   }
 
@@ -38,7 +67,7 @@ async function loadTeacherDashboard() {
     .eq('id', user.id)
     .maybeSingle()
 
-  if (error || !hasTeacherAccess(user, teacher)) {
+  if (error || !access.academic_access || (!hasTeacherAccess(user, teacher) && access.role !== 'admin')) {
     showAccessDenied(
       'Access denied.',
       'This account does not have Teacher access.'
@@ -106,198 +135,53 @@ function showAccessDenied(title, message) {
 
 function renderMainDashboardContent() {
   return `
-    <section class="teacher-welcome">
-
-      <div>
-
-        <p class="teacher-label">
-          VERA ORBIS · TEACHER ACCESS
-        </p>
-
-        <h1>
-          Your students.
-          <span>Your journey.</span>
-        </h1>
-
-        <p>
-          Manage your students, learning materials
-          and progress from one place.
-        </p>
-
+    <div class="teacher-welcome teacher-welcome-compact" data-overview-only>
+      <div class="teacher-welcome-compact-copy">
+        <p class="teacher-label">VERA ORBIS · TEACHER ACCESS</p>
+        <h1>Your students. <span>Your journey.</span></h1>
       </div>
-
-
-      <div class="teacher-welcome-orbit">
-
-        <div class="teacher-orbit-ring ring-one"></div>
-
-        <div class="teacher-orbit-ring ring-two"></div>
-
-        <div class="teacher-orbit-center">
-
-          <img
-            src="${LOGO}"
-            alt="Vera Orbis"
-          >
-
-        </div>
-
+      <div class="teacher-student-selector teacher-topbar-combobox" role="search" aria-label="Quick student profile launcher">
+        <input
+          type="search"
+          id="student-search-input"
+          class="teacher-search-input"
+          placeholder="Search student by name, language or level..."
+          autocomplete="off"
+          aria-label="Search students"
+        >
+        <label for="teacher-student-select" class="sr-only">Open a student profile</label>
+        <select id="teacher-student-select"><option value="">Choose a student</option></select>
+        <button type="button" id="teacher-open-selected-student">Open profile</button>
       </div>
-
-    </section>
+    </div>
 
     ${renderTeacherWorkspace()}
 
+    <div class="teacher-secondary-decks" data-secondary-decks>
+      ${renderEnrollmentPanel()}
 
-    <section class="teacher-section" id="teacher-students-section">
-
-      <div class="teacher-section-heading">
-
-        <div>
-
-          <p class="teacher-label">
-            STUDENTS
-          </p>
-
-          <h2>
-            Your students.
-          </h2>
-
-        </div>
-
-        <div class="teacher-search-wrapper">
-
-          <input
-            type="search"
-            id="student-search-input"
-            class="teacher-search-input"
-            placeholder="Search students by name, language or level..."
-            autocomplete="off"
-          >
-
-        </div>
-
-      </div>
-
-
-      <div
-        id="teacher-students"
-        class="teacher-students"
-      >
-
-        <div class="teacher-loading">
-          Loading students...
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <section class="teacher-section teacher-tools">
-
-      <div class="teacher-section-heading">
-
-        <div>
-
-          <p class="teacher-label">
-            TOOLS
-          </p>
-
-          <h2>
-            Manage Vera Orbis.
-          </h2>
-
-        </div>
-
-      </div>
-
-
-      <div class="teacher-tools-grid">
-
-        <article class="teacher-tool-card">
-
-          <span class="teacher-tool-icon">
-            +
-          </span>
-
+      <section class="teacher-section" id="teacher-students-section">
+        <div class="teacher-section-heading">
           <div>
-
-            <span>
-              STUDENTS
-            </span>
-
-            <h3>
-              Add and manage students
-            </h3>
-
-            <p>
-              Organize your student profiles and learning journeys.
-            </p>
-
+            <p class="teacher-label">STUDENTS</p>
+            <h2>Your students.</h2>
           </div>
-
-        </article>
-
-
-        <article class="teacher-tool-card">
-
-          <span class="teacher-tool-icon">
-            PDF
-          </span>
-
-          <div>
-
-            <span>
-              MATERIALS
-            </span>
-
-            <h3>
-              Upload class materials
-            </h3>
-
-            <p>
-              Give each student personalized resources.
-            </p>
-
+        </div>
+        <details class="teacher-students-browse" open><summary>Browse student cards</summary>
+          <div id="teacher-students" class="teacher-students">
+            <div class="teacher-loading">Loading students...</div>
           </div>
-
-        </article>
-
-
-        <article class="teacher-tool-card">
-
-          <span class="teacher-tool-icon">
-            %
-          </span>
-
-          <div>
-
-            <span>
-              PROGRESS
-            </span>
-
-            <h3>
-              Update student progress
-            </h3>
-
-            <p>
-              Keep each student's journey up to date.
-            </p>
-
-          </div>
-
-        </article>
-
-      </div>
-
-    </section>
+        </details>
+      </section>
+    </div>
   `
 }
 
 export function returnToTeacherDashboard(scrollToStudents = false) {
   const mainContainer = document.querySelector('#teacher-main-container')
   if (!mainContainer) return
+  teacherViewGeneration++
+  activeStudentProfileId = null
 
   if (typeof window !== 'undefined' && window.location?.hash?.startsWith('#student-')) {
     try {
@@ -307,14 +191,12 @@ export function returnToTeacherDashboard(scrollToStudents = false) {
 
   mainContainer.innerHTML = renderMainDashboardContent()
   setupTeacherWorkspace()
+  setupEnrollmentPanel()
   loadStudents()
 
   if (scrollToStudents) {
-    const studentsEl = document.querySelector('#teacher-students-section')
-    if (studentsEl) {
-      studentsEl.scrollIntoView({ behavior: 'smooth' })
-      return
-    }
+    loadTeacherModule('students')
+    return
   }
 
   window.scrollTo({
@@ -332,30 +214,39 @@ function renderTeacherDashboard(user) {
     <div class="teacher-page">
 
       <header class="teacher-navbar">
-
-        <a
-          href="/"
-          class="teacher-logo"
-        >
-          <img
-            src="${LOGO}"
-            alt="Vera Orbis"
-          >
-
-          <span>
-            VERA <strong>ORBIS</strong>
-          </span>
-        </a>
+        <div class="teacher-navbar-left">
+          <button type="button" class="teacher-mobile-nav-btn" id="teacher-mobile-nav-btn" aria-label="Open navigation menu">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <a href="/" class="teacher-logo">
+            <img src="${LOGO}" alt="Vera Orbis">
+            <span>VERA <strong>ORBIS</strong></span>
+          </a>
+          <span class="teacher-breadcrumb-sep" aria-hidden="true">/</span>
+          <span class="teacher-breadcrumb-current" id="teacher-topbar-current-module">Overview</span>
+        </div>
 
         <div class="teacher-account">
+          <details class="teacher-quick-create">
+            <summary class="vo-quick-create-trigger">+ Quick Create</summary>
+            <div class="vo-quick-create-menu">
+              <button type="button" data-topbar-module="exercise-studio">Guided Exercise</button>
+              <button type="button" data-topbar-module="materials-studio">Upload Materials</button>
+              <button type="button" data-topbar-module="calendar">Schedule Class</button>
+              <button type="button" data-topbar-module="finals">Final Assessment</button>
+              <button type="button" data-topbar-module="learning-plans">Learning Plan</button>
+              <button type="button" data-topbar-module="inbox">Direct Message</button>
+              <button type="button" data-topbar-module="students">Invite Student</button>
+            </div>
+          </details>
 
-          <span class="teacher-account-label">
-            TEACHER
-          </span>
+          <button type="button" class="teacher-notif-bell" data-topbar-module="notifications" aria-label="Notifications">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span data-academic-unread class="academic-unread-badge" hidden></span>
+          </button>
 
-          <span class="teacher-account-email">
-            ${escapeHtml(user.email || '')}
-          </span>
+          <span class="teacher-account-label">TEACHER</span>
+          <span class="teacher-account-email">${escapeHtml(user.email || '')}</span>
 
           <button
             type="button"
@@ -366,59 +257,60 @@ function renderTeacherDashboard(user) {
           >
             Sign out ↗
           </button>
-
         </div>
 
       </header>
 
-
       <main
         class="teacher-content"
         id="teacher-main-container"
+        data-active-module="overview"
       >
         ${renderMainDashboardContent()}
       </main>
 
-
       <footer class="teacher-footer">
-
-        <span>
-          VERA ORBIS
-        </span>
-
-        <span>
-          LEARN IT · LIVE IT · SPEAK IT
-        </span>
-
+        <span>VERA ORBIS</span>
+        <span>LEARN IT · LIVE IT · SPEAK IT</span>
       </footer>
 
     </div>
   `
 
   setupTeacherWorkspace()
+  setupEnrollmentPanel()
   loadStudents()
 
+  document.querySelector?.('#teacher-mobile-nav-btn')?.addEventListener?.('click', () => {
+    document.querySelector?.('#teacher-sidebar')?.classList.toggle('is-mobile-open')
+  })
+
+  document.querySelectorAll?.('[data-topbar-module]')?.forEach?.((btn) => {
+    btn.addEventListener('click', () => {
+      const mod = btn.dataset.topbarModule
+      if (mod) loadTeacherModule(mod)
+      btn.closest?.('details')?.removeAttribute('open')
+    })
+  })
+
   if (typeof window !== 'undefined') {
-    const handleHashChange = () => {
-      const hash = window.location.hash || ''
-      const match = hash.match(/^#student-(.+)$/)
-      if (match) {
-        openStudentProfile(match[1])
-      } else if (hash === '' || hash === '#' || hash === '#dashboard') {
-        const isProfileOpen = Boolean(document.querySelector('.student-profile-view'))
-        if (isProfileOpen) {
-          returnToTeacherDashboard(false)
-        }
+    const handleLocationChange = () => {
+      const route = readTeacherRoute()
+      if (route.studentId) {
+        if (activeStudentProfileId !== route.studentId) openStudentProfile(route.studentId)
+        return
       }
+      if (activeStudentProfileId) {
+        returnToTeacherDashboard(false)
+        return
+      }
+      const activeModule = document.querySelector('.teacher-module-nav .is-active')?.dataset.teacherModule
+      if (activeModule !== route.module) loadTeacherModule(route.module, { updateHistory: false })
     }
 
-    window.removeEventListener('hashchange', window._teacherHashHandler)
-    window._teacherHashHandler = handleHashChange
-    window.addEventListener('hashchange', handleHashChange)
-
-    if (window.location.hash && window.location.hash.startsWith('#student-')) {
-      handleHashChange()
-    }
+    stopTeacherRoutes()
+    stopTeacherRoutes = watchAcademicLocation(handleLocationChange)
+    if (readTeacherRoute().studentId) handleLocationChange()
   }
 
   document
@@ -481,6 +373,12 @@ async function loadStudents() {
 
   allStudentsCache = students || []
 
+  const selector = document.querySelector('#teacher-student-select')
+  if (selector) {
+    selector.innerHTML = '<option value="">Choose a student</option>' + allStudentsCache.map(student => `<option value="${escapeHtml(student.id)}" data-search="${escapeHtml(`${student.name} ${student.language || ''} ${student.level || ''}`.toLowerCase())}">${escapeHtml(student.name)} - ${escapeHtml(student.language || '')}</option>`).join('')
+    document.querySelector('#teacher-open-selected-student').onclick = () => { if (selector.value) openStudentProfile(selector.value) }
+  }
+
   renderStudentsList(allStudentsCache)
 
   setupStudentSearch()
@@ -506,6 +404,8 @@ function handleStudentSearch(event) {
     event.target.value
       .toLowerCase()
       .trim()
+
+  document.querySelectorAll('#teacher-student-select option[data-search]').forEach(option => { option.hidden = !option.dataset.search.includes(query) })
 
   if (!query) {
     renderStudentsList(allStudentsCache)
@@ -733,6 +633,8 @@ async function openStudentProfile(studentId) {
     document.querySelector('#teacher-main-container')
 
   if (!mainContainer) return
+  const viewGeneration = ++teacherViewGeneration
+  activeStudentProfileId = studentId
 
   if (typeof window !== 'undefined' && window.location && window.location.hash !== `#student-${studentId}`) {
     try {
@@ -825,6 +727,8 @@ async function openStudentProfile(studentId) {
       .order('created_at', { ascending: false })
       .limit(30)
   ])
+
+  if (teacherViewGeneration !== viewGeneration) return
 
   if (profileRes.error || !profileRes.data) {
     console.error(
@@ -1214,6 +1118,8 @@ function renderStudentProfile(
 
       </div>
 
+
+      <details class="student-profile-section" data-student-learning-plans><summary>Learning plan versions for ${escapeHtml(profile.name)}</summary><div data-student-plan-panel><p>Open to load saved plans.</p></div></details>
 
       <!-- =====================================================
            STUDENT HEADER
@@ -2083,7 +1989,7 @@ function renderStudentProfile(
           submitBtn.textContent = 'Sending...'
         }
 
-        const { error } = await supabase.from('inbox_messages').insert({
+        const { error } = await sendAcademicMessage(supabase, {
           sender_id: user.id,
           sender_role: 'teacher',
           recipient_id: profile.id,
@@ -2132,7 +2038,8 @@ function renderStudentProfile(
     btn.addEventListener('click', async () => {
       const msgId = btn.dataset.studentMsgRead
       btn.disabled = true
-      await supabase.from('inbox_messages').update({ is_read: true, read_at: new Date().toISOString() }).eq('id', msgId)
+      const result = await supabase.rpc('mark_inbox_message_as_read', { p_message_id: msgId })
+      if (result.error || result.data !== true) { btn.disabled = false; return }
       openStudentProfile(profile.id)
     })
   })
@@ -2905,6 +2812,12 @@ if (saveAcademicButton) {
    ========================================================= */
 
 function attachStudentProfileEvents(studentId) {
+  const plans = document.querySelector('[data-student-learning-plans]')
+  plans?.addEventListener('toggle', () => {
+    if (!plans.open || plans.dataset.loaded) return
+    plans.dataset.loaded = 'true'
+    mountLearningPlans(plans.querySelector('[data-student-plan-panel]'), supabase, { studentId })
+  })
   const backToDashboard =
     document.querySelector(
       '#back-to-dashboard'

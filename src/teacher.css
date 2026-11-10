@@ -2435,4 +2435,606 @@ a {
 
 .teacher-item-card:hover {
   box-shadow: 0 4px 16px rgba(24, 59, 102, 0.06);
-}
+}
+/* Guided exercise authoring and response review retain the existing palette. */
+.exercise-studio-editor [hidden], .studio-student-picker [hidden] { display: none !important; }
+.studio-student-picker { max-height: 18rem; overflow-y: auto; display: grid; gap: .5rem; }
+.studio-student-picker label { display: flex; align-items: center; gap: .7rem; }
+.studio-student-picker input[type="checkbox"] { width: auto; }
+.exercise-studio-editor fieldset, [data-review-attempt] { margin: 1rem 0; padding: 1rem; border: 1px solid var(--vo-border, #c9baaa); border-radius: 12px; }
+[data-preview-host] .exercise-activity { max-width: 52rem; margin: 1rem auto; }
+[data-preview-host] textarea, [data-preview-host] select { width: 100%; padding: .8rem; }
+
+/* =========================================================
+   VERA ORBIS 3.0 — TEACHER COMMAND SHELL & PERSISTENT SIDEBAR
+   ========================================================= */
+
+.teacher-content {
+  width: min(1440px, 95%);
+  margin: 0 auto;
+}
+
+/* Sticky Top Command Navbar */
+.teacher-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 45;
+  min-height: 70px;
+  padding: 0.6rem 2.5vw;
+  background: rgba(255, 250, 242, 0.94);
+  border-bottom: 1px solid rgba(24, 59, 102, 0.12);
+  box-shadow: 0 4px 20px rgba(24, 59, 102, 0.05);
+}
+
+.teacher-navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.teacher-mobile-nav-btn {
+  display: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 0.7rem;
+  border: 1px solid rgba(24, 59, 102, 0.16);
+  background: #ffffff;
+  color: var(--vo-navy);
+  place-items: center;
+}
+
+.teacher-mobile-nav-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.teacher-topbar-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  color: var(--vo-muted);
+}
+
+.teacher-topbar-breadcrumb strong {
+  color: var(--vo-navy);
+  font-weight: 800;
+}
+
+.teacher-navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.teacher-quick-create {
+  position: relative;
+}
+
+.teacher-quick-create-btn {
+  list-style: none;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #6c3bff, #4e24cc);
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 800;
+  box-shadow: 0 6px 16px rgba(108, 59, 255, 0.25);
+  user-select: none;
+}
+
+.teacher-quick-create-btn::-webkit-details-marker {
+  display: none;
+}
+
+.teacher-quick-create-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem);
+  z-index: 60;
+  min-width: 220px;
+  padding: 0.5rem;
+  border-radius: 1rem;
+  background: #ffffff;
+  border: 1px solid rgba(24, 59, 102, 0.15);
+  box-shadow: 0 18px 42px rgba(24, 59, 102, 0.16);
+  display: grid;
+  gap: 0.25rem;
+}
+
+.teacher-quick-create-menu button {
+  border: 0;
+  background: transparent;
+  color: var(--vo-navy);
+  text-align: left;
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.65rem;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.teacher-quick-create-menu button:hover {
+  background: rgba(108, 59, 255, 0.1);
+  color: var(--vo-purple);
+}
+
+.teacher-notif-bell {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(24, 59, 102, 0.15);
+  background: #ffffff;
+  color: var(--vo-navy);
+  display: grid;
+  place-items: center;
+}
+
+.teacher-notif-bell svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Compact Top Command Strip (Replaces 560px empty welcome hero) */
+.teacher-welcome-compact {
+  min-height: auto !important;
+  padding: 1.1rem 1.4rem !important;
+  margin: 1rem 0 0.75rem;
+  border-radius: 1.25rem;
+  background: linear-gradient(135deg, #183b66 0%, #244f86 100%);
+  color: #ffffff;
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  box-shadow: 0 12px 30px rgba(24, 59, 102, 0.12);
+}
+
+.teacher-welcome-copy {
+  flex: 1 1 320px;
+}
+
+.teacher-welcome-copy .teacher-label {
+  color: #ffc83d;
+  font-size: 0.7rem;
+}
+
+.teacher-welcome-copy h1 {
+  margin: 0.15rem 0 0.2rem !important;
+  font-size: clamp(1.35rem, 2.2vw, 1.75rem) !important;
+  line-height: 1.15 !important;
+  color: #ffffff !important;
+}
+
+.teacher-welcome-copy h1 span {
+  display: inline !important;
+  color: #20c7b5 !important;
+  margin-left: 0.3rem;
+}
+
+.teacher-welcome-copy p:not(.teacher-label) {
+  margin: 0 !important;
+  font-size: 0.86rem !important;
+  line-height: 1.45 !important;
+  color: rgba(255, 255, 255, 0.84) !important;
+}
+
+.teacher-welcome-compact .teacher-student-selector {
+  margin: 0 !important;
+  padding: 0.65rem 0.85rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.teacher-welcome-compact .teacher-student-selector label {
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #ffc83d;
+}
+
+.teacher-welcome-compact .teacher-student-selector .teacher-search-input,
+.teacher-welcome-compact .teacher-student-selector select {
+  padding: 0.5rem 0.8rem;
+  border-radius: 0.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: #ffffff;
+  color: var(--vo-navy);
+  font-size: 0.84rem;
+}
+
+/* Focus Isolation: When focused on a module other than Overview/Students, hide secondary stacked sections */
+#teacher-main-container:not([data-active-module="overview"]) [data-overview-only] {
+  display: none !important;
+}
+
+#teacher-main-container:not([data-active-module="overview"]):not([data-active-module="students"]) [data-secondary-decks] {
+  display: none !important;
+}
+
+/* Teacher Workspace Shell with Persistent Left Sidebar */
+.teacher-workspace {
+  margin: 0.75rem 0 2rem !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+.teacher-workspace-shell {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 1.35rem;
+  align-items: start;
+}
+
+.teacher-workspace-shell.is-sidebar-collapsed {
+  grid-template-columns: 76px minmax(0, 1fr);
+}
+
+.teacher-sidebar {
+  position: sticky;
+  top: 86px;
+  background: linear-gradient(180deg, #132c4e 0%, #183b66 100%);
+  color: #ffffff;
+  border-radius: 1.35rem;
+  padding: 1rem 0.75rem;
+  box-shadow: 0 18px 42px rgba(19, 44, 78, 0.18);
+  max-height: calc(100vh - 104px);
+  overflow-y: auto;
+}
+
+.teacher-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem 0.85rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  margin-bottom: 0.75rem;
+}
+
+.teacher-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.teacher-sidebar-logo-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #20c7b5;
+  box-shadow: 0 0 12px #20c7b5;
+}
+
+.teacher-sidebar-kicker {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.teacher-sidebar-collapse-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  font-size: 0.75rem;
+}
+
+/* Override horizontal .teacher-module-nav inside sidebar */
+.teacher-sidebar .teacher-module-nav {
+  display: grid !important;
+  gap: 0.9rem !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+.teacher-nav-group {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.teacher-nav-group-label {
+  padding: 0.2rem 0.65rem;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.52);
+}
+
+.teacher-sidebar .teacher-module-tab {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.8rem;
+  border: 1px solid transparent;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: left;
+  transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+.teacher-sidebar .teacher-module-tab:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.teacher-sidebar .teacher-module-tab.is-active {
+  background: linear-gradient(135deg, #6c3bff 0%, #5227d8 100%);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 8px 18px rgba(108, 59, 255, 0.35);
+  font-weight: 800;
+}
+
+.teacher-nav-icon {
+  width: 1.2rem;
+  height: 1.2rem;
+  flex: 0 0 1.2rem;
+  display: grid;
+  place-items: center;
+}
+
+.teacher-nav-icon svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.teacher-nav-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.teacher-workspace-shell.is-sidebar-collapsed .teacher-sidebar-kicker,
+.teacher-workspace-shell.is-sidebar-collapsed .teacher-nav-group-label,
+.teacher-workspace-shell.is-sidebar-collapsed .teacher-nav-label {
+  display: none;
+}
+
+.teacher-workspace-shell.is-sidebar-collapsed .teacher-sidebar .teacher-module-tab {
+  justify-content: center;
+  padding: 0.65rem;
+}
+
+/* Main Workspace Stage & Color-Blocked Header Banner */
+.teacher-workspace-main {
+  min-width: 0;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.teacher-workspace-banner {
+  padding: 1.35rem 1.6rem;
+  border-radius: 1.35rem;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  background: linear-gradient(135deg, #183b66 0%, #28568f 100%);
+  box-shadow: 0 14px 34px rgba(24, 59, 102, 0.12);
+}
+
+.teacher-workspace-banner[data-banner-theme="teal"] {
+  background: linear-gradient(135deg, #0d7468 0%, #19a392 100%);
+}
+
+.teacher-workspace-banner[data-banner-theme="violet"] {
+  background: linear-gradient(135deg, #4720be 0%, #6c3bff 100%);
+}
+
+.teacher-workspace-banner[data-banner-theme="coral"] {
+  background: linear-gradient(135deg, #b83d22 0%, #e85d35 100%);
+}
+
+.teacher-workspace-banner[data-banner-theme="gold"] {
+  background: linear-gradient(135deg, #8f5807 0%, #c88010 100%);
+}
+
+.teacher-workspace-banner[data-banner-theme="terracotta"] {
+  background: linear-gradient(135deg, #7a2c37 0%, #ab424f 100%);
+}
+
+.teacher-workspace-banner .teacher-label {
+  color: #ffc83d;
+  font-size: 0.7rem;
+}
+
+.teacher-workspace-banner h2 {
+  margin: 0.2rem 0 0.25rem;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(1.55rem, 2.6vw, 2.15rem);
+  color: #ffffff;
+}
+
+.teacher-workspace-banner .teacher-section-description {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.92rem;
+}
+
+.teacher-workspace-banner-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.teacher-banner-action-btn {
+  padding: 0.55rem 1.05rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.teacher-banner-action-btn--primary {
+  background: #ffffff;
+  color: var(--vo-navy);
+  border-color: #ffffff;
+}
+
+.teacher-sidebar-backdrop {
+  display: none;
+}
+
+@media (max-width: 980px) {
+  .teacher-mobile-nav-btn {
+    display: grid;
+  }
+
+  .teacher-workspace-shell,
+  .teacher-workspace-shell.is-sidebar-collapsed {
+    grid-template-columns: 1fr;
+  }
+
+  .teacher-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 80;
+    width: min(290px, 84vw);
+    max-height: 100vh;
+    border-radius: 0 1.35rem 1.35rem 0;
+    transform: translateX(-105%);
+    transition: transform 0.25s ease;
+  }
+
+  .teacher-workspace-shell.is-mobile-open .teacher-sidebar {
+    transform: translateX(0);
+  }
+
+  .teacher-workspace-shell.is-mobile-open .teacher-sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 75;
+    background: rgba(16, 40, 71, 0.48);
+  }
+}
+
+
+/* =========================================================
+   VISUAL POLISH & RESPONSIVE REFINEMENTS (DESKTOP/TABLET/MOBILE)
+   ========================================================= */
+
+.teacher-welcome.teacher-welcome-compact h1 {
+  margin: 0.15rem 0 0.25rem !important;
+  font-size: clamp(1.45rem, 2.4vw, 1.95rem) !important;
+  line-height: 1.15 !important;
+  color: #ffffff !important;
+  letter-spacing: -0.02em !important;
+}
+
+.teacher-welcome.teacher-welcome-compact h1 span {
+  display: inline !important;
+  color: #20c7b5 !important;
+  margin-left: 0.35rem;
+}
+
+.teacher-welcome.teacher-welcome-compact .teacher-student-selector button,
+#teacher-open-selected-student {
+  padding: 0.5rem 1.05rem !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  background: #6c3bff !important;
+  color: #ffffff !important;
+  font-size: 0.82rem !important;
+  font-weight: 800 !important;
+  box-shadow: 0 6px 16px rgba(108, 59, 255, 0.3);
+}
+
+.teacher-workspace-banner button,
+.teacher-workspace-banner [data-quick-open-module] {
+  padding: 0.48rem 0.95rem !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+  background: rgba(255, 255, 255, 0.16) !important;
+  color: #ffffff !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  backdrop-filter: blur(8px);
+  transition: background 0.18s ease, transform 0.18s ease;
+}
+
+.teacher-workspace-banner button:hover,
+.teacher-workspace-banner [data-quick-open-module]:hover {
+  background: #ffffff !important;
+  color: var(--vo-navy) !important;
+  transform: translateY(-1px);
+}
+
+.vo-studio-open-btn,
+.vo-saved-final-btn {
+  padding: 0.55rem 0.85rem !important;
+  border-radius: 0.75rem !important;
+  border: 1px solid rgba(24, 59, 102, 0.14) !important;
+  background: #faf6ef !important;
+  color: var(--vo-navy) !important;
+  font-size: 0.84rem !important;
+  font-weight: 700 !important;
+  text-align: left !important;
+  width: 100%;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+
+.vo-studio-open-btn:hover,
+.vo-saved-final-btn:hover {
+  border-color: var(--vo-purple) !important;
+  background: #f3eeff !important;
+}
+
+@media (max-width: 680px) {
+  .teacher-page {
+    overflow-x: clip;
+  }
+
+  .teacher-navbar {
+    padding: 0.5rem 3.5vw !important;
+    gap: 0.5rem !important;
+  }
+
+  .teacher-topbar-breadcrumb,
+  .teacher-account-label {
+    display: none !important;
+  }
+
+  .teacher-quick-create-btn {
+    padding: 0.4rem 0.75rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  .teacher-welcome.teacher-welcome-compact {
+    padding: 1rem !important;
+  }
+
+  .teacher-welcome.teacher-welcome-compact .teacher-student-selector {
+    width: 100%;
+  }
+}

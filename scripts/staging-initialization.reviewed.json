@@ -1,0 +1,199 @@
+{
+  "format": "vera-orbis-empty-staging-initialization-v1",
+  "target": {
+    "project_ref": "duinvkphfnugoyvvlbbq",
+    "project_name": "vera-orbis-staging"
+  },
+  "approval_required": true,
+  "migrations_approved": false,
+  "ready_to_apply": false,
+  "production_compatible": "not established; new empty-staging baseline only",
+  "release_manifest_sha256": "620e52dca8d4e1f9723d3813f280ac781d7b87c2e56c23f701fae3e4bc2d2240",
+  "plan_sha256": "46a4d771b5113fc284a13bea495379f0d375d29b25edc14398aa62dc078f69f0",
+  "entries": [
+    {
+      "order": 1,
+      "file": "supabase/staging/initial_application_schema.sql",
+      "bytes": 5055,
+      "sha256": "5f4b9eb97ae991b74c4dfc6ed3e32e338faed610a0b89058dd1a0f24c4b6f2fc",
+      "migration_version": null,
+      "migration_name": null
+    },
+    {
+      "order": 2,
+      "file": "supabase/staging/initialization_tracking.sql",
+      "bytes": 1701,
+      "sha256": "aea91fbdcee879ce6d44a22afcc9b89dc2d7deeb0bf32382f4a87db0f3484c32",
+      "migration_version": null,
+      "migration_name": null
+    },
+    {
+      "order": 3,
+      "file": "supabase/migrations/0002_teacher_operations.sql",
+      "bytes": 11314,
+      "sha256": "7d92f311a404dfa79aef3fa504a2c96d42fc378f225c7e44d319d7f0feeeba62",
+      "migration_version": "0002",
+      "migration_name": "teacher_operations"
+    },
+    {
+      "order": 4,
+      "file": "supabase/migrations/0004_exercise_studio.sql",
+      "bytes": 6650,
+      "sha256": "0df7d548bf522f86bf29dfbc40342fc27b1a8df7430f76fa1135f2b40fa3793f",
+      "migration_version": "0004",
+      "migration_name": "exercise_studio"
+    },
+    {
+      "order": 5,
+      "file": "supabase/migrations/0005_materials_storage_policy.sql",
+      "bytes": 4633,
+      "sha256": "f682ccc9857018f1688cf0b94074fb7fecf56c52b113bec73eead61a0e631544",
+      "migration_version": "0005",
+      "migration_name": "materials_storage_policy"
+    },
+    {
+      "order": 6,
+      "file": "supabase/migrations/0006_interface_language.sql",
+      "bytes": 403,
+      "sha256": "4ab6c9edefbbdfc8079936f632d7f8adb0759f818224e09a19165756b8e3a41f",
+      "migration_version": "0006",
+      "migration_name": "interface_language"
+    },
+    {
+      "order": 7,
+      "file": "supabase/migrations/0007_teacher_management_enhancements.sql",
+      "bytes": 22507,
+      "sha256": "4fe31451b1df7206a5c85cc48ad5c4c43eea1c598e45041c9a10768e2bab719a",
+      "migration_version": "0007",
+      "migration_name": "teacher_management_enhancements"
+    },
+    {
+      "order": 8,
+      "file": "supabase/migrations/0008_teacher_management_security_patch.sql",
+      "bytes": 20207,
+      "sha256": "72812c5c7c769792b3101c80cb1c024d769f42bc135561e367d401bea40e7fc8",
+      "migration_version": "0008",
+      "migration_name": "teacher_management_security_patch"
+    },
+    {
+      "order": 9,
+      "file": "supabase/migrations/0009_academic_sync_challenges_feedback.sql",
+      "bytes": 12657,
+      "sha256": "8cd86de925e427319c46d67ac9ab1cc08ddc165debda6024d4158040e14a849c",
+      "migration_version": "0009",
+      "migration_name": "academic_sync_challenges_feedback"
+    },
+    {
+      "order": 10,
+      "file": "supabase/migrations/0010_inbox_messaging.sql",
+      "bytes": 10648,
+      "sha256": "ade8449428a4a55278c44458b48f2fb46bcb5cdc18a6a6fd8cde06a8d1d8fee6",
+      "migration_version": "0010",
+      "migration_name": "inbox_messaging"
+    },
+    {
+      "order": 11,
+      "file": "supabase/migrations/0011_material_office_formats.sql",
+      "bytes": 606,
+      "sha256": "2a6242b769bce79f065db00ccc37c0364d3d89dccc65906316e2ee549cdbf8ad",
+      "migration_version": "0011",
+      "migration_name": "material_office_formats"
+    },
+    {
+      "order": 12,
+      "file": "supabase/migrations/0012_exercise_workflow.sql",
+      "bytes": 16343,
+      "sha256": "2948fda844f726bc612c651762e8ed7e9b4e3be56513624b8a2db3181bcc7f10",
+      "migration_version": "0012",
+      "migration_name": "exercise_workflow"
+    },
+    {
+      "order": 13,
+      "file": "supabase/migrations/0013_hybrid_enrollment.sql",
+      "bytes": 19359,
+      "sha256": "88b37326445127eee2d5d11954390d000122df4a799e5c0b8606f54efa9a21fc",
+      "migration_version": "0013",
+      "migration_name": "hybrid_enrollment"
+    },
+    {
+      "order": 14,
+      "file": "supabase/migrations/0014_ai_drafts.sql",
+      "bytes": 20116,
+      "sha256": "9c134d44d7bb3a405552e236ee0a20a1303c80e4c4c50f0a385255e06f582e62",
+      "migration_version": "0014",
+      "migration_name": "ai_drafts"
+    },
+    {
+      "order": 15,
+      "file": "supabase/migrations/0015_material_owner_boundary.sql",
+      "bytes": 5627,
+      "sha256": "d3979ac3d9219d700523ba824df4e3f2dee0f8eaf6a2e8567c8571e85866f787",
+      "migration_version": "0015",
+      "migration_name": "material_owner_boundary"
+    },
+    {
+      "order": 16,
+      "file": "supabase/migrations/0016_academic_teacher_scope.sql",
+      "bytes": 7690,
+      "sha256": "ae8117c3fb8497db50c8781853dc56ddf2407978a0d1771671dd14124811f5a6",
+      "migration_version": "0016",
+      "migration_name": "academic_teacher_scope"
+    },
+    {
+      "order": 17,
+      "file": "supabase/migrations/0017_inbox_authorization.sql",
+      "bytes": 5112,
+      "sha256": "22103240cc8f7bb09ae373db1e8e13a7d3a7785083e639c57977edf41ff01692",
+      "migration_version": "0017",
+      "migration_name": "inbox_authorization"
+    },
+    {
+      "order": 18,
+      "file": "supabase/migrations/0018_student_attachments.sql",
+      "bytes": 22251,
+      "sha256": "04bcd4c8970d1f02f6278d2f8391a9d45ec1bc95e62cede595f3de2da7cb185b",
+      "migration_version": "0018",
+      "migration_name": "student_attachments"
+    },
+    {
+      "order": 19,
+      "file": "supabase/migrations/0019_learning_plans.sql",
+      "bytes": 22697,
+      "sha256": "a89cc573f9f34c8d8cb1fc9e6265b264cd50a9559f9e20a3fdde73cd1a148024",
+      "migration_version": "0019",
+      "migration_name": "learning_plans"
+    },
+    {
+      "order": 20,
+      "file": "supabase/migrations/0020_challenges_notifications.sql",
+      "bytes": 23250,
+      "sha256": "806949a4b1e14c96d992ca33f83eab6ca4d87667b976367af72df8586959b61d",
+      "migration_version": "0020",
+      "migration_name": "challenges_notifications"
+    },
+    {
+      "order": 21,
+      "file": "supabase/migrations/0021_final_assessments.sql",
+      "bytes": 16367,
+      "sha256": "a57d743088ed1545ade4fef89ed9c917bbcfcbfb4dc303552b894d6e6f6a91b7",
+      "migration_version": "0021",
+      "migration_name": "final_assessments"
+    },
+    {
+      "order": 22,
+      "file": "supabase/staging/application_access.sql",
+      "bytes": 7851,
+      "sha256": "7b8e635d818cb6fdba38450c04fa14856506383333b3d1058e5b69f3453b066e",
+      "migration_version": null,
+      "migration_name": null
+    }
+  ],
+  "exclusions": [
+    "0001_teacher_security.template.sql",
+    "0003_teacher_operations_corrective.sql",
+    "Auth accounts or role seeding",
+    "production changes",
+    "AI provider activation"
+  ],
+  "recording_rule": "Record exact SQL files only after successful execution; never stamp historical versions to bypass a refusal."
+}

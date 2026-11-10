@@ -1,0 +1,1866 @@
+/* ==========================================================================
+   VERA ORBIS — TOTAL VISUAL REDESIGN (HOME EXPERIENCE)
+   Solid Saturated Brand Worlds · Kinetic 3D Cards · Interactive Passport
+   Zero SaaS Glassmorphism · Editorial Typography · Tactile Motion
+   ========================================================================== */
+
+.vo-world-home {
+  --vo-violet: #6C3BFF;
+  --vo-orange: #FF6B35;
+  --vo-yellow: #FFC83D;
+  --vo-turquoise: #20C7B5;
+  --vo-indigo: #183B66;
+  --vo-ivory: #FFF9F0;
+  --vo-ink: #132F54;
+  background-color: var(--vo-ivory);
+  color: var(--vo-indigo);
+  overflow-x: clip;
+}
+
+/* ==========================================================================
+   01. HERO + INTERACTIVE LANGUAGE PASSPORT (SOLID MARFIL #FFF9F0)
+   Preserves .hero-art-canvas 100% untouched!
+   ========================================================================== */
+
+.vo-world-home .hero {
+  background: var(--vo-ivory);
+  padding: 122px 5vw 76px;
+  min-height: auto;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 3px solid var(--vo-indigo);
+}
+
+/* Keep hero crisp solid Marfil without muddy SaaS fog */
+.vo-world-home .hero-ambient-glow {
+  display: none;
+}
+
+.vo-world-home .hero-main-layout {
+  max-width: 1260px;
+  margin: 0 auto 38px;
+  display: grid;
+  grid-template-columns: 1.08fr 0.92fr;
+  align-items: center;
+  gap: 44px;
+}
+
+.vo-hero-coord-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  background: #FFFFFF;
+  border: 2px solid var(--vo-indigo);
+  border-radius: 999px;
+  box-shadow: 4px 4px 0 var(--vo-yellow);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--vo-indigo);
+  margin-bottom: 22px;
+}
+
+.vo-coord-live-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--vo-orange);
+  display: inline-block;
+  animation: voPulseDot 2.2s ease-in-out infinite;
+}
+
+@keyframes voPulseDot {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.35); }
+}
+
+.vo-world-home .hero-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(42px, 5.2vw, 72px);
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  color: var(--vo-indigo);
+  margin: 0 0 20px;
+}
+
+.vo-world-home .hero-line-2 {
+  font-style: italic;
+  color: var(--vo-violet);
+  display: inline;
+  background: linear-gradient(transparent 64%, var(--vo-yellow) 64%, var(--vo-yellow) 93%, transparent 93%);
+  padding: 0 4px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.vo-world-home .hero-description {
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--vo-indigo);
+  max-width: 540px;
+  margin: 0 0 28px;
+  font-weight: 500;
+}
+
+.vo-hero-cta-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+.vo-btn-solid {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 15px 26px;
+  border-radius: 999px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  border: 2.5px solid var(--vo-indigo);
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.2s ease;
+}
+
+.vo-btn-orange {
+  background: var(--vo-orange);
+  color: #FFFFFF;
+  box-shadow: 5px 5px 0 var(--vo-indigo);
+}
+
+.vo-btn-orange:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 8px 8px 0 var(--vo-indigo);
+}
+
+.vo-btn-orange:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--vo-indigo);
+}
+
+.vo-btn-violet {
+  background: var(--vo-violet);
+  color: #FFFFFF;
+  box-shadow: 5px 5px 0 var(--vo-indigo);
+}
+
+.vo-btn-violet:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 8px 8px 0 var(--vo-indigo);
+}
+
+.vo-btn-yellow {
+  background: var(--vo-yellow);
+  color: var(--vo-indigo);
+  box-shadow: 5px 5px 0 var(--vo-indigo);
+}
+
+.vo-btn-yellow:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 8px 8px 0 var(--vo-indigo);
+}
+
+.vo-btn-indigo {
+  background: var(--vo-indigo);
+  color: var(--vo-ivory);
+  border-color: var(--vo-ivory);
+  box-shadow: 5px 5px 0 var(--vo-yellow);
+}
+
+.vo-btn-indigo:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 8px 8px 0 var(--vo-yellow);
+}
+
+.vo-btn-ivory {
+  background: var(--vo-ivory);
+  color: var(--vo-indigo);
+  box-shadow: 5px 5px 0 var(--vo-indigo);
+}
+
+.vo-btn-ivory:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 8px 8px 0 var(--vo-indigo);
+}
+
+.vo-hero-b2b-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: var(--vo-turquoise);
+  color: var(--vo-indigo);
+  border: 2px solid var(--vo-indigo);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 var(--vo-indigo);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vo-hero-b2b-pill:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 var(--vo-indigo);
+}
+
+/* ==========================================================================
+   HERO PASSPORT SHOWCASE DOCK (Interactive 3D Object in Section 1)
+   ========================================================================== */
+
+.vo-passport-dock {
+  max-width: 1220px;
+  margin: 12px auto 0;
+  padding: 28px 32px;
+  background: var(--vo-yellow);
+  border: 3px solid var(--vo-indigo);
+  border-radius: 32px;
+  box-shadow: 10px 10px 0 var(--vo-indigo);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 38px;
+  position: relative;
+  z-index: 4;
+}
+
+.vo-passport-dock.is-expanded {
+  grid-template-columns: 1fr;
+  justify-items: center;
+}
+
+.vo-passport-stage {
+  perspective: 1400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* CLOSED PHYSICAL PASSPORT BOOKLET */
+.vo-passport-closed {
+  position: relative;
+  width: 248px;
+  height: 332px;
+  border-radius: 10px 22px 22px 10px;
+  background: var(--vo-indigo);
+  border: 3px solid #0D2340;
+  box-shadow:
+    -6px 0 0 #0D2340,
+    10px 14px 0 var(--vo-violet),
+    0 22px 40px rgba(24, 59, 102, 0.28);
+  cursor: pointer;
+  padding: 16px 16px 16px 22px;
+  color: var(--vo-yellow);
+  transform-style: preserve-3d;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease;
+  animation: voPassportFloat 5.5s ease-in-out infinite;
+  user-select: none;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+@keyframes voPassportFloat {
+  0%, 100% { transform: translateY(0px) rotate(-1.5deg); }
+  50% { transform: translateY(-9px) rotate(1deg); }
+}
+
+.vo-passport-closed:hover {
+  animation-play-state: paused;
+}
+
+/* Stitched spine */
+.vo-passport-spine {
+  position: absolute;
+  left: 8px;
+  top: 12px;
+  bottom: 12px;
+  width: 4px;
+  border-left: 2px dashed rgba(255, 200, 61, 0.55);
+  pointer-events: none;
+}
+
+.vo-passport-foil-frame {
+  border: 2px solid var(--vo-yellow);
+  border-radius: 6px 14px 14px 6px;
+  padding: 16px 12px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.vo-passport-top-label {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  color: var(--vo-yellow);
+  display: block;
+}
+
+.vo-passport-sub-label {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--vo-ivory);
+  opacity: 0.9;
+  margin-top: 3px;
+  display: block;
+}
+
+.vo-passport-crest {
+  margin: 6px 0;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.vo-passport-closed:hover .vo-passport-crest {
+  transform: rotate(18deg) scale(1.08);
+}
+
+.vo-passport-chip-gold {
+  width: 34px;
+  height: 24px;
+  border-radius: 5px;
+  background: var(--vo-yellow);
+  border: 1.5px solid #B8860B;
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.vo-passport-chip-gold::before {
+  content: '';
+  width: 18px;
+  height: 12px;
+  border: 1.5px solid var(--vo-indigo);
+  border-radius: 2px;
+}
+
+.vo-passport-motto {
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: var(--vo-turquoise);
+}
+
+.vo-passport-ribbon-tab {
+  position: absolute;
+  right: -18px;
+  bottom: 28px;
+  background: var(--vo-orange);
+  color: #FFFFFF;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  padding: 7px 13px;
+  border-radius: 999px;
+  border: 2px solid var(--vo-indigo);
+  box-shadow: 3px 3px 0 var(--vo-indigo);
+  transition: transform 0.2s ease;
+}
+
+.vo-passport-closed:hover .vo-passport-ribbon-tab {
+  transform: translateX(5px) scale(1.05);
+}
+
+/* OPEN TWO-PAGE PASSPORT SPREAD */
+.vo-passport-open-book {
+  width: min(760px, 100%);
+  background: var(--vo-indigo);
+  padding: 12px;
+  border-radius: 22px;
+  border: 3px solid #0D2340;
+  box-shadow: 10px 12px 0 var(--vo-violet);
+  animation: voBookOpenPop 0.42s cubic-bezier(0.22, 1.25, 0.36, 1);
+}
+
+@keyframes voBookOpenPop {
+  0% { opacity: 0; transform: scale(0.88) rotateY(-22deg); }
+  100% { opacity: 1; transform: scale(1) rotateY(0deg); }
+}
+
+.vo-passport-pages-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--vo-ivory);
+  border-radius: 14px;
+  overflow: hidden;
+  border: 2px solid var(--vo-yellow);
+  position: relative;
+}
+
+.vo-passport-leaf {
+  padding: 22px 22px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 300px;
+  position: relative;
+}
+
+.vo-leaf-left {
+  border-right: 2px dashed rgba(24, 59, 102, 0.25);
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 23px,
+      rgba(32, 199, 181, 0.08) 23px,
+      rgba(32, 199, 181, 0.08) 24px
+    ),
+    var(--vo-ivory);
+}
+
+.vo-leaf-right {
+  background: #FFFDF8;
+}
+
+.vo-leaf-kicker {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: var(--vo-violet);
+  text-transform: uppercase;
+}
+
+.vo-passport-id-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 12px 0;
+  padding: 12px;
+  background: #FFFFFF;
+  border: 2px solid var(--vo-indigo);
+  border-radius: 14px;
+}
+
+.vo-passport-avatar-seal {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: var(--vo-turquoise);
+  border: 2px solid var(--vo-indigo);
+  display: grid;
+  place-items: center;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--vo-indigo);
+  flex-shrink: 0;
+}
+
+.vo-passport-holder-meta strong {
+  display: block;
+  font-size: 14px;
+  color: var(--vo-indigo);
+  letter-spacing: 0.04em;
+}
+
+.vo-passport-holder-meta span {
+  font-size: 11.5px;
+  color: var(--vo-orange);
+  font-weight: 700;
+}
+
+.vo-passport-data-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.vo-passport-data-cell {
+  background: #FFFFFF;
+  border: 1.5px solid rgba(24, 59, 102, 0.18);
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+
+.vo-passport-data-cell small {
+  display: block;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--vo-violet);
+}
+
+.vo-passport-data-cell strong {
+  font-size: 12.5px;
+  color: var(--vo-indigo);
+}
+
+.vo-passport-mrz {
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  line-height: 1.45;
+  color: var(--vo-indigo);
+  background: rgba(24, 59, 102, 0.07);
+  padding: 8px 10px;
+  border-radius: 8px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.vo-leaf-right-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.vo-passport-close-btn {
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--vo-indigo);
+  color: var(--vo-ivory);
+  font-size: 11px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+}
+
+.vo-passport-close-btn:hover {
+  background: var(--vo-orange);
+}
+
+.vo-stamp-picker-row {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.vo-stamp-ink-btn {
+  flex: 1;
+  padding: 8px 6px;
+  border-radius: 10px;
+  border: 2px solid var(--vo-indigo);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  box-shadow: 2px 3px 0 var(--vo-indigo);
+}
+
+.vo-stamp-ink-btn[data-stamp="en"] { background: var(--vo-orange); color: #FFFFFF; }
+.vo-stamp-ink-btn[data-stamp="fr"] { background: var(--vo-violet); color: #FFFFFF; }
+.vo-stamp-ink-btn[data-stamp="zh"] { background: var(--vo-turquoise); color: var(--vo-indigo); }
+
+.vo-stamp-ink-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 4px 5px 0 var(--vo-indigo);
+}
+
+.vo-stamps-canvas {
+  min-height: 116px;
+  background: var(--vo-ivory);
+  border: 2px dashed rgba(24, 59, 102, 0.22);
+  border-radius: 14px;
+  padding: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.vo-visa-seal {
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 2.5px double currentColor;
+  font-weight: 800;
+  text-align: center;
+  animation: voStampSlam 0.34s cubic-bezier(0.22, 1.45, 0.36, 1);
+}
+
+.vo-visa-seal.seal-en { color: var(--vo-orange); transform: rotate(-5deg); background: rgba(255, 107, 53, 0.08); }
+.vo-visa-seal.seal-fr { color: var(--vo-violet); transform: rotate(4deg); background: rgba(108, 59, 255, 0.08); }
+.vo-visa-seal.seal-zh { color: #0E8A7C; transform: rotate(-3deg); background: rgba(32, 199, 181, 0.12); }
+
+.vo-visa-seal strong {
+  display: block;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
+.vo-visa-seal small {
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+}
+
+@keyframes voStampSlam {
+  0% { transform: scale(1.75) rotate(-14deg); opacity: 0; }
+  70% { transform: scale(0.94) rotate(2deg); opacity: 1; }
+  100% { transform: scale(1) rotate(-3deg); opacity: 1; }
+}
+
+.vo-stamp-phrase-bar {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--vo-indigo);
+}
+
+.vo-stamp-jump-link {
+  color: var(--vo-violet);
+  text-decoration: underline;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* Companion Copy inside Passport Dock */
+.vo-passport-companion {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.vo-passport-dock.is-expanded .vo-passport-companion {
+  text-align: center;
+  align-items: center;
+  max-width: 640px;
+}
+
+.vo-dock-kicker {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--vo-indigo);
+  color: var(--vo-yellow);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.vo-passport-dock.is-expanded .vo-dock-kicker {
+  align-self: center;
+}
+
+.vo-dock-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(26px, 3vw, 38px);
+  font-weight: 700;
+  line-height: 1.12;
+  color: var(--vo-indigo);
+  margin: 0;
+}
+
+.vo-dock-micro {
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--vo-indigo);
+  font-weight: 600;
+  max-width: 540px;
+  margin: 0;
+}
+
+.vo-dock-quick-stamps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.vo-quick-stamp-pill {
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: var(--vo-ivory);
+  border: 2px solid var(--vo-indigo);
+  color: var(--vo-indigo);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 var(--vo-indigo);
+  transition: transform 0.18s ease, background-color 0.18s ease;
+}
+
+.vo-quick-stamp-pill:hover {
+  transform: translate(-2px, -2px);
+  background: #FFFFFF;
+}
+
+/* ==========================================================================
+   SHARED KINETIC 3D FLIP CARD ENGINE
+   Elevates, floats, tilts with cursor, flips 180deg on click/tap
+   ========================================================================== */
+
+.vo-kinetic-card {
+  perspective: 1300px;
+  cursor: pointer;
+  position: relative;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.vo-kinetic-card.float-a { animation: voCardFloatA 6.4s ease-in-out infinite; }
+.vo-kinetic-card.float-b { animation: voCardFloatB 7.1s ease-in-out infinite 0.7s; }
+.vo-kinetic-card.float-c { animation: voCardFloatC 6.8s ease-in-out infinite 1.3s; }
+
+@keyframes voCardFloatA {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes voCardFloatB {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes voCardFloatC {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-9px); }
+}
+
+.vo-kinetic-card:hover {
+  animation-play-state: paused;
+  z-index: 5;
+}
+
+.vo-kinetic-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.68s cubic-bezier(0.2, 0.85, 0.25, 1.12);
+}
+
+.vo-kinetic-card.is-flipped .vo-kinetic-inner {
+  transform: rotateY(180deg) !important;
+}
+
+.vo-kinetic-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 28px;
+  border: 3px solid var(--vo-indigo);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  position: relative;
+}
+
+.vo-kinetic-front {
+  position: relative;
+  z-index: 2;
+}
+
+.vo-kinetic-back {
+  position: absolute;
+  inset: 0;
+  transform: rotateY(180deg);
+  z-index: 1;
+}
+
+/* ==========================================================================
+   02. REAL VIDEO STAGE (SOLID VIOLETA ORBIS #6C3BFF)
+   Real Founder Video — Zero Stock Poster, Zero Vera Avatar
+   ========================================================================== */
+
+.vo-video-world {
+  background: var(--vo-violet);
+  color: var(--vo-ivory);
+  padding: 104px 5vw;
+  border-bottom: 3px solid var(--vo-indigo);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Bold solid geometric architectural accent shape */
+.vo-video-world::before {
+  content: 'VO';
+  position: absolute;
+  right: -20px;
+  bottom: -55px;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 280px;
+  font-weight: 700;
+  line-height: 1;
+  color: rgba(24, 59, 102, 0.22);
+  pointer-events: none;
+  user-select: none;
+}
+
+.vo-video-grid {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 0.88fr 1.12fr;
+  gap: 48px;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.vo-solid-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 15px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  border: 2px solid var(--vo-indigo);
+  margin-bottom: 18px;
+}
+
+.tag-yellow { background: var(--vo-yellow); color: var(--vo-indigo); box-shadow: 4px 4px 0 var(--vo-indigo); }
+.tag-turquoise { background: var(--vo-turquoise); color: var(--vo-indigo); box-shadow: 4px 4px 0 #0A1D36; }
+.tag-indigo { background: var(--vo-indigo); color: var(--vo-yellow); box-shadow: 4px 4px 0 var(--vo-ivory); }
+.tag-ivory { background: var(--vo-ivory); color: var(--vo-indigo); box-shadow: 4px 4px 0 var(--vo-indigo); }
+.tag-orange { background: var(--vo-orange); color: #FFFFFF; box-shadow: 4px 4px 0 var(--vo-indigo); }
+
+.vo-display-h2 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(34px, 4.3vw, 56px);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  margin: 0 0 16px;
+}
+
+.vo-video-copy .vo-display-h2 {
+  color: var(--vo-ivory);
+}
+
+.vo-accent-yellow { color: var(--vo-yellow); font-style: italic; }
+.vo-accent-turquoise { color: var(--vo-turquoise); font-style: italic; }
+.vo-accent-violet { color: var(--vo-violet); font-style: italic; }
+.vo-accent-indigo { color: var(--vo-indigo); font-style: italic; }
+.vo-accent-ivory { color: var(--vo-ivory); font-style: italic; }
+
+.vo-micro-lead {
+  font-size: 17px;
+  line-height: 1.52;
+  font-weight: 500;
+  max-width: 460px;
+  margin: 0 0 26px;
+}
+
+.vo-video-copy .vo-micro-lead {
+  color: var(--vo-ivory);
+}
+
+.vo-video-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Architectural Real Video Frame */
+.vo-real-video-card {
+  background: var(--vo-indigo);
+  border: 3.5px solid var(--vo-indigo);
+  border-radius: 28px;
+  padding: 12px;
+  box-shadow: 14px 14px 0 var(--vo-yellow);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+}
+
+.vo-real-video-card:hover {
+  transform: translate(-4px, -4px);
+  box-shadow: 18px 18px 0 var(--vo-yellow);
+}
+
+.vo-video-viewport {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #0D1F38;
+  aspect-ratio: 16 / 9;
+}
+
+.vo-live-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  cursor: pointer;
+}
+
+.vo-video-live-pill {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  left: auto;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: var(--vo-yellow);
+  color: var(--vo-indigo);
+  border: 2px solid var(--vo-indigo);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  pointer-events: none;
+}
+
+.vo-video-controls-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 8px 4px;
+  color: var(--vo-ivory);
+}
+
+.vo-vid-ctrl-btn {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--vo-ivory);
+  color: var(--vo-indigo);
+  border: 2px solid var(--vo-indigo);
+  font-size: 12.5px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.vo-vid-ctrl-btn:hover {
+  background: var(--vo-yellow);
+  transform: translateY(-1px);
+}
+
+.vo-vid-ctrl-btn.is-sound-on {
+  background: var(--vo-turquoise);
+  color: var(--vo-indigo);
+}
+
+.vo-vid-scrubber {
+  flex: 1;
+  height: 10px;
+  background: rgba(255, 249, 240, 0.22);
+  border-radius: 999px;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+}
+
+.vo-vid-scrubber-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--vo-yellow);
+  border-radius: 999px;
+  transition: width 0.12s linear;
+}
+
+.vo-vid-time {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--vo-yellow);
+  min-width: 72px;
+  text-align: right;
+}
+
+/* ==========================================================================
+   03. LANGUAGES SECTION — PURE COLOR + MONUMENTAL TYPOGRAPHY (ZERO PHOTOS)
+   Solid Azul Índigo #183B66 Stage · EN (#FF6B35) · FR (#6C3BFF) · 中文 (#20C7B5)
+   ========================================================================== */
+
+.vo-typo-languages-world {
+  background: var(--vo-indigo);
+  color: var(--vo-ivory);
+  padding: 108px 5vw;
+  border-bottom: 3px solid #0B1E36;
+  position: relative;
+}
+
+.vo-section-header-compact {
+  max-width: 780px;
+  margin: 0 auto 54px;
+  text-align: center;
+}
+
+.vo-section-header-compact .vo-micro-lead {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.vo-typo-languages-world .vo-display-h2 {
+  color: var(--vo-ivory);
+}
+
+.vo-typo-languages-world .vo-micro-lead {
+  color: rgba(255, 249, 240, 0.88);
+  margin: 0 auto;
+}
+
+/* Override old .lang-showcase-card styles cleanly inside .vo-world-home */
+.vo-world-home .languages-three-grid {
+  max-width: 1240px;
+  margin: 0 auto 44px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+
+.vo-world-home .lang-showcase-card {
+  min-height: 450px;
+  height: 450px;
+  perspective: 1400px;
+}
+
+.vo-world-home .lang-showcase-card .lang-card-inner {
+  width: 100%;
+  height: 100% !important;
+  min-height: 0 !important;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.68s cubic-bezier(0.2, 0.85, 0.25, 1.12);
+}
+
+.vo-world-home .lang-showcase-card.is-flipped .lang-card-inner {
+  transform: rotateY(180deg) !important;
+}
+
+.vo-typo-lang-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 30px;
+  padding: 30px 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  border: 3px solid #0B1E36;
+}
+
+/* SOLID COLOR WORLDS PER LANGUAGE */
+.vo-world-home .english-theme .vo-typo-front {
+  background: var(--vo-orange);
+  color: var(--vo-ivory);
+  box-shadow: 10px 12px 0 var(--vo-yellow);
+}
+
+.vo-world-home .french-theme .vo-typo-front {
+  background: var(--vo-violet);
+  color: var(--vo-ivory);
+  box-shadow: 10px 12px 0 var(--vo-turquoise);
+}
+
+.vo-world-home .mandarin-theme .vo-typo-front {
+  background: var(--vo-turquoise);
+  color: var(--vo-indigo);
+  box-shadow: 10px 12px 0 var(--vo-orange);
+}
+
+/* GIANT CHARACTER WATERMARKS */
+.vo-typo-watermark {
+  position: absolute;
+  right: -14px;
+  bottom: -28px;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 215px;
+  font-weight: 700;
+  line-height: 0.85;
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.18;
+  transform: rotate(-8deg);
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.vo-world-home .english-theme .vo-typo-watermark { color: var(--vo-indigo); }
+.vo-world-home .french-theme .vo-typo-watermark { color: var(--vo-yellow); font-style: italic; }
+.vo-world-home .mandarin-theme .vo-typo-watermark {
+  color: var(--vo-indigo);
+  font-size: 175px;
+  bottom: -10px;
+  font-family: 'Noto Serif SC', 'Microsoft YaHei', sans-serif;
+}
+
+.vo-world-home .lang-showcase-card:hover .vo-typo-watermark {
+  transform: rotate(-2deg) scale(1.08);
+}
+
+.vo-typo-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+}
+
+.vo-typo-level-pill {
+  padding: 6px 13px;
+  border-radius: 999px;
+  background: var(--vo-indigo);
+  color: var(--vo-ivory);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.vo-typo-flip-hint {
+  padding: 6px 13px;
+  border-radius: 999px;
+  background: var(--vo-ivory);
+  color: var(--vo-indigo);
+  border: 2px solid var(--vo-indigo);
+  font-size: 11.5px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.vo-world-home .lang-showcase-card:hover .vo-typo-flip-hint {
+  transform: scale(1.06);
+}
+
+.vo-typo-centerpiece {
+  position: relative;
+  z-index: 2;
+  margin: auto 0;
+}
+
+.vo-monumental-code {
+  display: block;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(74px, 7.2vw, 104px);
+  font-weight: 700;
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  margin-bottom: 12px;
+}
+
+.vo-world-home .french-theme .vo-monumental-code {
+  font-style: italic;
+  color: var(--vo-yellow);
+}
+
+.vo-world-home .mandarin-theme .vo-monumental-code {
+  font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+  font-size: clamp(64px, 6.2vw, 90px);
+  letter-spacing: 0.02em;
+  color: var(--vo-indigo);
+}
+
+.vo-typo-lang-name {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0 0 8px;
+  letter-spacing: -0.01em;
+}
+
+.vo-typo-subline {
+  font-size: 15px;
+  line-height: 1.45;
+  font-weight: 600;
+  margin: 0;
+  max-width: 280px;
+}
+
+.vo-typo-mandarin-tag {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 11.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--vo-indigo);
+  opacity: 0.9;
+}
+
+.vo-typo-bottom-bar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 14px;
+  border-top: 2px solid rgba(24, 59, 102, 0.22);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.vo-world-home .english-theme .vo-typo-bottom-bar,
+.vo-world-home .french-theme .vo-typo-bottom-bar {
+  border-top-color: rgba(255, 249, 240, 0.35);
+}
+
+/* LANGUAGE BACK FACE (SOLID MARFIL #FFF9F0 — BRIEF, USEFUL, ATTRACTIVE) */
+.vo-typo-back {
+  transform: rotateY(180deg);
+  background: var(--vo-ivory);
+  color: var(--vo-indigo);
+  box-shadow: 10px 12px 0 var(--vo-yellow);
+}
+
+.vo-back-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.vo-back-lang-pill {
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #FFFFFF;
+}
+
+.pill-bg-orange { background: var(--vo-orange); }
+.pill-bg-violet { background: var(--vo-violet); }
+.pill-bg-turquoise { background: var(--vo-turquoise); color: var(--vo-indigo); }
+
+.vo-back-return-btn {
+  padding: 6px 13px;
+  border-radius: 999px;
+  background: var(--vo-indigo);
+  color: var(--vo-ivory);
+  border: none;
+  font-size: 11.5px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.vo-back-return-btn:hover {
+  background: var(--vo-orange);
+}
+
+.vo-back-idiom-box {
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: var(--vo-yellow);
+  border: 2px solid var(--vo-indigo);
+}
+
+.vo-back-idiom-box blockquote {
+  margin: 0 0 4px;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 20px;
+  font-weight: 700;
+  font-style: italic;
+  color: var(--vo-indigo);
+}
+
+.vo-back-idiom-box p {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--vo-indigo);
+}
+
+.vo-back-points {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vo-back-points li {
+  font-size: 13.5px;
+  line-height: 1.4;
+  font-weight: 600;
+  color: var(--vo-indigo);
+  padding-left: 16px;
+  position: relative;
+}
+
+.vo-back-points li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--vo-orange);
+  font-weight: 900;
+}
+
+.vo-back-cta-pair {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 2px solid rgba(24, 59, 102, 0.14);
+}
+
+.vo-back-diag-btn {
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: var(--vo-indigo);
+  color: var(--vo-ivory);
+  border: none;
+  font-size: 12.5px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.vo-back-diag-btn:hover {
+  background: var(--vo-orange);
+  transform: translateY(-2px);
+}
+
+.vo-back-more-link {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--vo-violet);
+  text-decoration: none;
+}
+
+.vo-back-more-link:hover {
+  text-decoration: underline;
+}
+
+/* B2B + Honesty Compact Strip inside Languages Section */
+.vo-b2b-compact-strip {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.35fr 0.65fr;
+  gap: 24px;
+  align-items: stretch;
+}
+
+.vo-world-home .format-card.format-mandarin-b2b {
+  background: var(--vo-yellow);
+  color: var(--vo-indigo);
+  border: 3px solid #0B1E36;
+  border-radius: 24px;
+  padding: 24px 28px;
+  box-shadow: 8px 8px 0 var(--vo-orange);
+  animation: none;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.vo-b2b-strip-kicker {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--vo-indigo);
+  color: var(--vo-yellow);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  margin-bottom: 6px;
+}
+
+.vo-b2b-strip-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--vo-indigo);
+  margin: 0 0 4px;
+}
+
+.vo-b2b-strip-micro {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--vo-indigo);
+  margin: 0;
+}
+
+.vo-honesty-pill-card {
+  background: var(--vo-ivory);
+  color: var(--vo-indigo);
+  border: 3px solid #0B1E36;
+  border-radius: 24px;
+  padding: 22px 24px;
+  box-shadow: 8px 8px 0 var(--vo-turquoise);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+}
+
+.vo-honesty-pill-card strong {
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--vo-violet);
+}
+
+.vo-honesty-pill-card p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.45;
+  font-weight: 600;
+  color: var(--vo-indigo);
+}
+
+/* ==========================================================================
+   04. METHOD KINETIC DECK — SOLID AMARILLO SOL (#FFC83D)
+   Learn It · Live It · Speak It (3 Flip Cards, Zero Long Paragraphs)
+   ========================================================================== */
+
+.vo-method-sun-world {
+  background: var(--vo-yellow);
+  color: var(--vo-indigo);
+  padding: 104px 5vw;
+  border-bottom: 3px solid var(--vo-indigo);
+  position: relative;
+}
+
+.vo-method-deck {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.vo-method-card {
+  height: 330px;
+}
+
+.vo-method-card .vo-kinetic-front {
+  padding: 28px;
+  box-shadow: 9px 10px 0 var(--vo-indigo);
+}
+
+.vo-method-card.step-learn .vo-kinetic-front {
+  background: var(--vo-indigo);
+  color: var(--vo-ivory);
+  box-shadow: 9px 10px 0 var(--vo-violet);
+}
+
+.vo-method-card.step-live .vo-kinetic-front {
+  background: var(--vo-orange);
+  color: var(--vo-ivory);
+}
+
+.vo-method-card.step-speak .vo-kinetic-front {
+  background: var(--vo-violet);
+  color: var(--vo-ivory);
+}
+
+.vo-method-num-watermark {
+  position: absolute;
+  right: 12px;
+  bottom: -18px;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 145px;
+  font-weight: 700;
+  line-height: 1;
+  opacity: 0.18;
+  pointer-events: none;
+}
+
+.vo-method-step-pill {
+  align-self: flex-start;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--vo-ivory);
+  color: var(--vo-indigo);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.vo-method-front-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 38px;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+
+.vo-method-front-hook {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.vo-method-flip-cue {
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--vo-yellow);
+}
+
+.vo-method-card.step-live .vo-method-flip-cue {
+  color: var(--vo-ivory);
+}
+
+.vo-method-card .vo-kinetic-back {
+  background: var(--vo-ivory);
+  color: var(--vo-indigo);
+  padding: 28px;
+  box-shadow: 9px 10px 0 var(--vo-indigo);
+}
+
+.vo-method-back-quote {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 23px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--vo-indigo);
+  margin: 0;
+}
+
+.vo-method-cta-center {
+  text-align: center;
+  margin-top: 42px;
+}
+
+/* ==========================================================================
+   05. FIVE UNIVERSES (SOLID TURQUESA #20C7B5) + PORTAL DOORS (#FFF9F0)
+   ========================================================================== */
+
+.vo-universes-turquoise-world {
+  background: var(--vo-turquoise);
+  color: var(--vo-indigo);
+  padding: 102px 5vw;
+  border-bottom: 3px solid var(--vo-indigo);
+}
+
+.vo-world-home .universes-five-grid {
+  max-width: 1260px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
+}
+
+.vo-universe-kinetic {
+  height: 268px;
+}
+
+.vo-universe-kinetic .vo-kinetic-front,
+.vo-universe-kinetic .vo-kinetic-back {
+  padding: 22px 20px;
+  border-radius: 24px;
+  box-shadow: 7px 8px 0 var(--vo-indigo);
+}
+
+.vo-universe-kinetic.u-1 .vo-kinetic-front { background: var(--vo-ivory); color: var(--vo-indigo); }
+.vo-universe-kinetic.u-2 .vo-kinetic-front { background: var(--vo-indigo); color: var(--vo-ivory); box-shadow: 7px 8px 0 var(--vo-yellow); }
+.vo-universe-kinetic.u-3 .vo-kinetic-front { background: var(--vo-violet); color: var(--vo-ivory); }
+.vo-universe-kinetic.u-4 .vo-kinetic-front { background: var(--vo-yellow); color: var(--vo-indigo); }
+.vo-universe-kinetic.u-5 .vo-kinetic-front { background: var(--vo-orange); color: var(--vo-ivory); }
+
+.vo-u-roman {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 15px;
+  font-weight: 700;
+  opacity: 0.85;
+}
+
+.vo-universe-kinetic h3 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 26px;
+  font-weight: 700;
+  margin: 6px 0;
+  color: inherit;
+}
+
+.vo-u-front-micro {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.vo-u-tap {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.88;
+}
+
+.vo-universe-kinetic .vo-kinetic-back {
+  background: var(--vo-ivory);
+  color: var(--vo-indigo);
+}
+
+.vo-u-back-text {
+  font-size: 14.5px;
+  font-weight: 700;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.vo-u-portal-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--vo-indigo);
+  color: var(--vo-ivory);
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+  align-self: flex-start;
+}
+
+.vo-u-portal-link:hover {
+  background: var(--vo-orange);
+}
+
+/* PORTAL DOORS STRIP (SOLID MARFIL #FFF9F0) */
+.vo-portals-doors-world {
+  background: var(--vo-ivory);
+  padding: 84px 5vw;
+  border-bottom: 3px solid var(--vo-indigo);
+}
+
+.vo-world-home .home-portals-grid {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 18px;
+}
+
+.vo-door-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 205px;
+  padding: 22px 20px;
+  border-radius: 90px 90px 22px 22px;
+  border: 3px solid var(--vo-indigo);
+  text-decoration: none;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease;
+  box-shadow: 6px 7px 0 var(--vo-indigo);
+}
+
+.vo-door-card.door-1 { background: var(--vo-violet); color: var(--vo-ivory); }
+.vo-door-card.door-2 { background: var(--vo-orange); color: var(--vo-ivory); }
+.vo-door-card.door-3 { background: var(--vo-yellow); color: var(--vo-indigo); }
+.vo-door-card.door-4 { background: var(--vo-turquoise); color: var(--vo-indigo); }
+.vo-door-card.door-5 { background: var(--vo-indigo); color: var(--vo-ivory); box-shadow: 6px 7px 0 var(--vo-orange); }
+
+.vo-door-card:hover {
+  transform: translateY(-10px) rotate(-1deg);
+  box-shadow: 10px 14px 0 var(--vo-indigo);
+}
+
+.vo-door-num {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-align: center;
+  display: block;
+  margin-top: 8px;
+}
+
+.vo-door-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 21px;
+  font-weight: 700;
+  text-align: center;
+  margin: 10px 0 6px;
+  line-height: 1.2;
+}
+
+.vo-door-sub {
+  font-size: 12.5px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.35;
+  margin: 0 0 12px;
+}
+
+.vo-door-enter {
+  align-self: center;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--vo-ivory);
+  color: var(--vo-indigo);
+  font-size: 11.5px;
+  font-weight: 800;
+  border: 2px solid var(--vo-indigo);
+}
+
+/* ==========================================================================
+   06. GRAND FINALE — SOLID NARANJA VIVO (#FF6B35)
+   ========================================================================== */
+
+.vo-finale-orange-world {
+  background: var(--vo-orange);
+  color: var(--vo-ivory);
+  padding: 104px 5vw;
+  text-align: center;
+  border-bottom: 3px solid var(--vo-indigo);
+  position: relative;
+  overflow: hidden;
+}
+
+.vo-finale-inner {
+  max-width: 860px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.vo-finale-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(38px, 5vw, 66px);
+  font-weight: 700;
+  line-height: 1.06;
+  color: var(--vo-ivory);
+  margin: 0 0 16px;
+}
+
+.vo-finale-micro {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--vo-ivory);
+  margin: 0 auto 32px;
+  max-width: 540px;
+}
+
+.vo-finale-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (TABLET & MOBILE TOUCH)
+   ========================================================================== */
+
+@media (max-width: 1060px) {
+  .vo-world-home .hero-main-layout {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .vo-world-home .hero-description {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .vo-hero-cta-cluster {
+    justify-content: center;
+  }
+
+  .vo-passport-dock {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+    padding: 26px 22px;
+  }
+
+  .vo-dock-kicker {
+    align-self: center;
+  }
+
+  .vo-dock-quick-stamps {
+    justify-content: center;
+  }
+
+  .vo-video-grid {
+    grid-template-columns: 1fr;
+    gap: 34px;
+  }
+
+  .vo-world-home .languages-three-grid,
+  .vo-method-deck {
+    grid-template-columns: 1fr;
+    max-width: 520px;
+  }
+
+  .vo-b2b-compact-strip {
+    grid-template-columns: 1fr;
+    max-width: 520px;
+  }
+
+  .vo-world-home .format-card.format-mandarin-b2b {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .vo-world-home .universes-five-grid,
+  .vo-world-home .home-portals-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 680px) {
+  .vo-world-home .hero {
+    padding: 102px 5vw 56px;
+  }
+
+  .vo-passport-pages-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vo-leaf-left {
+    border-right: none;
+    border-bottom: 2px dashed rgba(24, 59, 102, 0.25);
+    min-height: auto;
+  }
+
+  .vo-leaf-right {
+    min-height: auto;
+  }
+
+  .vo-video-live-pill {
+    top: 8px;
+    right: 8px;
+    padding: 4px 9px;
+    font-size: 9px;
+  }
+
+  .vo-video-controls-bar {
+    flex-wrap: wrap;
+  }
+
+  .vo-vid-scrubber {
+    order: 3;
+    flex-basis: 100%;
+  }
+
+  .vo-world-home .lang-showcase-card {
+    height: 430px;
+    min-height: 430px;
+  }
+
+  .vo-world-home .universes-five-grid,
+  .vo-world-home .home-portals-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vo-door-card {
+    border-radius: 28px;
+    min-height: 155px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vo-passport-closed,
+  .vo-kinetic-card.float-a,
+  .vo-kinetic-card.float-b,
+  .vo-kinetic-card.float-c,
+  .vo-coord-live-dot {
+    animation: none !important;
+  }
+}

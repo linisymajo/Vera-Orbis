@@ -1,0 +1,73 @@
+{
+  "format": "vera-orbis-staging-manifest-v1",
+  "range": "0011-0021",
+  "entries": [
+    {
+      "id": "0011",
+      "file": "0011_material_office_formats.sql",
+      "bytes": 606,
+      "sha256": "2a6242b769bce79f065db00ccc37c0364d3d89dccc65906316e2ee549cdbf8ad"
+    },
+    {
+      "id": "0012",
+      "file": "0012_exercise_workflow.sql",
+      "bytes": 16343,
+      "sha256": "2948fda844f726bc612c651762e8ed7e9b4e3be56513624b8a2db3181bcc7f10"
+    },
+    {
+      "id": "0013",
+      "file": "0013_hybrid_enrollment.sql",
+      "bytes": 19359,
+      "sha256": "88b37326445127eee2d5d11954390d000122df4a799e5c0b8606f54efa9a21fc"
+    },
+    {
+      "id": "0014",
+      "file": "0014_ai_drafts.sql",
+      "bytes": 20116,
+      "sha256": "9c134d44d7bb3a405552e236ee0a20a1303c80e4c4c50f0a385255e06f582e62"
+    },
+    {
+      "id": "0015",
+      "file": "0015_material_owner_boundary.sql",
+      "bytes": 5627,
+      "sha256": "d3979ac3d9219d700523ba824df4e3f2dee0f8eaf6a2e8567c8571e85866f787"
+    },
+    {
+      "id": "0016",
+      "file": "0016_academic_teacher_scope.sql",
+      "bytes": 7690,
+      "sha256": "ae8117c3fb8497db50c8781853dc56ddf2407978a0d1771671dd14124811f5a6"
+    },
+    {
+      "id": "0017",
+      "file": "0017_inbox_authorization.sql",
+      "bytes": 5112,
+      "sha256": "22103240cc8f7bb09ae373db1e8e13a7d3a7785083e639c57977edf41ff01692"
+    },
+    {
+      "id": "0018",
+      "file": "0018_student_attachments.sql",
+      "bytes": 22251,
+      "sha256": "04bcd4c8970d1f02f6278d2f8391a9d45ec1bc95e62cede595f3de2da7cb185b"
+    },
+    {
+      "id": "0019",
+      "file": "0019_learning_plans.sql",
+      "bytes": 22697,
+      "sha256": "a89cc573f9f34c8d8cb1fc9e6265b264cd50a9559f9e20a3fdde73cd1a148024"
+    },
+    {
+      "id": "0020",
+      "file": "0020_challenges_notifications.sql",
+      "bytes": 23250,
+      "sha256": "806949a4b1e14c96d992ca33f83eab6ca4d87667b976367af72df8586959b61d"
+    },
+    {
+      "id": "0021",
+      "file": "0021_final_assessments.sql",
+      "bytes": 16367,
+      "sha256": "a57d743088ed1545ade4fef89ed9c917bbcfcbfb4dc303552b894d6e6f6a91b7"
+    }
+  ],
+  "manifest_sha256": "620e52dca8d4e1f9723d3813f280ac781d7b87c2e56c23f701fae3e4bc2d2240"
+}
