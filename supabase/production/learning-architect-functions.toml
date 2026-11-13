@@ -1,0 +1,8 @@
+# Proposal only. Copy to supabase/config.toml in the isolated production release
+# candidate after exact release approval. Never overwrite the staging config.
+project_id = "iopgzmvaqobigjwibual"
+
+[functions.academic-ai]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/academic-ai/index.ts"

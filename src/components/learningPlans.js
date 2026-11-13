@@ -1,9 +1,11 @@
 import {
   newLearningObjective, validateLearningPlan, listLearningPlanVersions, listLearningObjectiveEvents,
   createLearningPlanVersion, saveLearningPlanVersion, approveLearningPlanVersion,
-  setLearningObjectiveCompletion, generateLearningPlanDraft,
+  setLearningObjectiveCompletion,
 } from '../lib/learningPlans.js'
-import { listAcademicDrafts, academicAIGenerationEnabled } from '../lib/academicAI.js'
+import { listAcademicDrafts } from '../lib/academicAI.js'
+import { mountLearningArchitect, architectSessionFields, architectOverviewFields, readArchitectFields, architectSessionReadOnly, regenerateArchitectSession } from './learningArchitect.js'
+import { learningArchitectEnabled, publishLearningArchitect } from '../lib/learningArchitect.js'
 
 const esc = value => String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;')
 const date = value => value ? new Date(value).toLocaleString() : ''
@@ -163,6 +165,7 @@ export async function mountLearningPlans(panel, client, { studentId = null, stud
             <label>Level<input name="level" maxlength="40" value="${esc(content.level)}"></label>
           </div>
           <label>Plan summary<textarea name="summary" rows="3" maxlength="3000">${esc(content.summary)}</textarea></label>
+          ${architectOverviewFields(content)}
 
           <div class="vo-plan-objectives-stack">
             ${content.objectives.map((o, i) => `
@@ -172,6 +175,7 @@ export async function mountLearningPlans(panel, client, { studentId = null, stud
                   <label>Communicative objective<input name="objective-${i}" maxlength="300" value="${esc(o.title)}"></label>
                   <label>How we will know it is complete<textarea name="criteria-${i}" rows="2" maxlength="1000">${esc(o.success_criteria)}</textarea></label>
                 </div>
+                ${architectSessionFields(content, i)}
                 <div class="vo-plan-stage-grid">
                   ${o.steps.map((step, n) => {
                     const meta = STAGE_META[step.stage] || { step: `0${n + 1}`, theme: 'indigo', hint: '' }
@@ -190,7 +194,7 @@ export async function mountLearningPlans(panel, client, { studentId = null, stud
           </div>
 
           <div class="vo-plan-editor-actions">
-            <button type="button" class="btn-studio-secondary" data-add-objective ${content.objectives.length >= 10 ? 'disabled' : ''}>Add objective</button>
+            <button type="button" class="btn-studio-secondary" data-add-objective ${content.architect || content.objectives.length >= 10 ? 'disabled' : ''}>Add objective</button>
             <button type="submit" class="btn-studio-secondary" value="save">Save draft</button>
             <button type="submit" class="btn-studio-primary" value="approve">Save and approve plan</button>
           </div>
@@ -199,6 +203,7 @@ export async function mountLearningPlans(panel, client, { studentId = null, stud
       const form = target.querySelector('form')
       const read = () => ({
         ...content,
+        ...readArchitectFields(form, content),
         ...Object.fromEntries(['title', 'language', 'level', 'summary'].map(k => [k, form.elements[k].value])),
         objectives: content.objectives.map((o, i) => ({
           ...o,
@@ -216,7 +221,22 @@ export async function mountLearningPlans(panel, client, { studentId = null, stud
         button.onclick = () => {
           const edited = read()
           edited.objectives.splice(Number(button.dataset.removeObjective), 1)
+          edited.architect?.sessions.splice(Number(button.dataset.removeObjective), 1)
           renderEditor(edited)
+        }
+      })
+      form.querySelectorAll('[data-architect-regenerate]').forEach(button => {
+        button.disabled = !learningArchitectEnabled()
+        button.onclick = async () => {
+          const message = form.querySelector('[data-plan-edit-status]')
+          try {
+            if(JSON.stringify(validateLearningPlan(read()))!==JSON.stringify(validateLearningPlan(version.content))) throw new Error('Save your edits before regenerating a session.')
+            busy(form,true); message.textContent='Regenerating the selected session…'
+            const saved=await regenerateArchitectSession(client,version,Number(button.dataset.architectRegenerate))
+            if(saved.student_id!==selectedStudent)return
+            selectedVersion=saved.id
+            await refresh();status('Selected session regenerated and saved in the private draft. Other sessions were preserved.')
+          } catch(error) { message.textContent=error.message;busy(form,false) }
         }
       })
       form.onsubmit = async event => {
@@ -230,7 +250,7 @@ export async function mountLearningPlans(panel, client, { studentId = null, stud
           version.content = saved.content
           if (approve) await approveLearningPlanVersion(client, { id: version.id, revision: saved.revision })
           await refresh()
-          status(approve ? 'Learning plan approved and available to the student.' : 'Learning plan draft saved.')
+          status(approve ? (content.architect ? 'Plan approved. Publish explicitly to make it available to this student.' : 'Learning plan approved and available to the student.') : 'Learning plan draft saved.')
         } catch (error) {
           form.querySelector('[data-plan-edit-status]').textContent = error.message
           busy(form, false)
@@ -257,6 +277,7 @@ export async function mountLearningPlans(panel, client, { studentId = null, stud
           </div>
         </div>
         <p class="vo-plan-summary-lead">${esc(content.summary)}</p>
+        ${content.architect ? `<p>${content.architect.provisional ? 'Provisional plan — based on incomplete academic evidence.' : 'Teacher-reviewed learning roadmap.'} ${version.published_at ? 'Published to student.' : 'Approved privately; awaiting publication.'}</p><p>Goal: ${esc(content.architect.goal)}</p><p>Needs: ${esc(content.architect.needs)}</p><p>Approach: ${esc(content.architect.approach)}</p><p>Adaptations: ${esc(content.architect.adaptations.join(' · '))}</p><p>Revisit: ${esc(content.architect.revisit.join(' · '))}</p>` : ''}
 
         <div class="vo-plan-objectives-stack">
           ${content.objectives.map((o, idx) => {
@@ -271,6 +292,7 @@ export async function mountLearningPlans(panel, client, { studentId = null, stud
                   </div>
                   <span class="vo-badge ${progress?.completed ? 'vo-badge--teal' : 'vo-badge--indigo'}">${progress?.completed ? 'Completed' : 'In Progress'}</span>
                 </div>
+                ${architectSessionReadOnly(content, idx)}
                 <ol class="vo-plan-stage-grid vo-plan-stage-list">
                   ${o.steps.map((step, n) => {
                     const meta = STAGE_META[step.stage] || { step: `0${n + 1}`, theme: 'indigo' }
@@ -291,10 +313,17 @@ export async function mountLearningPlans(panel, client, { studentId = null, stud
 
         <div class="vo-plan-editor-actions">
           ${studentView ? '' : '<button type="button" class="btn-studio-primary" data-plan-copy>Create a new draft from this version</button>'}
+          ${!studentView && content.architect && !version.published_at ? '<button type="button" class="btn-studio-primary" data-architect-publish>Publish to Student</button>' : ''}
           <button type="button" class="btn-studio-secondary" data-plan-audit>View recent completion history</button>
         </div>
         <div class="vo-plan-events-box" data-plan-events></div>
       </article>`
+
+    target.querySelector('[data-architect-publish]')?.addEventListener('click',async event=>{
+      event.currentTarget.disabled=true
+      try { await publishLearningArchitect(client,version.id);await refresh();status('Approved plan published to the selected student.') }
+      catch(error){status(error.message);event.currentTarget.disabled=false}
+    })
 
     target.querySelector('[data-plan-copy]')?.addEventListener('click', async event => {
       const button = event.currentTarget
@@ -343,74 +372,22 @@ export async function mountLearningPlans(panel, client, { studentId = null, stud
   }
 
   async function renderAI() {
-    const target = workspace.querySelector('[data-plan-ai]')
-    if (studentView || !selectedStudent) {
-      target.innerHTML = ''
-      return
-    }
-    const forStudent = selectedStudent
-    let error = ''
-    try {
-      aiDrafts = (await listAcademicDrafts(client)).filter(d => d.student_id === forStudent && d.kind === 'learning_plan' && d.status !== 'rejected')
-    } catch (e) {
-      aiDrafts = []
-      error = e.message
-    }
-    if (forStudent !== selectedStudent) return
-    target.innerHTML = `
-      <section class="teacher-form-card vo-plan-ai-card">
-        <div class="vo-plan-header-row">
-          <div>
-            <span class="vo-section-kicker">AI LEARNING ARCHITECT</span>
-            <h3>Prepare a learning draft with AI</h3>
-            <p>Uses the student's authorized academic data and current approved plan. Consent and a configured server provider are required. Generation saves an AI draft; importing a plan version is a separate action.</p>
-          </div>
-        </div>
-        <form data-plan-generate>
-          <label>Learning goals and requirements<textarea name="brief" rows="2" maxlength="2000" required placeholder="Describe communicative goals, professional context, or upcoming milestones..."></textarea></label>
-          <div class="vo-plan-selector-actions">
-            <button type="submit" class="btn-studio-secondary" ${academicAIGenerationEnabled() ? '' : 'disabled'}>Generate AI learning draft</button>
-          </div>
-          <p data-plan-ai-status role="status" class="teacher-meta">${esc(error || (!academicAIGenerationEnabled() ? 'AI generation is disabled until the server provider and student consent settings are configured.' : ''))}</p>
-        </form>
-        <div class="vo-ai-draft-list" data-plan-ai-list>
-          ${aiDrafts.map(d => `
-            <details class="vo-ai-draft-item">
-              <summary>${esc(d.content.title)}  -  AI ${esc(d.status)}</summary>
-              <p>${esc(d.content.objective)}</p>
-              <ol>${d.content.steps.map(s => `<li>${esc(s.stage)}: ${esc(s.activity)}</li>`).join('')}</ol>
-              <button type="button" class="btn-studio-primary" data-import-learning-ai="${esc(d.id)}">Import into a new plan draft</button>
-            </details>`).join('')}
-        </div>
-      </section>`
-    const form = target.querySelector('form')
-    form.onsubmit = async event => {
-      event.preventDefault()
-      if (!academicAIGenerationEnabled()) {
-        form.querySelector('[data-plan-ai-status]').textContent = 'AI generation is not configured.'
-        return
-      }
-      busy(form, true)
-      try {
-        await generateLearningPlanDraft(client, { studentId: selectedStudent, brief: form.elements.brief.value })
-        await renderAI()
-        status('AI draft saved for review. Import it explicitly to create a plan version.')
-      } catch (e) {
-        form.querySelector('[data-plan-ai-status]').textContent = e.message
-        busy(form, false)
-      }
-    }
-    target.querySelectorAll('[data-import-learning-ai]').forEach(button => {
-      button.onclick = async () => {
-        button.disabled = true
-        try {
-          await create({ sourceAIDraftId: button.dataset.importLearningAi }, 'ai:' + button.dataset.importLearningAi)
-        } catch (e) {
-          status(e.message)
-          button.disabled = false
-        }
-      }
-    })
+    const target=workspace.querySelector('[data-plan-ai]')
+    if(studentView||!selectedStudent){target.innerHTML='';return}
+    const forStudent=selectedStudent
+    await mountLearningArchitect(target,client,{studentId:forStudent,onSaved:async version=>{
+      if(selectedStudent!==forStudent)return
+      selectedVersion=version.id;await refresh();status('AI plan draft saved. Review sessions, approve, then publish explicitly.')
+    }})
+    if(selectedStudent!==forStudent)return
+    // Retain importing previous-format recommendations without enabling other AI agents.
+    try{aiDrafts=(await listAcademicDrafts(client)).filter(d=>d.student_id===forStudent&&d.kind==='learning_plan'&&d.status!=='rejected')}
+    catch{aiDrafts=[]}
+    if(selectedStudent!==forStudent||!aiDrafts.length)return
+    const previous=document.createElement('details');previous.className='teacher-form-card';previous.innerHTML='<summary>Previous AI recommendations</summary>'+aiDrafts.map(d=>`<p>${esc(d.content.title)}</p><button type="button" data-import-learning-ai="${esc(d.id)}">Import into a new private draft</button>`).join('');target.append(previous)
+    previous.querySelectorAll('[data-import-learning-ai]').forEach(button=>{button.onclick=async()=>{
+      button.disabled=true;try{await create({sourceAIDraftId:button.dataset.importLearningAi},'ai:'+button.dataset.importLearningAi)}catch(error){status(error.message);button.disabled=false}
+    }})
   }
 
   if (!studentView) {

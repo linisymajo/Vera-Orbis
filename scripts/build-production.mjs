@@ -15,7 +15,7 @@ export function productionBuildEnvironment(env) {
   }
   const voice=env.VITE_VERA_VOICE_URL||''
   if(voice){let url;try{url=new URL(voice)}catch{throw new Error('VOICE_URL_INVALID')};if(url.protocol!=='https:'||url.username||url.password||url.search||url.hash)throw new Error('VOICE_URL_INVALID')}
-  return {VITE_SUPABASE_URL:PRODUCTION_URL,VITE_SUPABASE_PUBLISHABLE_KEY:key,VITE_VERA_VOICE_URL:voice,VITE_ACADEMIC_AI_ENABLED:'false'}
+  return {VITE_SUPABASE_URL:PRODUCTION_URL,VITE_SUPABASE_PUBLISHABLE_KEY:key,VITE_VERA_VOICE_URL:voice,VITE_ACADEMIC_AI_ENABLED:'false',...(env.VITE_LEARNING_ARCHITECT_ENABLED==='true'?{VITE_LEARNING_ARCHITECT_ENABLED:'true'}:{})}
 }
 
 export async function verifyProductionBuild(directory, configuration) {
@@ -38,7 +38,7 @@ export async function verifyProductionBuild(directory, configuration) {
   await walk(directory)
   if(!target||!key||(await readFile(join(directory,'CNAME'),'utf8')).trim()!=='veraorbis.studio')throw new Error('PRODUCTION_ARTIFACT_TARGET_UNVERIFIED')
   for(const path of ['index.html','teacher.html','platform.html','login.html','register.html','onboarding.html','reset-password.html'])if(!entries.some(e=>e.path===path))throw new Error('PRODUCTION_ROUTE_MISSING')
-  return {target:'iopgzmvaqobigjwibual',domain:'veraorbis.studio',ai_enabled:false,files:entries.sort((a,b)=>a.path.localeCompare(b.path)),hosting_deployed:false}
+  return {target:'iopgzmvaqobigjwibual',domain:'veraorbis.studio',ai_enabled:false,learning_architect_enabled:configuration.VITE_LEARNING_ARCHITECT_ENABLED==='true',files:entries.sort((a,b)=>a.path.localeCompare(b.path)),hosting_deployed:false}
 }
 
 export async function buildProduction({root=fileURLToPath(new URL('../',import.meta.url)),env=process.env,outDir=resolve(root,'dist')}={}) {

@@ -1,9 +1,12 @@
 import { AcademicAIError, generateAcademicDraft, readLimitedJson } from './core.js'
 import { createOpenAIProvider } from './provider.js'
+import { generateLearningArchitect } from './learning-architect.js'
+import { createGeminiProvider, GEMINI_ARCHITECT_MODEL } from './gemini-provider.js'
+import { authorizeAdultArchitectTeacher } from './teacher-access.js'
 
 // Deployment must keep Supabase's verify_jwt enabled. Additionally validate the
 // session against Auth, and use only the caller's JWT for every database RPC.
-export function createAcademicAIHandler({ env, createClient, providerFactory = createOpenAIProvider }) {
+export function createAcademicAIHandler({ env, createClient, providerFactory = createOpenAIProvider, geminiProviderFactory = createGeminiProvider, GoogleGenAI }) {
   return async (request) => {
   const allowed = (env('ACADEMIC_AI_ALLOWED_ORIGINS') ?? '').split(',').map((origin) => origin.trim()).filter(Boolean)
   const origin = request.headers.get('Origin')
@@ -25,10 +28,22 @@ export function createAcademicAIHandler({ env, createClient, providerFactory = c
     const client = createClient(url, key, { global: { headers: { Authorization: authorization } }, auth: { persistSession: false, autoRefreshToken: false } })
     const { data, error } = await client.auth.getUser(authorization.replace(/^Bearer\s+/i, ''))
     if (error || !data.user?.id) throw new AcademicAIError('unauthenticated', 'Your session could not be verified.', 401)
-    if (env('ACADEMIC_AI_ENABLED') !== 'true' || env('ACADEMIC_AI_PROVIDER') !== 'openai') throw new AcademicAIError('not_configured', 'Academic AI is disabled until the provider and consent settings are configured.', 503)
-    const provider = providerFactory({ apiKey: env('OPENAI_API_KEY'), model: env('ACADEMIC_AI_MODEL') })
     if (!request.headers.get('Content-Type')?.toLowerCase().startsWith('application/json')) throw new AcademicAIError('invalid_content_type', 'Use a JSON request body.', 415)
     const input = await readLimitedJson(request, 8192)
+    if (input?.mode === 'learning_architect') {
+      if (env('ACADEMIC_AI_ARCHITECT_ENABLED') !== 'true' || env('ACADEMIC_AI_PROVIDER') !== 'gemini' || env('ACADEMIC_AI_FREE_TIER_CONFIRMED') !== 'true') throw new AcademicAIError('not_configured', 'Gemini Learning Architect is disabled until free-tier staging testing is configured.', 503)
+      await authorizeAdultArchitectTeacher(env, client, data.user)
+      // The shared staging project is a synthetic test client only.
+      if (url === 'https://duinvkphfnugoyvvlbbq.supabase.co'
+        && !(env('ACADEMIC_AI_SYNTHETIC_STUDENT_IDS') || '').split(',').map(x => x.trim()).filter(Boolean).includes(input.studentId)) {
+        throw new AcademicAIError('privacy_gate', 'Staging generation is restricted to authorized synthetic fixtures.', 403)
+      }
+      const provider = geminiProviderFactory({ apiKey: env('GEMINI_API_KEY'), model: env('ACADEMIC_AI_MODEL') || GEMINI_ARCHITECT_MODEL, GoogleGenAI })
+      const version = await generateLearningArchitect(client, input, provider)
+      return Response.json({ version }, { status: 201, headers })
+    }
+    if (env('ACADEMIC_AI_ENABLED') !== 'true' || env('ACADEMIC_AI_PROVIDER') !== 'openai') throw new AcademicAIError('not_configured', 'Academic AI is disabled until the provider and consent settings are configured.', 503)
+    const provider = providerFactory({ apiKey: env('OPENAI_API_KEY'), model: env('ACADEMIC_AI_MODEL') })
     const draft = await generateAcademicDraft(client, input, provider)
     return Response.json({ draft }, { status: 201, headers })
   } catch (error) {

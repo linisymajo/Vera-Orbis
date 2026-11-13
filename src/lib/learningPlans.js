@@ -1,5 +1,6 @@
 import { STAGES } from '../../supabase/functions/academic-ai/core.js'
 import { requestAcademicDraft } from './academicAI.js'
+import { validateArchitectPlan } from '../../supabase/functions/academic-ai/learning-architect.js'
 
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const identifier=(value,label)=>{if(typeof value!=='string'||!UUID.test(value))throw new Error('Choose a valid '+label+'.');return value.toLowerCase()}
@@ -10,10 +11,11 @@ const revision=(value,zero=false)=>{if(!Number.isInteger(value)||value<(zero?0:1
 export function newLearningObjective(){return {id:crypto.randomUUID(),title:'',success_criteria:'',steps:STAGES.map(stage=>({stage,activity:''}))}}
 
 export function validateLearningPlan(content,{complete=false}={}){
-  fields(content,['title','language','level','summary','objectives'],'learning plan')
-  if(!Array.isArray(content.objectives)||content.objectives.length>10||(complete&&!content.objectives.length))throw new Error('Add between one and ten objectives before approval.')
+  fields(content,['title','language','level','summary','objectives',...(content?.architect ? ['architect'] : [])],'learning plan')
+  if(!Array.isArray(content.objectives)||content.objectives.length>(content.architect?12:10)||(complete&&!content.objectives.length))throw new Error(content.architect?'Add between one and twelve classes before approval.':'Add between one and ten objectives before approval.')
   const ids=new Set()
   const result={
+    ...(content.architect ? {architect:structuredClone(content.architect)} : {}),
     title:text(content.title,'Plan title',160,complete),
     language:text(content.language,'Language',80,complete),
     level:text(content.level,'Level',40,complete),
@@ -32,6 +34,7 @@ export function validateLearningPlan(content,{complete=false}={}){
         })}
     }),
   }
+  if(result.architect)validateArchitectPlan(result)
   if(new TextEncoder().encode(JSON.stringify(result)).length>48000)throw new Error('This learning plan exceeds the size limit.')
   return result
 }
@@ -52,7 +55,13 @@ export async function listLearningPlanVersions(client,studentId){
   if(!versions.length)return []
   const progress=await client.from('learning_plan_objective_progress').select('version_id,objective_id,completed,revision,updated_by,updated_at').in('version_id',versions.map(v=>v.id))
   if(progress.error)throw new Error(progress.error.message)
-  return versions.map(version=>({...version,progress:(progress.data||[]).filter(row=>row.version_id===version.id)}))
+  let publications=[]
+  if(versions.some(v=>v.content?.architect)){
+    const result=await client.from('learning_plan_publications').select('version_id,published_at').in('version_id',versions.map(v=>v.id))
+    if(result.error)throw new Error('Plan publication state could not be loaded.')
+    publications=result.data||[]
+  }
+  return versions.map(version=>({...version,published_at:publications.find(p=>p.version_id===version.id)?.published_at||null,progress:(progress.data||[]).filter(row=>row.version_id===version.id)}))
 }
 export async function listLearningObjectiveEvents(client,versionId){
   const {data,error}=await client.from('learning_plan_objective_events').select('objective_id,completed,revision,actor_id,created_at')

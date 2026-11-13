@@ -27,7 +27,7 @@ export function createOpenAIProvider({ apiKey, model, fetchImpl = fetch, timeout
       const inputTokens = result.usage?.input_tokens
       const outputTokens = result.usage?.output_tokens
       if (!Number.isInteger(inputTokens) || inputTokens < 0 || inputTokens > 40000 ||
-          !Number.isInteger(outputTokens) || outputTokens < 0 || outputTokens > 2500) {
+          !Number.isInteger(outputTokens) || outputTokens < 0 || outputTokens > body.max_output_tokens) {
         throw new AcademicAIError('invalid_usage', 'AI provider returned invalid usage accounting.', 502)
       }
       return { content, inputTokens, outputTokens }

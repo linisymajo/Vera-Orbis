@@ -1,0 +1,8 @@
+{
+  "name": "vera-orbis-academic-ai-server",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@google/genai": "3.0.0"
+  }
+}
