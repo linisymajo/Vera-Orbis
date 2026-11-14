@@ -27,13 +27,24 @@ function showToast(message, type = 'info') {
   setTimeout(() => toast.remove(), 4000)
 }
 
+function getEligibleTeacherRegistry() {
+  const envVar = import.meta.env?.VITE_ELIGIBLE_ADULT_TEACHER_IDS
+  if (envVar) {
+    return envVar.split(',').map(s => s.trim()).filter(Boolean)
+  }
+  if (typeof window !== 'undefined' && Array.isArray(window.__VERA_ADULT_TEACHER_REGISTRY__)) {
+    return window.__VERA_ADULT_TEACHER_REGISTRY__
+  }
+  return []
+}
+
 // 1. Initial State: Check if teacher is already authenticated
 async function init() {
   try {
     const { data: { session } } = await supabase.auth.getSession()
     if (session?.user) {
       renderVerifying()
-      const verified = await verifyAdultTeacherAccess(supabase)
+      const verified = await verifyAdultTeacherAccess(supabase, getEligibleTeacherRegistry())
       currentTeacher = verified
       renderWorkspace()
     } else {
@@ -103,7 +114,7 @@ function renderLogin(errorMessage = null) {
       if (error) throw new Error(error.message)
 
       // Strict server-side verification: Rejects student accounts immediately
-      const verified = await verifyAdultTeacherAccess(supabase)
+      const verified = await verifyAdultTeacherAccess(supabase, getEligibleTeacherRegistry())
       currentTeacher = verified
       renderWorkspace()
     } catch (err) {
