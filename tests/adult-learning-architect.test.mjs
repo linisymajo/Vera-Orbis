@@ -138,6 +138,51 @@ test('adult authorization rejects access if eligibility registry is missing, emp
   )
 })
 
+test('adult authorization calls server-side verify_adult_teacher_eligibility RPC in live mode', async () => {
+  let rpcCalled = false
+  const rpcClient = {
+    auth: {
+      getUser: async () => ({
+        data: { user: { id: TEACHER_UUID, email: 'teacher.prod@veraorbis.test' } },
+        error: null
+      })
+    },
+    from: () => ({
+      select: () => ({
+        eq: () => ({
+          maybeSingle: async () => ({ data: { id: TEACHER_UUID }, error: null })
+        })
+      })
+    }),
+    rpc: async (name) => {
+      if (name === 'get_my_enrollment') {
+        return {
+          data: { student_id: TEACHER_UUID, role: 'teacher', email_verified: true, academic_access: true },
+          error: null
+        }
+      }
+      if (name === 'verify_adult_teacher_eligibility') {
+        rpcCalled = true
+        return {
+          data: {
+            teacher_id: TEACHER_UUID,
+            email: 'teacher.prod@veraorbis.test',
+            role: 'teacher',
+            adult_verified: true
+          },
+          error: null
+        }
+      }
+      return { data: null, error: new Error('Unknown RPC') }
+    }
+  }
+
+  const verified = await verifyAdultTeacherAccess(rpcClient)
+  assert.equal(rpcCalled, true, 'Must call verify_adult_teacher_eligibility RPC on the server')
+  assert.equal(verified.adultVerified, true)
+  assert.equal(verified.teacherId, TEACHER_UUID)
+})
+
 test('curriculum engine generates complete 12-class study plans adhering to all validation rules', () => {
   for (const lang of ['English', 'French', 'Mandarin']) {
     for (const duration of [20, 45, 60, 90, 120]) {

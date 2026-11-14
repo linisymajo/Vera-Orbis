@@ -18,10 +18,10 @@ export class AdultAuthError extends Error {
  * Rejects student accounts, minors, unverified emails, and users lacking academic access.
  *
  * @param {object} client - Supabase client (scoped to user JWT)
- * @param {string[]} [eligibleAdultTeacherIds] - Optional administrator-maintained adult registry
+ * @param {string[]|object|null} [options] - Optional synthetic list for unit testing
  * @returns {Promise<{ teacherId: string, email: string, role: string, adultVerified: true }>}
  */
-export async function verifyAdultTeacherAccess(client, eligibleAdultTeacherIds = null) {
+export async function verifyAdultTeacherAccess(client, options) {
   // 1. Get current authenticated user
   const { data: authData, error: authError } = await client.auth.getUser()
   if (authError || !authData?.user?.id) {
@@ -65,14 +65,32 @@ export async function verifyAdultTeacherAccess(client, eligibleAdultTeacherIds =
   }
 
   // 4. MANDATORY Administrator Adult Teacher Registry Check
-  // An explicit non-empty registry of administrator-approved adult educator UUIDs is required.
-  // If the registry is missing, empty, or the user is not explicitly registered, access is strictly denied.
-  if (!Array.isArray(eligibleAdultTeacherIds) || eligibleAdultTeacherIds.length === 0) {
-    throw new AdultAuthError('Access Denied: No valid adult educator eligibility registry is configured. Access denied by mandatory security policy.', 403, 'adult_registry_missing')
-  }
-
-  if (!eligibleAdultTeacherIds.includes(userId)) {
-    throw new AdultAuthError('Access Denied: Instructor is not registered in the administrator-approved adult educator eligibility registry.', 403, 'adult_registry_unlisted')
+  if (arguments.length >= 2) {
+    // Explicit synthetic registry passed (unit testing or mock boundary)
+    const list = Array.isArray(options) ? options : options?.eligibleAdultTeacherIds
+    if (!Array.isArray(list) || list.length === 0) {
+      throw new AdultAuthError('Access Denied: No valid adult educator eligibility registry is configured. Access denied by mandatory security policy.', 403, 'adult_registry_missing')
+    }
+    if (!list.includes(userId)) {
+      throw new AdultAuthError('Access Denied: Instructor is not registered in the administrator-approved adult educator eligibility registry.', 403, 'adult_registry_unlisted')
+    }
+  } else {
+    // Live Production Path: Server-Side Authorization Boundary
+    // Executes verify_adult_teacher_eligibility() RPC on Supabase PostgreSQL backend
+    const { data: serverVerification, error: rpcError } = await client.rpc('verify_adult_teacher_eligibility')
+    if (rpcError) {
+      const msg = rpcError.message || ''
+      if (msg.includes('No valid adult educator eligibility registry')) {
+        throw new AdultAuthError('Access Denied: No valid adult educator eligibility registry confirms this account.', 403, 'adult_registry_missing')
+      }
+      if (msg.includes('Instructor role required')) {
+        throw new AdultAuthError('Access Denied: This portal is strictly restricted to verified teachers. Student accounts and non-instructional profiles are forbidden.', 403, 'student_or_non_teacher_rejected')
+      }
+      throw new AdultAuthError(msg || 'Server-side adult teacher verification failed.', 403, 'verification_failed')
+    }
+    if (!serverVerification || serverVerification.adult_verified !== true) {
+      throw new AdultAuthError('Access Denied: Server-side eligibility registry did not verify this teacher.', 403, 'adult_registry_unlisted')
+    }
   }
 
   return {
