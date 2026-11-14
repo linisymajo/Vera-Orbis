@@ -79,6 +79,9 @@ export async function mountLearningPlans(panel, client, { studentId = null, stud
             <label>Student<select data-plan-student><option value="">Choose a student</option>${students.map(s => `<option value="${esc(s.id)}" data-search="${esc((s.name + ' ' + (s.language || '')).toLowerCase())}">${esc(s.name)}  -  ${esc(s.language)}</option>`).join('')}</select></label>
             <div class="vo-plan-selector-actions">
               <button type="button" class="btn-studio-primary" data-plan-new>Create a plan draft</button>
+              <button type="button" class="btn-studio-secondary" data-plan-import-json>Import plan JSON</button>
+              <input type="file" accept=".json,application/json" data-plan-import-file style="display:none">
+              <a href="/architect/" target="_blank" rel="noopener noreferrer" class="btn-studio-ghost" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.35rem;" title="Open Standalone Adult AI Learning Architect">✨ AI Architect Studio (18+)</a>
               <button type="button" class="btn-studio-secondary" data-plan-reload>Reload saved plans</button>
             </div>
           </div>
@@ -417,6 +420,49 @@ export async function mountLearningPlans(panel, client, { studentId = null, stud
       } catch (e) {
         status(e.message)
         button.disabled = false
+      }
+    }
+    const importBtn = workspace.querySelector('[data-plan-import-json]')
+    const fileInput = workspace.querySelector('[data-plan-import-file]')
+    if (importBtn && fileInput) {
+      importBtn.onclick = () => {
+        if (!selectedStudent) {
+          status('Choose an enrolled student first before importing a learning plan.')
+          return
+        }
+        fileInput.click()
+      }
+      fileInput.onchange = async () => {
+        const file = fileInput.files?.[0]
+        if (!file) return
+        importBtn.disabled = true
+        status('Validating and importing plan JSON…')
+        try {
+          const text = await file.text()
+          const raw = JSON.parse(text)
+          const validated = validateLearningPlan(raw)
+          let version = versions.find(v => v.id === selectedVersion && v.status === 'draft')
+          if (!version) {
+            status('Creating a draft for the imported plan…')
+            const row = await createLearningPlanVersion(client, { studentId: selectedStudent, requestId: requestId('import:' + crypto.randomUUID()) })
+            selectedVersion = row.id
+            await refresh()
+            version = versions.find(v => v.id === selectedVersion)
+          }
+          if (version) {
+            status('Saving imported plan into draft…')
+            const saved = await saveLearningPlanVersion(client, { id: version.id, revision: version.revision, content: validated })
+            version.revision = saved.revision
+            version.content = saved.content
+            await refresh()
+            status('Imported plan saved in draft! Review each session before approval.')
+          }
+        } catch (err) {
+          status('Import failed: ' + err.message)
+        } finally {
+          fileInput.value = ''
+          importBtn.disabled = false
+        }
       }
     }
   }

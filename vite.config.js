@@ -28,6 +28,7 @@ export default defineConfig({
         resetPassword: resolve(rootDir, 'reset-password.html'),
         register: resolve(rootDir, 'register.html'),
         onboarding: resolve(rootDir, 'onboarding.html'),
+        architect: resolve(rootDir, 'architect/index.html')
       }
     }
   }
