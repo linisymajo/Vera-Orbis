@@ -143,7 +143,7 @@ function renderWorkspace() {
           <h3 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.15rem; color: #ffffff;">Modo Operativo: Catálogo Pedagógico Estructurado (Plantillas 12 Clases)</h3>
           <p style="margin: 0; font-size: 0.85rem; line-height: 1.5; color: #cbd5e1; max-width: 850px;">
             <strong>Modo Activo:</strong> Generación estructurada determinista basada en el banco curricular y la metodología Vera Orbis (<em>Power Expressions → Listen → Repeat → Personalize → Use</em>). Permite generar, editar en tiempo real, regenerar sesiones y exportar/importar planes completos de 12 clases sin enviar datos a APIs externas.<br>
-            <strong>Inferencia Neuronal Gemini LLM (gemini-3.1-flash-lite):</strong> Preservada y verificada en Staging (<code style="color: #38bdf8;">duinvkphfnugoyvvlbbq</code>), pero <strong>bloqueada en producción</strong> por salvaguarda contractual (restricción de clientes de API accesibles por menores de edad según los términos de Google). No se presentan ambos sistemas como equivalentes.
+            <strong>Inferencia Neuronal Gemini LLM (gemini-3.1-flash-lite):</strong> Preservada y verificada en el entorno de Staging aislado, pero <strong>bloqueada en producción</strong> por salvaguarda contractual (restricción de clientes de API accesibles por menores de edad según los términos de Google). No se presentan ambos sistemas como equivalentes.
           </p>
         </div>
         <div>
