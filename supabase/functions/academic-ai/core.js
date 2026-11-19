@@ -67,7 +67,9 @@ export function validateDraftContent(content, kind) {
   } else if (content.exercise_type !== null || content.questions.length) invalid('Only exercises may include questions.')
   if (kind === 'feedback' ? result.feedback === null : result.feedback !== null) invalid('Feedback is only allowed for feedback drafts.')
   result.questions = content.questions.map((question) => {
-    exactKeys(question, ['prompt', 'options', 'answer', 'explanation', 'left', 'right', 'items', 'passage'], 'question')
+    const hasVariants = Object.hasOwn(question, 'accepted_answers')
+    exactKeys(question, ['prompt', 'options', 'answer', 'explanation', 'left', 'right', 'items', 'passage', ...(hasVariants ? ['accepted_answers'] : [])], 'question')
+    if (hasVariants && (!Array.isArray(question.accepted_answers) || question.accepted_answers.length > 20 || question.accepted_answers.some(v => typeof v !== 'string' || !v.trim() || v.length > 300))) invalid('Invalid accepted answer variants.')
     if (!Array.isArray(question.options) || question.options.length > 8) invalid('Invalid answer options.')
     const options = question.options.map((value) => textValue(value, 'Option', 300))
     if (new Set(options).size !== options.length) invalid('Answer options must be distinct.')
@@ -83,6 +85,7 @@ export function validateDraftContent(content, kind) {
     return {
       prompt: textValue(question.prompt, 'Question', 2000), options, answer, ...lists, passage: textValue(question.passage, 'Passage', 2000, true),
       explanation: textValue(question.explanation, 'Explanation', 1000, true),
+      ...(hasVariants ? { accepted_answers: [...question.accepted_answers] } : {}),
     }
   })
   if (new TextEncoder().encode(JSON.stringify(result)).length > 20000) invalid('Draft is too large.')

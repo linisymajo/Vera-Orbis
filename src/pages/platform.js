@@ -888,7 +888,8 @@ export function renderPlatformView(
 
           </div>
 
-          ${renderRoadmap(student, { showHeading: false })}
+          <div data-student-journey></div>
+          <details><summary>Your language pathway</summary>${renderRoadmap(student, { showHeading: false })}</details>
 
         </section>
       `

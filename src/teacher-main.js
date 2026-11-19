@@ -1,3 +1,4 @@
+import { mountStudentAcademicAI } from './components/studentAcademicAI.js'
 import { sendAcademicMessage } from './lib/messaging.js'
 import { mountLearningPlans } from './components/learningPlans.js'
 import './teacher.css'
@@ -1119,6 +1120,7 @@ function renderStudentProfile(
       </div>
 
 
+      <details class="student-profile-section" data-student-ai-context><summary>Academic AI ? Review student context</summary><div data-student-ai-panel></div></details>
       <details class="student-profile-section" data-student-learning-plans><summary>Learning plan versions for ${escapeHtml(profile.name)}</summary><div data-student-plan-panel><p>Open to load saved plans.</p></div></details>
 
       <!-- =====================================================
@@ -2812,6 +2814,7 @@ if (saveAcademicButton) {
    ========================================================= */
 
 function attachStudentProfileEvents(studentId) {
+  const ai = document.querySelector('[data-student-ai-context]'); ai?.addEventListener('toggle', () => { if (!ai.open || ai.dataset.loaded) return; ai.dataset.loaded = 'true'; mountStudentAcademicAI(ai.querySelector('[data-student-ai-panel]'), supabase, { studentId }) })
   const plans = document.querySelector('[data-student-learning-plans]')
   plans?.addEventListener('toggle', () => {
     if (!plans.open || plans.dataset.loaded) return

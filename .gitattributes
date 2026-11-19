@@ -1,2 +1,10 @@
 supabase/**/*.sql -text
 scripts/production-release.reviewed.json -text
+
+# Preserve reviewed release byte hashes across Windows/Linux checkouts.
+supabase/migrations/0028_unified_academic_context.sql -text
+supabase/migrations/0029_personal_learning_journey.sql -text
+supabase/functions/academic-ai/** -text
+src/lib/exerciseWorkflow.js -text
+src/lib/exerciseExperience.js -text
+docs/unified-academic-*manifest.json -text

@@ -1,3 +1,7 @@
+import { mountStudentAcademicAI, renderAcademicSources } from './studentAcademicAI.js'
+import { loadAcademicProvenanceByRequest } from '../lib/studentAcademicContext.js'
+import { listLearningPlanVersions } from '../lib/learningPlans.js'
+import { prepareLessonExercise } from '../lib/academicPreparation.js'
 import { renderAttachmentReview, setupAttachmentDownloads } from './exerciseAttachments.js'
 import { mountAcademicAI } from './academicAI.js'
 import { validateExercise, saveExerciseDraft, publishExercise } from '../lib/exerciseWorkflow.js'
@@ -57,7 +61,16 @@ const typeCards = [
   { id: 'true_false', badge: 'CHECKPOINT', title: 'True or False', desc: 'Quick comprehension check on dialogues and cultural insights.', theme: 'teal' }
 ]
 
-export async function mountExerciseStudio(panel, client, initialDraft = null) {
+export async function mountExerciseStudio(panel, client, initialDraft = null, academicOptions = {}) {
+  let lessonError = ''
+  if (!initialDraft && academicOptions.studentId && academicOptions.lesson) {
+    try {
+      const versions = await listLearningPlanVersions(client, academicOptions.studentId)
+      const version = versions.find(v => v.id === academicOptions.lesson.versionId)
+      if (!version) throw Error('The selected published lesson is unavailable.')
+      initialDraft = prepareLessonExercise(version, academicOptions.lesson.session, academicOptions.studentId)
+    } catch (e) { lessonError = e.message }
+  }
   const [activities, students, attempts] = await Promise.all([
     client.from('exercises').select('*').order('created_at', { ascending: false }).limit(100),
     client.from('profiles').select('id,name,language').order('name').limit(1000),
@@ -222,20 +235,24 @@ export async function mountExerciseStudio(panel, client, initialDraft = null) {
 
   const aiHost = document.createElement('details')
   aiHost.className = 'vo-ai-drawer-card'
-  aiHost.innerHTML = '<summary>Create an exercise with AI</summary><div data-studio-ai></div>'
+  aiHost.innerHTML = '<summary>Generate Exercises with AI</summary><div data-studio-ai></div>'
   panel.prepend(aiHost)
   aiHost.addEventListener('toggle', () => {
     if (aiHost.open && !aiHost.dataset.loaded) {
       aiHost.dataset.loaded = 'true'
-      mountAcademicAI(aiHost.querySelector('[data-studio-ai]'), client, {
-        exerciseOnly: true,
-        onUseExercise: draft => mountExerciseStudio(panel, client, draft)
+      mountStudentAcademicAI(aiHost.querySelector('[data-studio-ai]'), client, {
+        kind: 'exercise', ...academicOptions,
+        onUseExercise: (draft, selectedLesson, selectedStudent) => mountExerciseStudio(panel, client, draft, { studentId: selectedStudent, lesson: selectedLesson })
       })
     }
   })
 
+  if (academicOptions.studentId) aiHost.open = true
+  const sources = document.createElement('details'); sources.className = 'teacher-form-card'; sources.hidden = !initialDraft?.academicSources; panel.prepend(sources)
+  if (initialDraft?.academicSources) sources.innerHTML = '<summary>Review sources used</summary>' + renderAcademicSources(initialDraft.academicSources)
   const form = panel.querySelector('#teacher-exercise-form')
   const status = form.querySelector('[data-form-status]')
+  if (lessonError) status.textContent = lessonError
   const editor = form.querySelector('[data-question-editor]')
   setCorrectionControls(form)
   form.elements.correction_mode.addEventListener('change', () => {
@@ -362,6 +379,10 @@ export async function mountExerciseStudio(panel, client, initialDraft = null) {
     assignmentsLoaded = copy
     form.querySelector('[data-publish-exercise]').disabled = !copy
     const item = activityList.find(e => e.id === id)
+    sources.hidden = true
+    if (item.settings?.academic_ai_run) loadAcademicProvenanceByRequest(client, item.settings.academic_ai_run).then(p => {
+      if (selectionGeneration === generation && p && sources.isConnected) { sources.hidden = false; sources.innerHTML = '<summary>Review sources used (generation snapshot)</summary>' + renderAcademicSources(p.citations || p.sources) }
+    }).catch(() => { /* Manual exercise use must survive unavailable provenance integration. */ })
     current = copy ? null : item
     baseSettings = structuredClone(item.settings || {})
     form.reset()
@@ -457,6 +478,7 @@ export async function mountExerciseStudio(panel, client, initialDraft = null) {
       if (previewSignature !== JSON.stringify(draft)) throw new Error('Preview this version before publishing.')
       if (form.dataset.mixedDeadlines === 'true' && !form.elements.overwrite_deadlines.checked) throw new Error('Confirm that you want to replace the different student deadlines.')
       const studentIds = [...form.querySelectorAll('[name="student_ids"]:checked')].map(input => input.value)
+      if (draft.settings?.learning_journey && studentIds.some(id => id !== draft.settings.learning_journey.student_id)) throw Error('This lesson activity belongs to one student. Assign it only to the linked student; create a separate activity for another student.')
       const dueAt = form.elements.due_at.value ? new Date(form.elements.due_at.value).toISOString() : null
       const exerciseId = (!current?.id || current?.status === 'draft')
         ? await saveExerciseDraft(client, draft, current?.id)
@@ -530,5 +552,7 @@ export async function mountExerciseStudio(panel, client, initialDraft = null) {
     syncTypeCards()
     ;(initialDraft.questions || []).forEach(addQuestion)
     showStep(2)
+    const linkedStudent = initialDraft.settings?.learning_journey?.student_id || academicOptions.studentId
+    if (linkedStudent) form.querySelectorAll('[name="student_ids"]').forEach(input => { input.checked = input.value === linkedStudent })
   } else addQuestion()
 }

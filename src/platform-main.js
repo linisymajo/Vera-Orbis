@@ -11,6 +11,7 @@ import {
 import { supabase } from './lib/supabase.js'
 import { setupExerciseForms } from './components/exercises.js'
 import { mountLearningPlans } from './components/learningPlans.js'
+import { mountStudentJourney } from './components/studentJourney.js'
 import { mountNotifications } from './components/notifications.js'
 import { renderFinals, setupFinals } from './components/finals.js'
 import { submitAcademicChallenge } from './lib/academicChallenges.js'
@@ -92,6 +93,10 @@ async function refreshNotificationBadge() {
 
 async function setupStudentAcademicView(view, host) {
   if (!host) return
+  if (view === 'journey') {
+    const journey = host.querySelector('[data-student-journey]')
+    if (journey && currentStudent?.id) await mountStudentJourney(journey, supabase, currentStudent.id)
+  }
   if (platformData.viewErrors?.[view]) {
     host.innerHTML = '<p role="alert">Your current learning information could not be loaded. Your saved work is safe.</p><button type="button" data-academic-retry>Try again</button>'
     host.querySelector('[data-academic-retry]').onclick = () => openPlatformView(view)

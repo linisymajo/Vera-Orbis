@@ -3,6 +3,9 @@ import { createOpenAIProvider } from './provider.js'
 import { generateLearningArchitect } from './learning-architect.js'
 import { createGeminiProvider, GEMINI_ARCHITECT_MODEL } from './gemini-provider.js'
 import { authorizeAdultArchitectTeacher } from './teacher-access.js'
+import { indexAcademicMaterial } from './material-extraction.js'
+import { generateUnifiedAcademic, uuid, sameKeys } from './academic-context.js'
+import { authorizeUnifiedTeacher, unifiedProviderStatus, selectUnifiedProvider } from './unified-providers.js'
 
 // Deployment must keep Supabase's verify_jwt enabled. Additionally validate the
 // session against Auth, and use only the caller's JWT for every database RPC.
@@ -30,6 +33,16 @@ export function createAcademicAIHandler({ env, createClient, providerFactory = c
     if (error || !data.user?.id) throw new AcademicAIError('unauthenticated', 'Your session could not be verified.', 401)
     if (!request.headers.get('Content-Type')?.toLowerCase().startsWith('application/json')) throw new AcademicAIError('invalid_content_type', 'Use a JSON request body.', 415)
     const input = await readLimitedJson(request, 8192)
+    if (['unified_status', 'index_academic_material', 'unified_academic'].includes(input?.mode)) {
+      await authorizeUnifiedTeacher(env, client, data.user, { adult: input.mode === 'unified_academic' })
+      if (input.mode === 'unified_status') return Response.json(unifiedProviderStatus(env), { headers })
+      if (input.mode === 'index_academic_material') {
+        if (!sameKeys(input, ['mode', 'studentId', 'materialId']) || !uuid(input.studentId) || !uuid(input.materialId)) throw new AcademicAIError('invalid_input', 'Choose an authorized student and material.', 422)
+        return Response.json({ extraction: await indexAcademicMaterial(client, input.studentId, input.materialId) }, { headers })
+      }
+      const provider = selectUnifiedProvider(env)
+      return Response.json(await generateUnifiedAcademic(client, input, provider), { status: 201, headers })
+    }
     if (input?.mode === 'learning_architect') {
       if (env('ACADEMIC_AI_ARCHITECT_ENABLED') !== 'true' || env('ACADEMIC_AI_PROVIDER') !== 'gemini' || env('ACADEMIC_AI_FREE_TIER_CONFIRMED') !== 'true') throw new AcademicAIError('not_configured', 'Gemini Learning Architect is disabled until free-tier staging testing is configured.', 503)
       await authorizeAdultArchitectTeacher(env, client, data.user)

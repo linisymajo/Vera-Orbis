@@ -1,3 +1,5 @@
+import { mountStudentAcademicAI, mountAcademicSourceHistory } from './studentAcademicAI.js'
+import { requestStudentAwareAcademic, academicContextProviderStatus, loadStudentAcademicContext } from '../lib/studentAcademicContext.js'
 import {
   newLearningObjective, validateLearningPlan, listLearningPlanVersions, listLearningObjectiveEvents,
   createLearningPlanVersion, saveLearningPlanVersion, approveLearningPlanVersion,
@@ -6,6 +8,7 @@ import {
 import { listAcademicDrafts } from '../lib/academicAI.js'
 import { mountLearningArchitect, architectSessionFields, architectOverviewFields, readArchitectFields, architectSessionReadOnly, regenerateArchitectSession } from './learningArchitect.js'
 import { learningArchitectEnabled, publishLearningArchitect } from '../lib/learningArchitect.js'
+import { mountJourneyBindings } from './journeyBindings.js'
 
 const esc = value => String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;')
 const date = value => value ? new Date(value).toLocaleString() : ''
@@ -27,7 +30,7 @@ const STAGE_META = {
   Use: { step: '04', theme: 'coral', hint: 'Spontaneous real-world mission' }
 }
 
-export async function mountLearningPlans(panel, client, { studentId = null, studentView = false } = {}) {
+export async function mountLearningPlans(panel, client, { studentId = null, studentView = false, unifiedContext = true, initialVersionId = null } = {}) {
   const initialContent = panel.firstChild
   const auth = await client.auth.getUser()
   if (panel.firstChild !== initialContent) return
@@ -37,7 +40,7 @@ export async function mountLearningPlans(panel, client, { studentId = null, stud
   }
   const actorId = auth.data.user.id
   let selectedStudent = studentView ? actorId : studentId
-  let selectedVersion = null
+  let selectedVersion = initialVersionId
   let versions = []
   let students = []
   let aiDrafts = []
@@ -81,7 +84,6 @@ export async function mountLearningPlans(panel, client, { studentId = null, stud
               <button type="button" class="btn-studio-primary" data-plan-new>Create a plan draft</button>
               <button type="button" class="btn-studio-secondary" data-plan-import-json>Import plan JSON</button>
               <input type="file" accept=".json,application/json" data-plan-import-file style="display:none">
-              <a href="/architect/" target="_blank" rel="noopener noreferrer" class="btn-studio-ghost" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.35rem;" title="Open Standalone Adult AI Learning Architect">✨ AI Architect Studio (18+)</a>
               <button type="button" class="btn-studio-secondary" data-plan-reload>Reload saved plans</button>
             </div>
           </div>
@@ -92,7 +94,7 @@ export async function mountLearningPlans(panel, client, { studentId = null, stud
 
       <section data-plan-ai></section>
       <nav class="vo-plan-versions-nav" data-plan-versions aria-label="Learning plan history"></nav>
-      <section data-plan-editor></section>
+      <section data-plan-sources></section><section data-plan-editor></section>
     </div>
   `
 
@@ -138,6 +140,7 @@ export async function mountLearningPlans(panel, client, { studentId = null, stud
       }
     })
     renderEditor()
+    const sourcesHost = workspace.querySelector('[data-plan-sources]'); sourcesHost.replaceChildren(); if (!studentView && selectedVersion) mountAcademicSourceHistory(sourcesHost, client, selectedVersion)
   }
 
   function renderEditor(override = null) {
@@ -190,14 +193,14 @@ export async function mountLearningPlans(panel, client, { studentId = null, stud
                   }).join('')}
                 </div>
                 <div class="vo-plan-objective-footer">
-                  <button type="button" class="btn-studio-ghost" data-remove-objective="${i}">Remove objective</button>
+                  <button type="button" class="btn-studio-ghost" data-remove-objective="${i}">Remove objective</button><button type="button" data-objective-move="${i}" data-direction="-1" ${i === 0 ? 'disabled' : ''}>Move lesson up</button><button type="button" data-objective-move="${i}" data-direction="1" ${i === content.objectives.length - 1 ? 'disabled' : ''}>Move lesson down</button><span>Save and approve the plan to generate lesson exercises.</span>
                 </div>
               </fieldset>
             `).join('')}
           </div>
 
           <div class="vo-plan-editor-actions">
-            <button type="button" class="btn-studio-secondary" data-add-objective ${content.architect || content.objectives.length >= 10 ? 'disabled' : ''}>Add objective</button>
+            <button type="button" class="btn-studio-secondary" data-add-objective ${content.objectives.length >= (content.architect ? 12 : 10) ? 'disabled' : ''}>Add objective</button>
             <button type="submit" class="btn-studio-secondary" value="save">Save draft</button>
             <button type="submit" class="btn-studio-primary" value="approve">Save and approve plan</button>
           </div>
@@ -218,8 +221,10 @@ export async function mountLearningPlans(panel, client, { studentId = null, stud
       form.querySelector('[data-add-objective]').onclick = () => {
         const edited = read()
         edited.objectives.push(newLearningObjective())
+        if (edited.architect) edited.architect.sessions.push({ ...structuredClone(edited.architect.sessions[0]), title: 'New manual lesson: edit all activities' })
         renderEditor(edited)
       }
+      form.querySelectorAll('[data-objective-move]').forEach(button => button.onclick = () => { const edited = read(), i = Number(button.dataset.objectiveMove), j = i + Number(button.dataset.direction); [edited.objectives[i], edited.objectives[j]] = [edited.objectives[j], edited.objectives[i]]; if (edited.architect) [edited.architect.sessions[i], edited.architect.sessions[j]] = [edited.architect.sessions[j], edited.architect.sessions[i]]; renderEditor(edited) })
       form.querySelectorAll('[data-remove-objective]').forEach(button => {
         button.onclick = () => {
           const edited = read()
@@ -228,14 +233,17 @@ export async function mountLearningPlans(panel, client, { studentId = null, stud
           renderEditor(edited)
         }
       })
+      const regenerationAvailability = unifiedContext ? academicContextProviderStatus(client) : null
       form.querySelectorAll('[data-architect-regenerate]').forEach(button => {
-        button.disabled = !learningArchitectEnabled()
+        button.disabled = unifiedContext || !learningArchitectEnabled()
+        if (unifiedContext) regenerationAvailability.then(s => { if (button.isConnected) button.disabled = !s.enabled })
         button.onclick = async () => {
           const message = form.querySelector('[data-plan-edit-status]')
           try {
             if(JSON.stringify(validateLearningPlan(read()))!==JSON.stringify(validateLearningPlan(version.content))) throw new Error('Save your edits before regenerating a session.')
             busy(form,true); message.textContent='Regenerating the selected session…'
-            const saved=await regenerateArchitectSession(client,version,Number(button.dataset.architectRegenerate))
+            const ctx = unifiedContext ? await loadStudentAcademicContext(client, selectedStudent) : null
+            const saved = unifiedContext ? (await requestStudentAwareAcademic(client, { studentId: selectedStudent, reviewRevision: ctx.review?.revision, kind: 'learning_plan', regenerate: { versionId: version.id, revision: version.revision, session: Number(button.dataset.architectRegenerate) } })).result : await regenerateArchitectSession(client,version,Number(button.dataset.architectRegenerate))
             if(saved.student_id!==selectedStudent)return
             selectedVersion=saved.id
             await refresh();status('Selected session regenerated and saved in the private draft. Other sessions were preserved.')
@@ -282,6 +290,7 @@ export async function mountLearningPlans(panel, client, { studentId = null, stud
         <p class="vo-plan-summary-lead">${esc(content.summary)}</p>
         ${content.architect ? `<p>${content.architect.provisional ? 'Provisional plan — based on incomplete academic evidence.' : 'Teacher-reviewed learning roadmap.'} ${version.published_at ? 'Published to student.' : 'Approved privately; awaiting publication.'}</p><p>Goal: ${esc(content.architect.goal)}</p><p>Needs: ${esc(content.architect.needs)}</p><p>Approach: ${esc(content.architect.approach)}</p><p>Adaptations: ${esc(content.architect.adaptations.join(' · '))}</p><p>Revisit: ${esc(content.architect.revisit.join(' · '))}</p>` : ''}
 
+        ${studentView ? '' : '<section data-journey-links></section>'}
         <div class="vo-plan-objectives-stack">
           ${content.objectives.map((o, idx) => {
             const progress = (version.progress || []).find(p => p.objective_id === o.id)
@@ -291,6 +300,7 @@ export async function mountLearningPlans(panel, client, { studentId = null, stud
                   <div>
                     <span class="vo-section-kicker">MILESTONE 0${idx + 1}</span>
                     <h4>${esc(o.title)}</h4>
+                    ${studentView ? '' : `<a href="/teacher.html?module=exercise-studio&academic_student=${esc(selectedStudent)}&academic_plan=${esc(version.id)}&academic_lesson=${idx}">Create Exercises for This Lesson</a>`}
                     <p>${esc(o.success_criteria)}</p>
                   </div>
                   <span class="vo-badge ${progress?.completed ? 'vo-badge--teal' : 'vo-badge--indigo'}">${progress?.completed ? 'Completed' : 'In Progress'}</span>
@@ -322,6 +332,7 @@ export async function mountLearningPlans(panel, client, { studentId = null, stud
         <div class="vo-plan-events-box" data-plan-events></div>
       </article>`
 
+    if (!studentView) mountJourneyBindings(target.querySelector('[data-journey-links]'), client, version).catch(() => {})
     target.querySelector('[data-architect-publish]')?.addEventListener('click',async event=>{
       event.currentTarget.disabled=true
       try { await publishLearningArchitect(client,version.id);await refresh();status('Approved plan published to the selected student.') }
@@ -378,9 +389,9 @@ export async function mountLearningPlans(panel, client, { studentId = null, stud
     const target=workspace.querySelector('[data-plan-ai]')
     if(studentView||!selectedStudent){target.innerHTML='';return}
     const forStudent=selectedStudent
-    await mountLearningArchitect(target,client,{studentId:forStudent,onSaved:async version=>{
+    await (unifiedContext ? mountStudentAcademicAI : mountLearningArchitect)(target,client,{studentId:forStudent,onSaved:async version=>{
       if(selectedStudent!==forStudent)return
-      selectedVersion=version.id;await refresh();status('AI plan draft saved. Review sessions, approve, then publish explicitly.')
+      selectedVersion=version.id;await refresh();status('Plan draft saved. Review sessions, approve, then publish explicitly.')
     }})
     if(selectedStudent!==forStudent)return
     // Retain importing previous-format recommendations without enabling other AI agents.

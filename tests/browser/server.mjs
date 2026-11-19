@@ -1,9 +1,18 @@
+import { generateUnifiedAcademic } from '../../supabase/functions/academic-ai/academic-context.js'
+import { indexAcademicMaterial } from '../../supabase/functions/academic-ai/material-extraction.js'
+import { createRequire } from 'node:module'
+const testRequire = createRequire(new URL('../../supabase/functions/academic-ai/package.json', import.meta.url))
+const { zipSync, strToU8 } = testRequire('fflate')
+let unifiedFixtureProvider = false
 // Isolated API: real PostgreSQL migrations/RLS, fixture identities and in-memory
 // bytes. This is not Supabase Auth or the Supabase Storage service.
 import http from 'node:http'
 import { readFileSync } from 'node:fs'
 import { createServer } from 'vite'
 import { PGlite } from '@electric-sql/pglite'
+import { generateLearningArchitect } from '../../supabase/functions/academic-ai/learning-architect.js'
+import { syntheticCourse } from '../fixtures/architect-course.mjs'
+import { createGeminiProvider } from '../../supabase/functions/academic-ai/gemini-provider.js'
 const db=new PGlite()
 const actors={teacher:'10000000-0000-4000-8000-000000000001',teacher2:'10000000-0000-4000-8000-000000000002',student:'20000000-0000-4000-8000-000000000001',student2:'20000000-0000-4000-8000-000000000002'}
 const {teacher,teacher2,student,student2}=actors
@@ -14,8 +23,10 @@ create function auth.uid() returns uuid language sql stable as $$select nullif(c
 grant usage on schema public,auth,storage to authenticated,anon;
 create table teachers(id uuid primary key references auth.users(id));
 create table profiles(id uuid primary key references auth.users(id),name text,language text,level text,level_name text,progress int,lessons_completed int,current_module text,next_step text,interface_language text);
+create table public.onboarding_responses(id uuid primary key default gen_random_uuid(),student_id uuid,learning_goals text,previous_experience text,difficulties text,updated_at timestamptz default now());
+create table public.teacher_notes(teacher_id uuid,student_id uuid,notes text,updated_at timestamptz default now());
 create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
-create table storage.objects(id uuid primary key default gen_random_uuid(),bucket_id text,name text,metadata jsonb,unique(bucket_id,name));
+create table storage.objects(id uuid primary key default gen_random_uuid(),bucket_id text,name text,metadata jsonb,updated_at timestamptz default now(),unique(bucket_id,name));
 create function storage.foldername(name text) returns text[] language sql immutable as $$select (string_to_array(name,'/'))[1:array_length(string_to_array(name,'/'),1)-1]$$;
 alter table storage.objects enable row level security;
 grant select,insert on storage.objects to authenticated;
@@ -23,15 +34,23 @@ grant select on storage.buckets,teachers,profiles to authenticated;`)
 for(const id of Object.values(actors))await db.query('insert into auth.users(id,email,email_confirmed_at) values($1,$2,now())',[id,id+'@example.test'])
 await db.query('insert into teachers values($1),($2)',[teacher,teacher2])
 await db.query("insert into profiles(id,name,language) values($1,'Safe Test Student','French'),($2,'Unassigned Test Student','French')",[student,student2])
-for(const name of ['0008_teacher_management_security_patch.sql','0004_exercise_studio.sql','0005_materials_storage_policy.sql','0009_academic_sync_challenges_feedback.sql','0010_inbox_messaging.sql','0011_material_office_formats.sql','0012_exercise_workflow.sql','0013_hybrid_enrollment.sql','0014_ai_drafts.sql','0015_material_owner_boundary.sql','0016_academic_teacher_scope.sql','0017_inbox_authorization.sql','0018_student_attachments.sql','0019_learning_plans.sql','0020_challenges_notifications.sql','0021_final_assessments.sql'])await db.exec(readFileSync(new URL(`../../supabase/migrations/${name}`,import.meta.url),'utf8'))
+for(const name of ['0002_teacher_operations.sql','0008_teacher_management_security_patch.sql','0004_exercise_studio.sql','0005_materials_storage_policy.sql','0009_academic_sync_challenges_feedback.sql','0010_inbox_messaging.sql','0011_material_office_formats.sql','0012_exercise_workflow.sql','0013_hybrid_enrollment.sql','0014_ai_drafts.sql','0015_material_owner_boundary.sql','0016_academic_teacher_scope.sql','0017_inbox_authorization.sql','0018_student_attachments.sql','0019_learning_plans.sql','0020_challenges_notifications.sql','0021_final_assessments.sql'])await db.exec(readFileSync(new URL(`../../supabase/migrations/${name}`,import.meta.url),'utf8'))
 await db.exec(readFileSync(new URL('../../supabase/migrations/0022_exercise_experience.sql',import.meta.url),'utf8'))
 await db.exec(readFileSync(new URL('../../supabase/migrations/0023_legacy_exercise_feedback.sql',import.meta.url),'utf8'))
+await db.exec(readFileSync(new URL('../../supabase/migrations/0025_learning_architect.sql',import.meta.url),'utf8'))
+await db.exec(readFileSync(new URL('../../supabase/migrations/0026_learning_architect_twelve_classes.sql',import.meta.url),'utf8'))
 await db.exec('grant select,insert,update,delete on public.materials,public.classes,public.class_participants to authenticated')
-const vite=await createServer({server:{middlewareMode:true,hmr:false,watch:null},appType:'mpa'})
+await db.exec(readFileSync(new URL('../../supabase/migrations/0028_unified_academic_context.sql',import.meta.url),'utf8'))
+await db.exec(readFileSync(new URL('../../supabase/migrations/0029_personal_learning_journey.sql',import.meta.url),'utf8'))
+const vite=await createServer({define:{'import.meta.env.VITE_LEARNING_ARCHITECT_ENABLED':'"true"'},server:{middlewareMode:true,hmr:false,watch:null},appType:'mpa'})
 const rpcNames=new Set(['publish_exercise','submit_exercise','review_exercise_attempt','reserve_exercise_attachment','confirm_exercise_attachment','submit_exercise_with_attachments','revise_exercise_attachments','list_exercise_attachments','create_learning_plan_version','save_learning_plan_version','approve_learning_plan_version','set_learning_objective_completion','save_final_draft','publish_final_assessment','save_final_result','publish_final_result','review_academic_ai_draft','publish_academic_challenge','submit_academic_challenge','review_challenge_submission','mark_academic_notification_read'])
 const tables=new Set(['exercises','profiles','exercise_assignments','exercise_attempts','student_exercises','materials','learning_plan_versions','learning_plan_objective_progress','learning_plan_objective_events','final_assessments','final_results','student_finals','weekly_challenges','challenge_submissions','student_challenge_submissions','challenge_publications','ai_academic_drafts','academic_notifications'])
 const fieldNames=new Set(['id','teacher_id','status','exercise_id','student_id','version_id','objective_id','kind','recipient_id','read_at','created_at','updated_at','submitted_at','revision','version_number','name','title','assigned_at'])
 for (const name of ['exercise_experience_capabilities','save_exercise_progress','get_exercise_practice_state','check_exercise_question','save_exercise_feedback','get_exercise_teacher_review']) rpcNames.add(name)
+for(const name of ['get_learning_architect_context','get_learning_architect_profile','get_learning_architect_draft','reserve_learning_architect_request','complete_learning_architect_request','publish_learning_architect_plan','set_academic_ai_consent'])rpcNames.add(name)
+tables.add('learning_plan_publications');tables.add('unified_academic_runs');fieldNames.add('request_id')
+for(const name of ['get_student_academic_context','save_academic_context_review','get_academic_material_source','save_academic_material_text','reserve_unified_academic_request','complete_unified_academic_request','get_unified_academic_provenance'])rpcNames.add(name)
+for(const name of ['get_student_learning_journey','get_learning_journey_binding','get_learning_journey_options','save_learning_journey_binding'])rpcNames.add(name)
 const json=(res,value)=>{res.setHeader('Content-Type','application/json');res.end(JSON.stringify(value))}
 const server=http.createServer(async(req,res)=>{
   if(req.url?.startsWith('/__academic_test_file/')){
@@ -46,7 +65,15 @@ const server=http.createServer(async(req,res)=>{
   try{
     let body='';for await(const chunk of req){body+=chunk;if(body.length>16*1024*1024)throw Error('Test request too large')}
     const input=JSON.parse(body)
-    if(input.reset===true){await db.exec('truncate public.exercises,public.learning_plan_versions,public.academic_ai_requests,public.academic_notifications,public.inbox_messages,public.classes,public.materials cascade;truncate storage.objects');objectBytes.clear();downloadTokens.clear();json(res,{data:{reset:true}});return}
+    if(input.reset===true){unifiedFixtureProvider=false;await db.exec("truncate academic_context_reviews,material_text_versions,teacher_notes,student_packages,packages cascade;update profiles set language='French',level=null,lessons_completed=0,total_lessons=null where id='"+student+"'");await db.exec('truncate public.exercises,public.learning_plan_versions,public.academic_ai_requests,public.academic_notifications,public.inbox_messages,public.classes,public.materials cascade;truncate storage.objects');objectBytes.clear();downloadTokens.clear();json(res,{data:{reset:true}});return}
+    if(input.seedUnified===true){
+      unifiedFixtureProvider=input.providerDisabled!==true
+      await db.query("update profiles set language='English',level='B1',lessons_completed=5,total_lessons=12,goal='Use practical travel expressions' where id=$1",[student])
+      await db.query("insert into teacher_notes values($1,$2,'Teacher observation: requested practice with polite questions.',now())",[teacher,student])
+      for(let i=0;i<6;i++){const c=(await db.query("insert into classes(teacher_id,title,starts_at,status) values($1,$2,now()-interval '1 day',$3) returning id",[teacher,'Travel class '+i,i<5?'completed':'scheduled'])).rows[0];await db.query('insert into class_participants(class_id,teacher_id,student_id) values($1,$2,$3)',[c.id,teacher,student]);await db.query("insert into class_attendance values($1,$2,'present',null,now())",[c.id,student])}
+      const mid=crypto.randomUUID(),file=teacher+'/synthetic-travel.pptx';await db.query("insert into materials(id,teacher_id,student_id,title,language,file_path) values($1,$2,$3,'Previous travel PowerPoint','English',$4)",[mid,teacher,student,file]);await db.query("insert into storage.objects(bucket_id,name,metadata) values('materials',$1,'{}')",[file]);objectBytes.set('materials/'+file,{bytes:Buffer.from(zipSync({'ppt/slides/slide1.xml':strToU8('<p:sld xmlns:p="p" xmlns:a="a"><a:t>Could you tell me how to get to the station?</a:t></p:sld>')})),contentType:'application/vnd.openxmlformats-officedocument.presentationml.presentation'})
+      json(res,{data:{materialId:mid,provider:'explicit local test double',live_provider:false}});return
+    }
     if(input.seedChallenge===true){
       // A static local draft tests review/publication without invoking an AI provider.
       const content={title:'A practical invitation',objective:'Use a personalized expression to invite a colleague.',language:'French',level:'A2',steps:['Listen','Repeat','Personalize','Use'].map(stage=>({stage,activity:stage+' an expression in a practical invitation.'})),exercise_type:null,questions:[],feedback:null}
@@ -56,6 +83,32 @@ const server=http.createServer(async(req,res)=>{
     }
     const actor=actors[input.actor]
     if(!actor)throw Error('Test identity unavailable')
+    if(input.architect){
+      // Explicit local provider double. Never calls a live provider or simulates activation.
+      const localClient={rpc:async(name,params)=>{if(!rpcNames.has(name))throw Error('Test RPC unavailable');try{return{data:await db.transaction(async tx=>{await tx.exec('set local role authenticated');await tx.query("select set_config('request.jwt.claim.sub',$1,true)",[actor]);return(await tx.query('select public.'+name+'('+Object.keys(params).map((k,i)=>k+'=> $'+(i+1)).join(',')+') result',Object.values(params))).rows[0].result})}}catch(error){return{error:{code:error.code,message:error.message}}}}}
+      localClient.storage={from:()=>({download:async path=>{const file=objectBytes.get('materials/'+path);return file?{data:new Blob([file.bytes])}:{error:{message:'Fixture file unavailable'}}}})}
+      localClient.from=()=>({select:()=>{const filters=[];const q={eq(k,v){filters.push([k,v]);return q},async single(){return{data:await db.transaction(async tx=>{await tx.exec('set local role authenticated');await tx.query("select set_config('request.jwt.claim.sub',$1,true)",[actor]);return(await tx.query('select * from learning_plan_versions where '+filters.map(([k],i)=>k+'=$'+(i+1)).join(' and '),filters.map(([,v])=>v))).rows[0]})}}};return q}})
+      if(input.architect.mode==='unified_status'){json(res,{data:{enabled:unifiedFixtureProvider,message:unifiedFixtureProvider?'Explicit local synthetic provider double.':'Contextual generation is disabled; manual work remains available.'}});return}
+      if(input.architect.mode==='index_academic_material'){const extraction=await indexAcademicMaterial(localClient,input.architect.studentId,input.architect.materialId);json(res,{data:{extraction}});return}
+      if(input.architect.mode==='unified_academic'){
+        if(!unifiedFixtureProvider)throw Error('Fixture provider explicitly disabled')
+        const data=await generateUnifiedAcademic(localClient,input.architect,async body=>{
+          const selected=JSON.parse(body.input),source=selected.evidence.find(s=>s.kind==='material'&&s.detail.sections.length)||selected.evidence[0]
+          let content=syntheticCourse();content.language=selected.language;content.level=selected.level;content.sessions=Array.from({length:selected.remaining_sessions},(_,i)=>({...structuredClone(content.sessions[i%2]),title:'Remaining lesson '+(i+1)}))
+          if(input.architect.kind==='exercise')content={title:'Polite directions',objective:'Ask politely for directions',language:selected.language,level:selected.level,steps:['Listen','Repeat','Personalize','Use'].map(stage=>({stage,activity:stage+' a practical travel question'})),exercise_type:selected.exercise_type,questions:[{prompt:'Could you ___ me where the station is?',options:[],answer:'tell',explanation:'Almost! Use tell to request information naturally.',left:[],right:[],items:[],passage:null,accepted_answers:['please tell']}],feedback:null}
+          else if(input.architect.regenerate)content={...content.sessions[0],title:'Regenerated remaining lesson'}
+          return{content:{content,citations:[{source:source.source,locator:source.kind==='material'?'slide 1':'record',reason:'Practise previously introduced practical expressions.'}]},inputTokens:100,outputTokens:1000}
+        });json(res,{data});return
+      }
+      const provider=createGeminiProvider({apiKey:'synthetic-no-real-provider-access',fetchImpl:async(_url,options)=>{
+        const data=JSON.parse(JSON.parse(options.body).contents[0].parts[0].text)
+        if(data.pedagogy.communicative_objective==='Professional conversations')return Response.json({error:{code:503,message:'Synthetic failure'}},{status:503})
+        let content=syntheticCourse();content.sessions=Array.from({length:data.pedagogy.lesson_count},(_,i)=>({...structuredClone(content.sessions[i%2]),title:'Travel story '+(i+1)}));content.language=data.pedagogy.language;content.level=data.pedagogy.cefr_level
+        if(data.pedagogy.lesson_number){content=content.sessions[data.pedagogy.lesson_number-1];content.title='Regenerated travel session'}
+        return Response.json({candidates:[{finishReason:'STOP',content:{parts:[{text:JSON.stringify(content)}]}}],usageMetadata:{promptTokenCount:100,candidatesTokenCount:1000}})
+      }})
+      const version=await generateLearningArchitect(localClient,input.architect,provider);json(res,{data:{version}});return
+    }
     let byteWrite=null
     const result=await db.transaction(async tx=>{
       await tx.exec('set local role authenticated')

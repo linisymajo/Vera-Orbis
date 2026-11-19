@@ -1,5 +1,42 @@
 # Vera Orbis implementation status
 
+## 2026-11-18 ? integrated academic frontend release
+
+The existing Teacher Dashboard now integrates student context, versioned plans and
+lesson-to-Exercise Studio handoff. The Student Platform adds published lesson
+Journey flip cards without replacing Language Passport or existing 3D navigation.
+The compatible production frontend keeps VITE_ACADEMIC_CONTEXT_READY=false until
+the exact new SQL/function release is approved and verified; manual planning and
+published Journey cards use existing RLS-protected data. No contextual inference
+or paid billing is activated.
+
+Verified this run: 60 focused Node tests; eight distinct Chromium workflows
+(two initial local timing failures passed on targeted rerun); guarded production
+build; real staging teacher/student Auth, private PPTX upload/download, actual
+local extraction saved in staging, seven-class private draft editing/approval/
+publication/versioning; ten additional real staging Journey fallback checks,
+including preservation of audited teacher completion after a student self-toggle.
+Mocks exist only in the local test driver; no external provider calls occurred.
+
+Staging 0028 was applied with its approved hash and existing rows preserved.
+Its Edge package deployment stopped before execution on management HTTP 401.
+0029 is tested locally and awaits exact staging approval. New hosted Journey
+resource-link workflows and fresh unrelated-account authorization checks remain
+unverified: no suitable unrelated hosted fixture is available. Production already
+has 0025/0026/0027; only 0028 and 0029 are proposed, not applied.
+
+Fresh encrypted production backup verified outside Git: 85 database/Auth tables
+and all 32 private Storage objects, source hashes and unchanged inventory. A full
+platform restore remains untested. The frontend candidate is based on current
+main 1592da5 and uses only the existing Pages workflow.
+
+Exact remaining release: [unified-academic-production-release.md](unified-academic-production-release.md).
+Staging supplement: [personal-journey-staging-plan.md](personal-journey-staging-plan.md).
+
+---
+
+Earlier status/verification history follows.
+
 Production release preparation updated 2026-11-10. Read-only verified-TLS inspection confirmed the missing enrollment RPC and actual production schema. The encrypted database/Auth backup and all 14 private Storage files are verified, outside the repository; full platform restore remains untested. The isolated application candidate passed 354 Node tests and production artifact checks. Exact 15-file SQL hashes, compatibility changes, deployment and recovery limits are in [production-release-plan.md](production-release-plan.md). New production supplements were rehearsed locally against actual schema DDL, not yet on hosted staging. No production SQL, account/configuration changes, push or deployment occurred. Explicit approval is still required. Unrelated revenue work and migration 0024 are excluded.
 
 Updated 2026-11-10. The only authorized staging target is

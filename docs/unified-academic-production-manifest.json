@@ -1,0 +1,134 @@
+{
+  "format": "vera-unified-academic-production-v1",
+  "target": "iopgzmvaqobigjwibual",
+  "sql": [
+    {
+      "path": "supabase/migrations/0028_unified_academic_context.sql",
+      "bytes": 24208,
+      "sha256": "1de5d785d4bff3cb3e1eab9552174953921314c644d5ae338c19782c78f0b262"
+    },
+    {
+      "path": "supabase/migrations/0029_personal_learning_journey.sql",
+      "bytes": 18007,
+      "sha256": "dd3e97f12efcdb74a9ff683068f71f8e6d6eab601b321d387f05f1926a446723"
+    }
+  ],
+  "already_applied": [
+    "0025",
+    "0026",
+    "0027"
+  ],
+  "excluded": [
+    "0024"
+  ],
+  "function": {
+    "name": "academic-ai",
+    "verify_jwt": true,
+    "files": [
+      {
+        "path": "supabase/functions/academic-ai/academic-context.js",
+        "bytes": 18097,
+        "sha256": "54f77a59f48b2b72f16071b886471d87c40b07a5f3aa8a89adb5d4ee300e104a"
+      },
+      {
+        "path": "supabase/functions/academic-ai/core.js",
+        "bytes": 13022,
+        "sha256": "024b1a6aa15798dac5b3a4be89b54beba40305e8a2473a9da26d184b881a5534"
+      },
+      {
+        "path": "supabase/functions/academic-ai/feedback-coach.js",
+        "bytes": 1791,
+        "sha256": "570756e4ea95c97517d91660bacd800834d189ac7348972b5178e0bc2fb69c80"
+      },
+      {
+        "path": "supabase/functions/academic-ai/gemini-provider.js",
+        "bytes": 4806,
+        "sha256": "1e35b7200d03c35da9669db2b38c61e6cdc230ad6b5c5b2a62b00959d54be77c"
+      },
+      {
+        "path": "supabase/functions/academic-ai/handler.js",
+        "bytes": 5550,
+        "sha256": "3f9199bf4a9d8afe4ef6c540dd631f237c3b872b1dfcf30b0d7a3b08aedbb1e9"
+      },
+      {
+        "path": "supabase/functions/academic-ai/index.ts",
+        "bytes": 285,
+        "sha256": "993e269e0bc36254f9247f7748bfa22c283f1b408482e765b7c88f5e146c5931"
+      },
+      {
+        "path": "supabase/functions/academic-ai/learning-architect.js",
+        "bytes": 15626,
+        "sha256": "b387361ea86f6cde7ed7c396122e834a52300bc6cac0c464697df0e668d167a8"
+      },
+      {
+        "path": "supabase/functions/academic-ai/material-extraction.js",
+        "bytes": 7340,
+        "sha256": "fc743bacb4b3b6e3e8a88f6590963d9961526d3f2db47bb5da412b9a03cacbd6"
+      },
+      {
+        "path": "supabase/functions/academic-ai/package-lock.json",
+        "bytes": 22665,
+        "sha256": "cfba77f93e9444f41df9dbd475a59f54da54f455bdfde261dcbe33bb7065061a"
+      },
+      {
+        "path": "supabase/functions/academic-ai/package.json",
+        "bytes": 217,
+        "sha256": "a770f5d8bd4790ad550452db2d74b9630caefe326c721d18ef2d81f081ef60f6"
+      },
+      {
+        "path": "supabase/functions/academic-ai/pedagogy.js",
+        "bytes": 2628,
+        "sha256": "c57f95c57c3c50bc4fe340d8c82c8b836569de2f1a8dde92ae9c0f606084d7ac"
+      },
+      {
+        "path": "supabase/functions/academic-ai/provider.js",
+        "bytes": 2821,
+        "sha256": "05073ccd493bbec518663ab3fd852d6f79cbaa44e804d51bade844018dfb6c89"
+      },
+      {
+        "path": "supabase/functions/academic-ai/teacher-access.js",
+        "bytes": 1772,
+        "sha256": "243cfa057194a6958084bbf76dfe14767f650c9600e3b5bab948601591cefd2e"
+      },
+      {
+        "path": "supabase/functions/academic-ai/unified-providers.js",
+        "bytes": 5173,
+        "sha256": "20cb57cbadedea93de9c807c8a46966c92aed23a27adecc94fd4fd1fa540d354"
+      },
+      {
+        "path": "src/lib/exerciseWorkflow.js",
+        "bytes": 4712,
+        "sha256": "b1f730e309c0813a484ca529a7ab4b4296456e01bcca02e88044cc61484158c5"
+      },
+      {
+        "path": "src/lib/exerciseExperience.js",
+        "bytes": 7072,
+        "sha256": "f81ce501187a738c6e74ec040b82aa2b723efb5b5529dd397d5144385c7fc8cc"
+      }
+    ]
+  },
+  "secret_values": {
+    "ACADEMIC_AI_UNIFIED_ENABLED": "false",
+    "ACADEMIC_AI_ENABLED": "false",
+    "ACADEMIC_AI_ARCHITECT_ENABLED": "false",
+    "ACADEMIC_AI_ALLOWED_ORIGINS": "https://veraorbis.studio"
+  },
+  "frontend": {
+    "workflow": ".github/workflows/deploy.yml",
+    "base_commit": "1592da52e49f4353be106184aaf0f79fa9831520",
+    "ready_variable": "VITE_ACADEMIC_CONTEXT_READY",
+    "ready_before_sql_and_edge": "false",
+    "ready_after_verified_sql_and_edge": "true"
+  },
+  "external_provider_calls": false,
+  "billing_activation": false,
+  "account_changes": false,
+  "production_sql_approved": false,
+  "prerequisites": [
+    "exact staging 0029 approval",
+    "staging Edge deployment with a valid scoped credential",
+    "hosted Journey verification",
+    "fresh verified DB/Auth/Storage backup",
+    "explicit exact production approval"
+  ]
+}

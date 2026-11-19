@@ -15,7 +15,7 @@ export function productionBuildEnvironment(env) {
   }
   const voice=env.VITE_VERA_VOICE_URL||''
   if(voice){let url;try{url=new URL(voice)}catch{throw new Error('VOICE_URL_INVALID')};if(url.protocol!=='https:'||url.username||url.password||url.search||url.hash)throw new Error('VOICE_URL_INVALID')}
-  return {VITE_SUPABASE_URL:PRODUCTION_URL,VITE_SUPABASE_PUBLISHABLE_KEY:key,VITE_VERA_VOICE_URL:voice,VITE_ACADEMIC_AI_ENABLED:'false',...(env.VITE_LEARNING_ARCHITECT_ENABLED==='true'?{VITE_LEARNING_ARCHITECT_ENABLED:'true'}:{})}
+  return {VITE_SUPABASE_URL:PRODUCTION_URL,VITE_SUPABASE_PUBLISHABLE_KEY:key,VITE_VERA_VOICE_URL:voice,VITE_ACADEMIC_AI_ENABLED:'false',VITE_ACADEMIC_CONTEXT_READY:env.VITE_ACADEMIC_CONTEXT_READY==='true'?'true':'false',...(env.VITE_LEARNING_ARCHITECT_ENABLED==='true'?{VITE_LEARNING_ARCHITECT_ENABLED:'true'}:{})}
 }
 
 export async function verifyProductionBuild(directory, configuration) {

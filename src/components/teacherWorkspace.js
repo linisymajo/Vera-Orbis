@@ -298,11 +298,11 @@ export async function loadTeacherModule(module, { updateHistory = true } = {}) {
     academic: loadAcademic,
     'exercise-studio': loadExerciseStudio,
     'materials-studio': panel => mountMaterialsStudio(panel, supabase),
-    'learning-plans': panel => mountLearningPlans(panel, supabase),
+    'learning-plans': panel => { const p = new URLSearchParams(location.search); return mountLearningPlans(panel, supabase, { studentId: p.get('academic_student'), initialVersionId: p.get('academic_version') }) },
     challenges: panel => mountChallengeManager(panel, supabase),
     finals: panel => mountFinalsStudio(panel, supabase),
     notifications: panel => mountNotifications(panel, supabase, { onNavigate: view => loadTeacherModule(view === 'exercises' ? 'exercise-studio' : view) }),
-    'academic-ai': panel => mountAcademicAI(panel, supabase, { onUseExercise: draft => mountExerciseStudio(panel, supabase, draft) }),
+    'academic-ai': panel => mountLearningPlans(panel, supabase),
     finance: loadFinance,
     leads: loadLeads,
     culture: loadCulture,
@@ -782,7 +782,9 @@ function materialsCard(items = [], studentMap = new Map()) {
 }
 
 async function loadExerciseStudio(panel) {
-  await mountExerciseStudio(panel, supabase)
+  const params = new URLSearchParams(location.search), sid = params.get('academic_student'), plan = params.get('academic_plan'), n = Number(params.get('academic_lesson'))
+  const valid = v => /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i.test(v || '')
+  await mountExerciseStudio(panel, supabase, null, valid(sid) ? { studentId: sid, lesson: valid(plan) && Number.isInteger(n) && n >= 0 ? { versionId: plan, session: n } : null } : {})
 }
 
 function materialForm(students = []) {
