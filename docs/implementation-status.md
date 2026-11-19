@@ -1,5 +1,23 @@
 # Vera Orbis implementation status
 
+## 2026-11-19 ? authorized production database activation
+
+Reviewed migrations 0028 and 0029 are committed in production with 255 checks
+passing and existing application/Auth/Storage records preserved. A 19-check
+synthetic plan-to-submission rehearsal passed against production PostgreSQL and
+was rolled back. The fresh encrypted backup covers 85 tables and all 32 private
+Storage objects. No provider calls, account changes, Voice changes or billing.
+
+Frontend context/Journey activation is being released independently of document
+processing. The new Edge deployment remains blocked before any secret write by
+Management API HTTP 401. AI stays disabled; templates are deterministic.
+Actual production teacher/student browser authentication remains unverified.
+See [current activation details](unified-academic-production-activation.md).
+The November 18 entries below are historical and superseded by this update.
+
+
+**Live frontend verified 2026-11-18:** commit 7b305d129be1c2af2a7fb583f5e1126ba170606e; [successful existing Pages workflow](https://github.com/linisymajo/Vera-Orbis/actions/runs/44432959849). Public verification passed: current teacher/student assets, production target, preserved Voice target, legacy Architect redirect and unauthenticated access gates (34 checks, ten assets). No new production SQL or Edge deployment. VITE_ACADEMIC_CONTEXT_READY remains false. Complete hosted context/resource synchronization is still pending the exact approvals and staging credential described below.
+
 ## 2026-11-18 ? integrated academic frontend release
 
 The existing Teacher Dashboard now integrates student context, versioned plans and
@@ -37,7 +55,196 @@ Staging supplement: [personal-journey-staging-plan.md](personal-journey-staging-
 
 Earlier status/verification history follows.
 
-Production release preparation updated 2026-11-10. Read-only verified-TLS inspection confirmed the missing enrollment RPC and actual production schema. The encrypted database/Auth backup and all 14 private Storage files are verified, outside the repository; full platform restore remains untested. The isolated application candidate passed 354 Node tests and production artifact checks. Exact 15-file SQL hashes, compatibility changes, deployment and recovery limits are in [production-release-plan.md](production-release-plan.md). New production supplements were rehearsed locally against actual schema DDL, not yet on hosted staging. No production SQL, account/configuration changes, push or deployment occurred. Explicit approval is still required. Unrelated revenue work and migration 0024 are excluded.
+Final local validation: **109 focused Node tests and seven distinct Chromium
+workflows passed** (three new Unified Academic scenarios plus four Architect/exercise
+regressions). New contextual inference uses explicit mocks only; document parsers,
+PostgreSQL/RLS, persistence and browser interactions are real local implementations.
+Deno checking and the guarded staging build passed. No hosted 0028/runtime or live
+contextual provider verification is claimed.
+
+2026-11-14 **Unified Academic AI 5.0 implemented locally in the existing Teacher Dashboard.**
+Learning Plans, Exercise Studio and student dossiers share authorized academic context
+review, source exclusions/annotations and provider-disabled states. Actual parsers
+extract PDF/DOCX/PPTX/XLSX/text locally; scanned PDFs report OCR required. Changed
+material/source fingerprints require reprocessing/review. The 12-total/5-completed
+fixture persists seven editable lessons with reordering, private approval and
+explicit publication. Actual submitted responses and released historical feedback
+are included; private feedback drafts are excluded. Exercise suggestions become
+existing Studio cards with accepted variants, explanations and persisted sources.
+Gemini is preserved; an alternative provider adapter is implemented but NOT live
+verified or enabled. Mock inference is confined to tests, never a production mode.
+
+Hosted verification requires the pending revision-2 staging approval for 0028 and
+academic-ai; no SQL or deployment has run. The fresh encrypted staging DB/Auth
+backup passed archive/table-count verification for 87 tables outside Git; external
+Storage bytes are separate and full platform restore remains untested. Existing
+production, Vera Voice, accounts and billing were not changed. Production activation
+still requires provider eligibility/processing/minor/consent/spending approval and
+a new exact production release. See [implementation and evidence](unified-academic-ai.md)
+and [current staging approval plan](unified-academic-staging-plan.md).
+
+
+2026-11-12 scope research: the minimum proposed adult-only authoring boundary,
+ready-to-send Google clarification and conditional Claude API alternative are in
+[learning-architect-adult-service-proposal.md](learning-architect-adult-service-proposal.md).
+Isolation is proposed, not deployed or established as compliant. Existing Gemini
+and plan functionality are preserved; production remains disabled. No new tests
+or technical audits were repeated for this documentation-only investigation.
+
+
+2026-11-12 **Privacy-minimized Gemini revision 4 verified in staging.** Server-only
+allowlisting sends fixed generic pedagogy only; no identity, records, private text
+or saved lesson content reaches Gemini, including regeneration. Adult teacher
+eligibility requires administrator registry + verified Auth/teacher membership.
+Staging remains restricted to synthetic fixtures. A real 12-class English B1 draft
+and single-lesson replacement passed 20 hosted workflow checks; five additional
+hosted denial checks, nine actual Dashboard/Platform Chromium checks, two local
+Chromium tests and 56 focused Node tests pass. Existing plans/history preserved.
+Fresh encrypted production database/Auth backup and all 21 private Storage objects
+verified outside Git through read-only operations; full platform restore untested.
+**Production activation remains blocked:** the founder confirmed students under 18
+are admitted; adult teacher controls do not resolve Google's API Client restriction.
+No production application/schema/secret changes, Vera Voice or billing changes.
+Exact twenty-file release proposal, backup and rollback:
+[learning-architect-production-activation.md](learning-architect-production-activation.md).
+This entry supersedes earlier synthetic-only implementation/release summaries.
+
+
+2026-11-12 **Gemini Learning Architect works in staging with real provider responses**.
+0025 and 0026 applied/checksums confirmed; canonical token and secured Gemini key
+work. Fixed the reproduced Google 400 schema rejection by removing grammar-heavy
+array bounds and explicitly requesting the complete course; JS/PostgreSQL limits
+remain strict. Deployed academic-ai source revision 3 only to staging, JWT enabled.
+Real **12-class English B1** plan generated/saved (HTTP 201; 787 input/4,692 output
+tokens), then one lesson regenerated while preserving the other eleven. **20 live
+workflow checks + 9 real-browser Dashboard/Platform checks + 54 focused automated
+tests passed**; Deno check passed. Editing, saving, versioning, private approval,
+explicit publication, mobile student rendering and old manual/history preservation
+verified. Original synthetic consent restored; no real student/provider processing.
+Production was inspected read-only for necessary differences: 0025/0026 are missing.
+Exact seventeen-file preparation manifest/workflow patch are ready; privacy for
+real records and separate production approval remain required. No production
+changes, billing activation or Vera Voice changes in this AI task. Full evidence:
+[learning-architect-production-activation.md](learning-architect-production-activation.md).
+Earlier failed staging attempts below are superseded by this verified success.
+
+2026-11-12 production invited-student incident **resolved after explicit approval**.
+Applied the exact reviewed one-case repair only to iopgzmvaqobigjwibual: one existing
+enrollment approved/assigned to the inviting teacher and its existing invitation
+marked redeemed by the matching confirmed student. Verified encrypted before-images
+and unchanged SQL hash before execution. **60 checks passed in the transaction**,
+including preserved fingerprints across **46 tables** and unchanged fields outside
+the approved update; **five independent read-only postcommit checks passed**.
+Teacher Dashboard profile query now returns the student under real RLS and the
+Student Platform enrollment check grants her own access. Auth/password/profile,
+unrelated records, policies and deployed code were unchanged. Sixteen local tests
+passed, including another teacher's exclusion (no other non-admin production
+teacher was available to check). Refresh Dashboard to reload its student cache;
+student retains existing credentials and still needs to complete normal initial
+goals. No signed-in real-student browser verification is claimed. Evidence:
+[production-invited-student-incident.md](production-invited-student-incident.md).
+The approval-pending incident note below is historical.
+
+2026-11-12 production onboarding incident takes priority over AI/visual work.
+Read-only diagnosis found the sole invited account exists with confirmed email,
+password and profile, but its valid invitation is unredeemed. Enrollment is
+pending/self with no teacher; production RLS and get_my_enrollment reproduce the
+visibility/access block. The inviting teacher is not an administrator; pending
+requests are admin-only in both dashboard and RPC. Four live frontend entry assets
+were inspected. Exact token-loss/redemption failure in the student's browser is
+not established. Six production read-only checks and 16 local tests passed. A
+minimal two-existing-row repair is prepared; encrypted before-images are verified
+outside Git. **No production write has occurred; approval pending.** See
+[production-invited-student-incident.md](production-invited-student-incident.md).
+
+2026-11-11 final approved revision-2 attempt: all eleven root/staged source hashes
+matched manifest 02b8eebbf839ecfe54da33772c94eed0c3742efa07251b25c89ea62236168250.
+Deployed academic-ai source revision 2 to staging only (platform code version 3,
+ACTIVE, verify_jwt=true); no SQL applied. Existing synthetic-only provider
+configuration verified; only Architect activation flag enabled. The one additional
+authorized twelve-class generation failed **502 provider_unavailable**, with no
+saved result. Upstream cause remains unconfirmed. Per the explicit stop condition,
+**generation disabled again and preview stopped; no retries or further deployment**.
+Five hosted security checks passed afterward. Failed run has no result version;
+all three pre-existing plan rows still match the encrypted backup; original test
+consent restored and temporary sessions signed out. No successful live
+generation/edit/approval/publication workflow is claimed. Production, Vera Voice,
+billing and real student records untouched. See the latest result in
+[revision 2](learning-architect-staging-revision-2.md). Older proposal/status notes
+below are historical. No additional setup or approval request was issued.
+
+2026-11-11 latest hosted result: new scoped-token access succeeded. Deployed
+**academic-ai v1 ACTIVE with verify_jwt=true**, exclusively to staging
+duinvkphfnugoyvvlbbq, with server-side Gemini secrets and synthetic-only allowlist.
+The **one authorized real generation returned 422 invalid_architect**; no plan
+was saved or published. The failed request has no result version; all three
+existing plan rows match the encrypted backup and synthetic consent was restored.
+Generation was explicitly **disabled after failure**. Five hosted Auth/gateway/
+CORS/disabled-provider checks passed; production, billing and Vera Voice unchanged.
+No successful live twelve-class generation/edit/approval workflow is claimed.
+Local schema repair is prepared, **not deployed**: exact class count, language,
+level, ordered stages and minute tuples, bounded lists and safe field diagnostics.
+371 Node tests passed; final focused tests 17/17; clean Chromium rerun 2/2;
+Deno check passed. Two deployed auxiliary files had only CRLF differences from
+approved root hashes; the next package verifies all eleven staged files byte for
+byte. No new SQL is proposed. A changed-source deployment and one additional
+synthetic generation need new approval because the previous single attempt is
+consumed. Full evidence and exact manifest:
+[learning-architect-staging-revision-2.md](learning-architect-staging-revision-2.md).
+Older token-blocker and activation notes below are historical.
+
+2026-11-11 hosted activation attempt: Windows User token was found under
+SUPA_BASE_ACCESS_TOKEN and privately mapped into the child process's standard
+SUPABASE_ACCESS_TOKEN. Authenticated management GET confirmed the exact staging
+project/name; all eleven approved manifest entries matched and no existing
+functions/Academic AI secrets conflicted. The authorized secret upload returned
+HTTP 403: **edge_functions_secrets_write missing**. The explicitly targeted CLI
+3.1.0 deployment returned HTTP 403: **edge_functions_write missing**. Independent
+management GET afterward confirmed **no academic-ai function and no Academic AI
+or Gemini secrets persisted**. No real Gemini requests occurred. Synthetic-account
+identity was verified with real staging Auth and its temporary session signed out.
+0026 remains applied/verified from the previous step; no SQL rerun, production
+connection, billing change, Vera Voice change or real-student provider processing
+occurred. Required access correction: replace the token with a staging-scoped PAT
+retaining existing read permissions plus Edge Functions and Edge Function Secrets
+Read-write. Existing deployment approval remains valid. Local receipt:
+`.temp/gemini-staging-activation-result.json`.
+
+2026-11-11 approved staging activation progress: user approved the exact manifest,
+0026, secret configuration, Edge deployment and one synthetic twelve-class Gemini
+request, and confirmed IA Architecture has no linked billing. All eleven manifest
+entries match. Fresh encrypted staging backup verified by decrypt/hash and full
+archive extraction with **87 matching table counts**; outside Git under
+LocalAppData/VeraOrbis/staging-backups/pre-0026-1794410018754. Full platform restore
+remains untested; Storage bytes are excluded and unaffected by this migration.
+**0026 applied only to duinvkphfnugoyvvlbbq**, exact approved SHA-256, with execution
+and checksum committed atomically after **112 checks**. Existing public rows,
+Auth and Storage metadata were preserved. Hosted PostgreSQL accepted twelve
+classes, rejected duplicate IDs, invalid final-lesson durations, thirteen classes
+and manual plans over ten objectives; validators remain private. Independent
+read-only postcommit verification confirmed history/hash, preserved prior validator
+and exclusion of 0024. Supabase CLI 3.1.0 is available. Deployment and real Gemini
+generation remain pending solely on unavailable **SUPABASE_ACCESS_TOKEN** (neither
+Windows User nor process contains it). No secret upload, function deployment,
+provider generation, production connection or Vera Voice change occurred.
+
+2026-11-11 Gemini activation preparation: privately verified the Windows User key
+with Google Models GET; gemini-3.1-flash-lite accepts generateContent. No generation
+or billing change occurred. Twelve-class Architect support is implemented locally;
+manual plans retain their previous limit. Proposed 0026 remains unapplied and 0025
+retains its approved hash. Isolated full Node regression: **370/370 passed**;
+focused SDK/PostgreSQL: **16/16 passed**; Chromium: **2/2 passed**, including the
+twelve-class teacher-to-student workflow with an explicitly mocked provider and
+mobile screenshot inspection. No live Gemini generation or hosted Edge test is
+claimed. Exact staging deployment/secret configuration and SQL approval proposal:
+[learning-architect-staging-deployment.md](learning-architect-staging-deployment.md).
+Supabase management access and confirmation of no linked Google billing remain
+necessary. Vera Voice, production, historical records and existing visual work
+were not modified by this preparation.
+
+Gemini Learning Architect updated 2026-11-10. Reuses existing teacher/student/version flows with official Google GenAI SDK 3.0.0 and gemini-3.1-flash-lite; GEMINI_API_KEY only, server-side. Approved 0025 applied solely to staging with exact hash after a verified encrypted backup (85 table counts). Migration plus success tracking passed 102 checks and preserved existing rows/Auth/Storage metadata. Real staging Auth/REST/RLS workflow passed 18 checks with the official SDK using explicit mocked HTTP; zero real Gemini requests. Final isolated Node regression: 368 passing; focused SDK checks: four passing, including deadline/quotas/structured output/privacy gates. Guarded local staging build verified. Five unique Chromium workflows have passing evidence (four in the combined run, manual-plan navigation passed on targeted rerun after external-font isolation). Production, provider activation, billing and deployments remain unchanged. A synthetic-only allowlist/host privacy gate rejects all real production records. See [learning-architect-activation.md](learning-architect-activation.md).
+
+Production SQL release approved and applied 2026-11-10. All 15 exact SQL files committed atomically after 92 checks; original public rows, 17 Auth users and 14 private Storage objects were preserved. Fresh encrypted database/Auth/Storage backup is verified outside the repository. Twelve actual migration versions and 15 checksums are recorded. The enrollment RPC now exists in PostgREST; PGRST202 is resolved and anonymous execution is denied. Ten API checks passed. Approved commit d6f8e4b4e9e82372313c159e15df8b75f61d39c5 is published at https://veraorbis.studio/ through successful Pages run 42865365816. Live verification passed 121 checks and 54 file hashes; Chromium passed 12 public/unauthenticated desktop/mobile route checks with no JavaScript exceptions or horizontal overflow. No signed-in production workflow is claimed. Candidate Node tests: 354 passing; hosted supplement rehearsal: eight checks with rollback; latest focused compatibility run: five passing. Full authenticated production workflows and full platform restore remain unverified. AI, SMTP and account changes remain excluded. See [production-release-plan.md](production-release-plan.md).
 
 Updated 2026-11-10. The only authorized staging target is
 `duinvkphfnugoyvvlbbq` (`vera-orbis-staging`). Direct authenticated inspection with

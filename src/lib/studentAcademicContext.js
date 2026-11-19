@@ -1,5 +1,10 @@
 import { validateContextReview } from '../../supabase/functions/academic-ai/academic-context.js'
 const errorText = 'Academic context integration is not available yet. Existing manual plans and exercises remain available.'
+export function academicContextCapabilities(environment = import.meta.env) {
+  const production = environment?.MODE === 'production'
+  const context = !production || environment.VITE_ACADEMIC_CONTEXT_READY === 'true'
+  return { context, materials: context && (!production || environment.VITE_ACADEMIC_MATERIALS_READY === 'true'), generation: context && (!production || environment.VITE_ACADEMIC_AI_ENABLED === 'true') }
+}
 export async function loadStudentAcademicContext(client, studentId) {
   if (import.meta.env?.MODE === 'production' && import.meta.env?.VITE_ACADEMIC_CONTEXT_READY !== 'true') throw new Error(errorText)
   const { data, error } = await client.rpc('get_student_academic_context', { p_student_id: studentId })
@@ -21,17 +26,21 @@ async function invoke(client, body) {
   }
   return data
 }
-export async function academicContextProviderStatus(client) {
-  if (import.meta.env?.MODE === 'production' && import.meta.env?.VITE_ACADEMIC_CONTEXT_READY !== 'true') return { enabled: false, message: errorText }
+export async function academicContextProviderStatus(client, environment = import.meta.env) {
+  const capabilities = academicContextCapabilities(environment)
+  if (!capabilities.context) return { enabled: false, message: errorText }
+  if (!capabilities.generation) return { enabled: false, message: 'AI generation is disabled pending an eligible provider and approved privacy arrangements. Review academic records and prepare editable lesson templates without AI.' }
   try { const s = await invoke(client, { mode: 'unified_status' }); return { enabled: s?.enabled === true, message: s?.message || 'Contextual provider unavailable.' } }
   catch { return { enabled: false, message: 'Student-aware AI generation is disabled until a compatible provider and privacy permissions are approved. Context review and manual work remain available.' } }
 }
-export async function processAcademicMaterial(client, studentId, materialId) {
+export async function processAcademicMaterial(client, studentId, materialId, environment = import.meta.env) {
+  if (!academicContextCapabilities(environment).materials) throw new Error('Document text processing is temporarily unavailable. Your original files remain available in Materials.')
   const data = await invoke(client, { mode: 'index_academic_material', studentId, materialId })
   if (!data?.extraction?.id) throw new Error('Material processing could not be confirmed.')
   return data.extraction
 }
-export async function requestStudentAwareAcademic(client, { studentId, reviewRevision, kind, exerciseType = null, lesson = null, regenerate = null, requestId = crypto.randomUUID() }) {
+export async function requestStudentAwareAcademic(client, { studentId, reviewRevision, kind, exerciseType = null, lesson = null, regenerate = null, requestId = crypto.randomUUID() }, environment = import.meta.env) {
+  if (!academicContextCapabilities(environment).generation) throw new Error('AI generation is disabled pending an eligible provider and approved privacy arrangements.')
   const data = await invoke(client, { mode: 'unified_academic', studentId, requestId, reviewRevision, kind, exerciseType, lesson, regenerate })
   if (!data?.result?.id || data.result.student_id !== studentId || data.result.status !== 'draft') throw new Error('The private student draft could not be confirmed.')
   return data

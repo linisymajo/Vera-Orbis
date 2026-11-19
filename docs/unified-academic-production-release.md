@@ -1,5 +1,23 @@
 # Unified academic experience — production release and remaining activation
 
+## 2026-11-19 ? authorized production database activation
+
+Reviewed migrations 0028 and 0029 are committed in production with 255 checks
+passing and existing application/Auth/Storage records preserved. A 19-check
+synthetic plan-to-submission rehearsal passed against production PostgreSQL and
+was rolled back. The fresh encrypted backup covers 85 tables and all 32 private
+Storage objects. No provider calls, account changes, Voice changes or billing.
+
+Frontend context/Journey activation is being released independently of document
+processing. The new Edge deployment remains blocked before any secret write by
+Management API HTTP 401. AI stays disabled; templates are deterministic.
+Actual production teacher/student browser authentication remains unverified.
+See [current activation details](unified-academic-production-activation.md).
+The November 18 entries below are historical and superseded by this update.
+
+
+**Live frontend verified 2026-11-18:** commit 7b305d129be1c2af2a7fb583f5e1126ba170606e; [successful existing Pages workflow](https://github.com/linisymajo/Vera-Orbis/actions/runs/44432959849). Public verification passed: current teacher/student assets, production target, preserved Voice target, legacy Architect redirect and unauthenticated access gates (34 checks, ten assets). No new production SQL or Edge deployment. VITE_ACADEMIC_CONTEXT_READY remains false. Complete hosted context/resource synchronization is still pending the exact approvals and staging credential described below.
+
 2026-11-18. Existing site: `https://veraorbis.studio/`. Production database:
 `iopgzmvaqobigjwibual`. No new domain, portal, login, provider or billing.
 

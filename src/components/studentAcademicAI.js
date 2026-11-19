@@ -1,4 +1,4 @@
-import { loadStudentAcademicContext, saveStudentContextReview, academicContextProviderStatus, processAcademicMaterial, requestStudentAwareAcademic, exerciseStudioDraftFromAI, loadAcademicProvenance } from '../lib/studentAcademicContext.js'
+import { loadStudentAcademicContext, saveStudentContextReview, academicContextProviderStatus, academicContextCapabilities, processAcademicMaterial, requestStudentAwareAcademic, exerciseStudioDraftFromAI, loadAcademicProvenance } from '../lib/studentAcademicContext.js'
 import { remainingLessons } from '../../supabase/functions/academic-ai/academic-context.js'
 import { savePreparedPlan } from '../lib/academicPreparation.js'
 import { prepareLessonExercise } from '../lib/academicPreparation.js'
@@ -25,6 +25,7 @@ export async function mountStudentAcademicAI(target, client, { studentId = null,
   let reviewRevision = context.review?.revision || 0, dirty = !r || context.sources.some(source => context.review?.source_snapshot?.[source.ref] !== source.fingerprint), provider = { enabled: false, message: 'Checking provider availability…' }, pending = false
   const s = r || { language: p.language, level: p.level, goal: p.goal || '', total: onePackage?.class_count ?? p.recorded_total ?? '', completed: context.verified_completed ?? '', duration: onePackage?.duration_minutes || 60, priorities: '', excluded: [], corrections: {}, confirmed: false }
   const plans = context.sources.filter(s => s.kind === 'plan')
+  const materialProcessing = academicContextCapabilities().materials
   initial.innerHTML = `<span class="vo-section-kicker">STUDENT-AWARE ACADEMIC ASSISTANT</span><h3>${kind === 'exercise' ? 'Generate Exercises with AI' : 'Generate Personalized Learning Plan'}</h3>
     <p>Review the student's evidence and confirm the remaining course. Generated suggestions stay private until your explicit review and publication.</p>
     <p>Recorded sessions completed: ${esc(p.recorded_completed ?? 'unknown')}. Completed with attendance verified: ${esc(context.verified_completed)}. Purchased packages: ${context.packages.map(p => `${esc(p.name)} (${p.class_count} sessions; ${p.classes_consumed} consumed)`).join(', ') || 'not recorded'}.</p>
@@ -77,11 +78,14 @@ export async function mountStudentAcademicAI(target, client, { studentId = null,
     try { const saved = await saveStudentContextReview(client, studentId, reviewRevision, settings(), context.sources); reviewRevision = saved.revision; dirty = false; status.textContent = 'Reviewed context saved. Original academic records were preserved.'; update() }
     catch (e) { status.textContent = e.message } finally { btn.disabled = false }
   }
-  initial.querySelectorAll('[data-process-material]').forEach(btn => btn.onclick = async () => {
+  initial.querySelectorAll('[data-process-material]').forEach(btn => {
+    if (!materialProcessing) { btn.disabled = true; const note = document.createElement('p'); note.textContent = 'Document text processing is temporarily unavailable. Open the original file in Materials; academic review and manual planning remain available.'; btn.after(note); return }
+    btn.onclick = async () => {
     if (dirty) { status.textContent = 'Save your context changes before processing a document.'; return }
     btn.disabled = true; status.textContent = 'Extracting authorized document text locally on the server…'
     try { const indexed = await processAcademicMaterial(client, studentId, btn.dataset.processMaterial); await mountStudentAcademicAI(target, client, { studentId, kind, onSaved, onUseExercise, lesson }); const newStatus = target.querySelector('[data-context-status]'); if (newStatus) newStatus.textContent = `Document status: ${indexed.status}. Review the refreshed source before generation.` }
     catch (e) { status.textContent = e.message; btn.disabled = false }
+    }
   })
   generate.onclick = async () => {
     if (generate.disabled) return

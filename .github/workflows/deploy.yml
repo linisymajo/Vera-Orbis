@@ -38,6 +38,7 @@ jobs:
           VITE_VERA_VOICE_URL: ${{ secrets.VITE_VERA_VOICE_URL || vars.VITE_VERA_VOICE_URL }}
           VITE_ACADEMIC_AI_ENABLED: "false"
           VITE_ACADEMIC_CONTEXT_READY: ${{ vars.VITE_ACADEMIC_CONTEXT_READY || 'false' }}
+          VITE_ACADEMIC_MATERIALS_READY: ${{ vars.VITE_ACADEMIC_MATERIALS_READY || 'false' }}
           VITE_LEARNING_ARCHITECT_ENABLED: ${{ vars.VITE_LEARNING_ARCHITECT_ENABLED || 'false' }}
         run: npm run build
 
