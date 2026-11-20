@@ -17,7 +17,7 @@ const db=new PGlite()
 const actors={teacher:'10000000-0000-4000-8000-000000000001',teacher2:'10000000-0000-4000-8000-000000000002',student:'20000000-0000-4000-8000-000000000001',student2:'20000000-0000-4000-8000-000000000002'}
 const {teacher,teacher2,student,student2}=actors
 const objectBytes=new Map(),downloadTokens=new Map()
-await db.exec(`create role anon;create role authenticated;create schema auth;create schema storage;
+await db.exec(`create role anon;create role authenticated;create role service_role bypassrls;create schema auth;create schema storage;
 create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz,raw_user_meta_data jsonb default '{}'::jsonb);
 create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
 grant usage on schema public,auth,storage to authenticated,anon;
@@ -42,10 +42,13 @@ await db.exec(readFileSync(new URL('../../supabase/migrations/0026_learning_arch
 await db.exec('grant select,insert,update,delete on public.materials,public.classes,public.class_participants to authenticated')
 await db.exec(readFileSync(new URL('../../supabase/migrations/0028_unified_academic_context.sql',import.meta.url),'utf8'))
 await db.exec(readFileSync(new URL('../../supabase/migrations/0029_personal_learning_journey.sql',import.meta.url),'utf8'))
-const vite=await createServer({define:{'import.meta.env.VITE_LEARNING_ARCHITECT_ENABLED':'"true"'},server:{middlewareMode:true,hmr:false,watch:null},appType:'mpa'})
+await db.exec(readFileSync(new URL('../../supabase/migrations/0030_student_management.sql',import.meta.url),'utf8'))
+await db.exec(readFileSync(new URL('../../supabase/migrations/0031_student_account_deletion.sql',import.meta.url),'utf8'))
+const vite=await createServer({define:{'import.meta.env.VITE_LEARNING_ARCHITECT_ENABLED':'"true"','import.meta.env.VITE_STUDENT_MANAGEMENT_READY':'"true"','import.meta.env.VITE_STUDENT_DELETION_READY':'"true"'},server:{middlewareMode:true,hmr:false,watch:null},appType:'mpa'})
 const rpcNames=new Set(['publish_exercise','submit_exercise','review_exercise_attempt','reserve_exercise_attachment','confirm_exercise_attachment','submit_exercise_with_attachments','revise_exercise_attachments','list_exercise_attachments','create_learning_plan_version','save_learning_plan_version','approve_learning_plan_version','set_learning_objective_completion','save_final_draft','publish_final_assessment','save_final_result','publish_final_result','review_academic_ai_draft','publish_academic_challenge','submit_academic_challenge','review_challenge_submission','mark_academic_notification_read'])
 const tables=new Set(['exercises','profiles','exercise_assignments','exercise_attempts','student_exercises','materials','learning_plan_versions','learning_plan_objective_progress','learning_plan_objective_events','final_assessments','final_results','student_finals','weekly_challenges','challenge_submissions','student_challenge_submissions','challenge_publications','ai_academic_drafts','academic_notifications'])
 const fieldNames=new Set(['id','teacher_id','status','exercise_id','student_id','version_id','objective_id','kind','recipient_id','read_at','created_at','updated_at','submitted_at','revision','version_number','name','title','assigned_at'])
+for(const name of ['get_student_management_capabilities','get_managed_students','get_managed_student_history','manage_student_enrollment','list_student_deletion_jobs','preview_student_deletion','confirm_student_deletion'])rpcNames.add(name)
 for (const name of ['exercise_experience_capabilities','save_exercise_progress','get_exercise_practice_state','check_exercise_question','save_exercise_feedback','get_exercise_teacher_review']) rpcNames.add(name)
 for(const name of ['get_learning_architect_context','get_learning_architect_profile','get_learning_architect_draft','reserve_learning_architect_request','complete_learning_architect_request','publish_learning_architect_plan','set_academic_ai_consent'])rpcNames.add(name)
 tables.add('learning_plan_publications');tables.add('unified_academic_runs');fieldNames.add('request_id')
@@ -65,7 +68,8 @@ const server=http.createServer(async(req,res)=>{
   try{
     let body='';for await(const chunk of req){body+=chunk;if(body.length>16*1024*1024)throw Error('Test request too large')}
     const input=JSON.parse(body)
-    if(input.reset===true){unifiedFixtureProvider=false;await db.exec("truncate academic_context_reviews,material_text_versions,teacher_notes,student_packages,packages cascade;update profiles set language='French',level=null,lessons_completed=0,total_lessons=null where id='"+student+"'");await db.exec('truncate public.exercises,public.learning_plan_versions,public.academic_ai_requests,public.academic_notifications,public.inbox_messages,public.classes,public.materials cascade;truncate storage.objects');objectBytes.clear();downloadTokens.clear();json(res,{data:{reset:true}});return}
+    if(input.reset===true){unifiedFixtureProvider=false;await db.exec("truncate student_deletion_jobs,student_retention_holds,student_roster_states,student_management_events;update enrollments set status='approved',source='legacy',teacher_id=null;truncate academic_context_reviews,material_text_versions,teacher_notes,student_packages,packages cascade;update profiles set language='French',level=null,lessons_completed=0,total_lessons=null where id='"+student+"'");await db.exec('truncate public.exercises,public.learning_plan_versions,public.academic_ai_requests,public.academic_notifications,public.inbox_messages,public.classes,public.materials cascade;truncate storage.objects');objectBytes.clear();downloadTokens.clear();json(res,{data:{reset:true}});return}
+    if(input.seedManagement===true){await db.exec('delete from academic_admins');await db.query("update enrollments set teacher_id=$1,status='approved',source='self' where student_id=$2",[teacher,student]);if(input.admin===true)await db.query('insert into academic_admins(user_id) values($1)',[teacher2]);json(res,{data:{seeded:true}});return}
     if(input.seedUnified===true){
       unifiedFixtureProvider=input.providerDisabled!==true
       await db.query("update profiles set language='English',level='B1',lessons_completed=5,total_lessons=12,goal='Use practical travel expressions' where id=$1",[student])

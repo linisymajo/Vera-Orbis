@@ -9,6 +9,8 @@ import { renderChallenges } from '/src/components/challenges.js'
 import { listStudentChallenges,submitAcademicChallenge } from '/src/lib/academicChallenges.js'
 import { mountNotifications } from '/src/components/notifications.js'
 import { mountMaterialsStudio } from '/src/components/materialsStudio.js'
+import { mountStudentManagement } from '/src/components/studentManagement.js'
+import '/src/components/studentManagement.css'
 import '/src/academic.css'
 import '/src/teacher.css'
 import '/src/platform.css'
@@ -36,8 +38,17 @@ const client={functions:{invoke:async(name,{body})=>send({architect:body})},auth
   async download(path){const result=await send({storage:'download',bucket,path});if(result.error)return result;const bytes=Uint8Array.from(atob(result.data.base64),c=>c.charCodeAt(0));return{data:new Blob([bytes],{type:result.data.contentType})}}
 })}}
 window.testClient=client
+// Synthetic admin preview uses real local SQL. Auth/Storage deletion remains an
+// endpoint unit/isolated database test; this adapter never deletes an account.
+const architectInvoke=client.functions.invoke
+client.functions.invoke=async(name,{body})=>{
+ if(name!=='student-management')return architectInvoke(name,{body})
+ const r=body.mode==='preview'?await send({rpc:'preview_student_deletion',params:{p_student_id:body.studentId,p_request_id:body.requestId}}):await send({rpc:'confirm_student_deletion',params:{p_job_id:body.jobId,p_confirmation:body.confirmation,p_retention_reviewed:body.retentionReviewed,p_shared_reviewed:body.sharedReviewed}})
+ return r.error?r:{data:body.mode==='preview'?{preview:r.data}:{result:r.data}}
+}
 const app=document.querySelector('#test-app')
-if(mode==='teacher-materials')await mountMaterialsStudio(app,client)
+if(mode==='teacher-management')await mountStudentManagement(app,client)
+else if(mode==='teacher-materials')await mountMaterialsStudio(app,client)
 else if(mode==='teacher-unified-plans')await mountLearningPlans(app,client)
 else if(mode==='student-journey')await mountStudentJourney(app,client,identities[actor])
 else if(mode==='teacher-plans'||mode==='student-plans')await mountLearningPlans(app,client,{studentView:mode==='student-plans',unifiedContext:false})

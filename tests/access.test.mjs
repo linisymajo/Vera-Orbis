@@ -398,15 +398,15 @@ test('student material opening maintains valid method chaining and popup-blocker
     /\.from\('materials'\)\s*\n\s*console\.log/
   )
 
-  // Ensure clean chained createSignedUrl call
+  // Downloads must use the live user session rather than a reusable signed URL.
   assert.match(
     platSource,
-    /await\s+supabase\s*\.\s*storage\s*\.\s*from\('materials'\)\s*\.\s*createSignedUrl\(cleanPath,\s*3600\)/
+    /await privateFileDownload\(supabase,'materials',cleanPath\)/
   )
 
   // Ensure popup blocker pre-opening and fallback
   assert.match(platSource, /targetWindow\s*=\s*window\.open\('about:blank',\s*'_blank'\)/)
-  assert.match(platSource, /targetWindow\.location\.href\s*=\s*data\.signedUrl/)
+  assert.match(platSource, /targetWindow\.location\.href\s*=\s*fileUrl/)
   assert.match(platSource, /targetWindow\.close\(\)/)
 
   // Ensure file path sanitization

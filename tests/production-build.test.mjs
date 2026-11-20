@@ -9,6 +9,11 @@ test('production browser build accepts only the pinned target and a public key w
   const env={VITE_SUPABASE_URL:PRODUCTION_URL,VITE_SUPABASE_PUBLISHABLE_KEY:key,VITE_ACADEMIC_AI_ENABLED:'true',VITE_OTHER_SECRET:'must-not-be-copied'}
   const actual=productionBuildEnvironment(env)
   assert.equal(actual.VITE_ACADEMIC_AI_ENABLED,'false');assert.equal(actual.VITE_OTHER_SECRET,undefined)
+  assert.equal(actual.VITE_LEARNING_ARCHITECT_ENABLED,undefined)
+  assert.equal(actual.VITE_STUDENT_MANAGEMENT_READY,'false');assert.equal(actual.VITE_STUDENT_DELETION_READY,'false')
+  assert.throws(()=>productionBuildEnvironment({...env,VITE_STUDENT_DELETION_READY:'true'}),/MANAGEMENT_REQUIRED/)
+  const architect=productionBuildEnvironment({...env,VITE_LEARNING_ARCHITECT_ENABLED:'true'})
+  assert.equal(architect.VITE_LEARNING_ARCHITECT_ENABLED,'true');assert.equal(architect.VITE_ACADEMIC_AI_ENABLED,'false')
   for(const change of [{VITE_SUPABASE_URL:'https://duinvkphfnugoyvvlbbq.supabase.co'},{VITE_SUPABASE_PUBLISHABLE_KEY:'sb_secret_do_not_publish'},{VITE_VERA_VOICE_URL:'http://localhost:3000'}])assert.throws(()=>productionBuildEnvironment({...env,...change}))
   const jwt=role=>'eyJhbGciOiJIUzI1NiJ9.'+Buffer.from(JSON.stringify({role,ref:'iopgzmvaqobigjwibual'})).toString('base64url')+'.synthetic_signature'
   assert.throws(()=>productionBuildEnvironment({...env,VITE_SUPABASE_PUBLISHABLE_KEY:jwt('service_role')}))

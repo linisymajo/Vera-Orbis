@@ -1,4 +1,5 @@
 import { materialContentType } from './academicOperations.js'
+import { privateFileDownload } from './privateFileDownload.js'
 export const SUBMISSION_BUCKET = 'academic-submissions'
 export const ATTACHMENT_ACCEPT = '.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png,.webp,.mp3,.wav,.ogg,.mp4'
 async function rpc(client,name,params) {
@@ -32,9 +33,7 @@ export async function attachmentDownloadUrl(client,{assignmentId,attachmentId}) 
  const files=await listExerciseAttachments(client,assignmentId)
  const file=files.find(item=>item.id===attachmentId)
  if(!file)throw new Error('This file is unavailable for your account.')
- const result=await client.storage.from(SUBMISSION_BUCKET).createSignedUrl(file.file_path,300)
- if(result.error||!result.data?.signedUrl)throw new Error('The private download could not be authorized.')
- return result.data.signedUrl
+ return privateFileDownload(client,SUBMISSION_BUCKET,file.file_path)
 }
 export async function reviseExerciseAttachments(client,{attemptId,attachmentIds,requestId}) {
  const result=await rpc(client,'revise_exercise_attachments',{p_attempt_id:attemptId,p_attachment_ids:attachmentIds,p_request_id:requestId})

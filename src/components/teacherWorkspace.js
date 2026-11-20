@@ -10,6 +10,8 @@ import { uploadMaterialFile } from '../lib/materialStorage.js'
 import { supabase } from '../lib/supabase.js'
 import { getCurrentUser } from '../lib/auth.js'
 import { isTeacherModule, readTeacherRoute, writeTeacherModuleRoute } from '../lib/academicRoutes.js'
+import { studentManagementEnabled } from '../lib/studentManagement.js'
+import { mountStudentManagement } from './studentManagement.js'
 
 const MODULE_META = {
   overview: {
@@ -523,6 +525,7 @@ async function loadOverview(panel) {
 }
 
 async function loadStudentsDirectoryModule(panel) {
+  if (studentManagementEnabled()) return mountStudentManagement(panel, supabase)
   const [studentsRes, classesRes, assignmentsRes] = await Promise.all([
     supabase.from('profiles').select('*').order('name').limit(1000),
     supabase.from('classes').select('id, title, starts_at, status').neq('status', 'cancelled').order('starts_at', { ascending: true }).limit(100),

@@ -40,6 +40,8 @@ jobs:
           VITE_ACADEMIC_CONTEXT_READY: ${{ vars.VITE_ACADEMIC_CONTEXT_READY || 'false' }}
           VITE_ACADEMIC_MATERIALS_READY: ${{ vars.VITE_ACADEMIC_MATERIALS_READY || 'false' }}
           VITE_LEARNING_ARCHITECT_ENABLED: ${{ vars.VITE_LEARNING_ARCHITECT_ENABLED || 'false' }}
+          VITE_STUDENT_MANAGEMENT_READY: ${{ vars.VITE_STUDENT_MANAGEMENT_READY || 'false' }}
+          VITE_STUDENT_DELETION_READY: ${{ vars.VITE_STUDENT_DELETION_READY || 'false' }}
         run: npm run build
 
       - name: Setup Pages

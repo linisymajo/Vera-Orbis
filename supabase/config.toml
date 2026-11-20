@@ -1,0 +1,12 @@
+# Environment is always supplied explicitly to the deployment command.
+project_id = "vera-orbis-academic-services"
+
+[functions.academic-ai]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/academic-ai/index.ts"
+
+[functions.student-management]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/student-management/index.ts"

@@ -581,3 +581,11 @@ and full message threading. Real AI generation, academic email, password-recover
 mail delivery, platform restore and the complete cross-account staging acceptance
 matrix remain unverified. Live exercise Auth/Storage and teacher confirmation
 email have the narrower verified evidence recorded above.
+
+## 2026-11-20 - Approved student management production release
+
+The user approved manifest f03e82c0055fef9bb707eb7834d9bfd1c0c9465104a2020ede643407baf642e0, SQL 0030/0031 and the exact founder administrator bootstrap. All three files committed in one guarded production transaction after 243 target, dependency, backup, RLS, authorization and preservation checks. Only the privately verified existing founder teacher received administrator membership. Existing academic, Auth and Storage rows were preserved; no account deletion was executed.
+
+A fresh encrypted manual backup verified 89 database/Auth tables and 34 private objects (33,374,099 bytes), including decrypt/hash, archive counts and source rechecks. Full platform restore remains untested. student-management version 1 is ACTIVE with JWT validation. Nine hosted checks passed for administrator preview, future-class/retention blocks, student denial and foreign-origin denial. All existing academic-ai application modules and its transpiled entrypoint matched the approved hosted code after a metadata comparison warning; unrelated secret digests and disabled generation flags were preserved.
+
+Eighteen focused Node checks passed in this release run. The two explicit frontend readiness variables are enabled only after successful SQL/backend verification. Manage Students is being published through the existing Pages workflow from the isolated approved tree. Hosted roster state/browser regression results must be checked in the final release receipt; real hosted permanent account deletion is deliberately untested. AI inference, Vera Voice and billing remain unchanged. The unrelated payment-summary view remains unresolved and excluded.

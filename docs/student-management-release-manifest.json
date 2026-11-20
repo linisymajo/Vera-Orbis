@@ -1,0 +1,152 @@
+{
+  "base": "60534bd9367e41bad3e6d3b3c92f4642993ca846",
+  "production": "iopgzmvaqobigjwibual",
+  "staging": "duinvkphfnugoyvvlbbq",
+  "status": "prepared_not_authorized_not_applied",
+  "sql": [
+    {
+      "path": "supabase/migrations/0030_student_management.sql",
+      "bytes": 15256,
+      "sha256": "eec9f137e381638e88a5a1d3e633f4f2dd1249b634b21b1eea655f32a33de61c"
+    },
+    {
+      "path": "supabase/migrations/0031_student_account_deletion.sql",
+      "bytes": 37723,
+      "sha256": "78e84f3c73805fd31747b7feb30315a267a81842f085ae988fc5bde05f51f097"
+    },
+    {
+      "path": "supabase/production/bootstrap_academic_owner.sql",
+      "bytes": 1118,
+      "sha256": "6ea6011e6d2f7709e0a3313ca463c5e6895affae39995ffa0978c1ea9583dfc3"
+    }
+  ],
+  "files": [
+    {
+      "path": "src/lib/studentManagement.js",
+      "bytes": 2254,
+      "sha256": "9362a815939424a60fd6960a1d50979e36d5c8c10feb988163af7c55ef38f97b"
+    },
+    {
+      "path": "src/components/studentManagement.js",
+      "bytes": 15656,
+      "sha256": "5b7459e5c869d49555c4bc0476a53e88b997c883f1022e1488ab5d9d54122cd1"
+    },
+    {
+      "path": "src/components/studentManagement.css",
+      "bytes": 1752,
+      "sha256": "8b6b0e44b2061beccc8863057a8ce23b4e47d1c618a13798e9308e714438ca96"
+    },
+    {
+      "path": "supabase/functions/student-management/handler.js",
+      "bytes": 8480,
+      "sha256": "fbcfb75c6c90ac0227badef246554c0232fc94538c7a47f53300426d0ada72f3"
+    },
+    {
+      "path": "supabase/functions/student-management/index.ts",
+      "bytes": 231,
+      "sha256": "980a686f0def5fd0f5886cd54131c890b73b74b3278f36a59373f8291de6dcb5"
+    },
+    {
+      "path": "scripts/build-production.mjs",
+      "bytes": 5561,
+      "sha256": "03620a617d0d4eea462590889505fe165131ca52dbc35bdf99f20055c5d00ddf"
+    },
+    {
+      "path": "tests/student-management.test.mjs",
+      "bytes": 4884,
+      "sha256": "3195438145d92ef37040e9b122e9b6a2c1b0b6ecee25308c26263d195978b10c"
+    },
+    {
+      "path": "tests/student-deletion.test.mjs",
+      "bytes": 10187,
+      "sha256": "8809c0775d1e373a254e161c8ffb25f36f83cc12beec5a44bbecf381335cbcb0"
+    },
+    {
+      "path": "tests/student-management-endpoint.test.mjs",
+      "bytes": 5775,
+      "sha256": "4d58c30b268888e3dc3e2deb323dcc7c7cfeae367ee0a95b865ede9abf636af9"
+    },
+    {
+      "path": "tests/production-build.test.mjs",
+      "bytes": 3334,
+      "sha256": "a87c95239b55b08d128234de5b7011bc961e03697178e513acab221032d5f2a3"
+    },
+    {
+      "path": "tests/browser/student-management.spec.mjs",
+      "bytes": 4710,
+      "sha256": "df9834a7a1426f4635d7eebfb4b2ae2d757b8d2942fa0eba0343640a56036d26"
+    },
+    {
+      "path": "tests/browser/server.mjs",
+      "bytes": 23140,
+      "sha256": "e68076a3564a5550478db4b007d540f2674e70b85b51087822dd33624e395623"
+    },
+    {
+      "path": "tests/browser/fixture.html",
+      "bytes": 6334,
+      "sha256": "f755bd1963c95b1b2724d83960b233a76f51e0ad90b0ec386767a04c80722444"
+    },
+    {
+      "path": "tests/fixtures/architect-course.mjs",
+      "bytes": 1181,
+      "sha256": "4b74e46a6136862dceb87ac2a1b612d795d8085e200701015875d25dc3346e21"
+    },
+    {
+      "path": "src/lib/privateFileDownload.js",
+      "bytes": 1053,
+      "sha256": "dfc4ce2973a422a40ebdf7b6d0b6ff3f6066f2fe5a6b264907200872030794e0"
+    },
+    {
+      "path": "src/lib/exerciseAttachments.js",
+      "bytes": 3007,
+      "sha256": "6e016c9edfcd5703799864fc5a5dd9c5530cba9a868490513d13b3a02895372f"
+    },
+    {
+      "path": "src/components/exerciseAttachments.js",
+      "bytes": 5373,
+      "sha256": "3c3cba4d34fec78d81cd5921bddd1872b40149b057551f546b92417bf584d205"
+    },
+    {
+      "path": "tests/private-file-download.test.mjs",
+      "bytes": 1628,
+      "sha256": "9c1b156fcb1c7f30319786a8612a191ac40211d555f1560cee30c7efa8ac5e37"
+    },
+    {
+      "path": "tests/access.test.mjs",
+      "bytes": 61606,
+      "sha256": "0c99fc4ed2df9e1909609c66a2c14c730a1a3f35781cf571d57cf9802948cf18"
+    },
+    {
+      "path": "src/components/teacherWorkspace.js",
+      "bytes": 103975,
+      "sha256": "36796de0d61eda2721d9b10fa18ad58de0e42d283fba96f25c630d383519e94b"
+    },
+    {
+      "path": "src/teacher-main.js",
+      "bytes": 95415,
+      "sha256": "fe928738757f896ded53d356d311f08ee731f87352419af44acaafd0d17a1b3a"
+    },
+    {
+      "path": "src/platform-main.js",
+      "bytes": 74888,
+      "sha256": "b041e60e878a8b4fe64a4cf886280d12535cfdb03d28604a32b385296d694872"
+    },
+    {
+      "path": ".github/workflows/deploy.yml",
+      "bytes": 1882,
+      "sha256": "ac3c4698056125539b97186f2d91c492d043b0f85f151e02a2b04b44c4be6f63"
+    },
+    {
+      "path": "supabase/config.toml",
+      "bytes": 341,
+      "sha256": "8c2e28e9e2b5a295635a30bddf09b59901f563bf88a0478fe63df56f6f550ad3"
+    }
+  ],
+  "owner_actor_ledger_sha256": "374fbf185a867606fe27a597a4555c7e926bf9a05bae8681d2b7210b78509106",
+  "function": {
+    "name": "student-management",
+    "verify_jwt": true
+  },
+  "provider_calls": 0,
+  "production_account_deletion_tests": false
+}

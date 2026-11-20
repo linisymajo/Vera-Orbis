@@ -7,6 +7,7 @@ import { createStagingDevLogger } from './dev-staging-config.mjs'
 export const PRODUCTION_URL='https://iopgzmvaqobigjwibual.supabase.co'
 const STAGING_REF='duinvkphfnugoyvvlbbq'
 export function productionBuildEnvironment(env) {
+  if(env.VITE_STUDENT_DELETION_READY==='true'&&env.VITE_STUDENT_MANAGEMENT_READY!=='true')throw new Error('STUDENT_MANAGEMENT_REQUIRED_FOR_DELETION')
   if(env.VITE_SUPABASE_URL!==PRODUCTION_URL)throw new Error('PRODUCTION_BROWSER_TARGET_REQUIRED')
   const key=env.VITE_SUPABASE_PUBLISHABLE_KEY
   if(!/^sb_publishable_[A-Za-z0-9_-]{20,}$/.test(key||'')) {
@@ -15,7 +16,7 @@ export function productionBuildEnvironment(env) {
   }
   const voice=env.VITE_VERA_VOICE_URL||''
   if(voice){let url;try{url=new URL(voice)}catch{throw new Error('VOICE_URL_INVALID')};if(url.protocol!=='https:'||url.username||url.password||url.search||url.hash)throw new Error('VOICE_URL_INVALID')}
-  return {VITE_SUPABASE_URL:PRODUCTION_URL,VITE_SUPABASE_PUBLISHABLE_KEY:key,VITE_VERA_VOICE_URL:voice,VITE_ACADEMIC_AI_ENABLED:'false',VITE_ACADEMIC_CONTEXT_READY:env.VITE_ACADEMIC_CONTEXT_READY==='true'?'true':'false',VITE_ACADEMIC_MATERIALS_READY:env.VITE_ACADEMIC_MATERIALS_READY==='true'?'true':'false',...(env.VITE_LEARNING_ARCHITECT_ENABLED==='true'?{VITE_LEARNING_ARCHITECT_ENABLED:'true'}:{})}
+  return {VITE_SUPABASE_URL:PRODUCTION_URL,VITE_SUPABASE_PUBLISHABLE_KEY:key,VITE_VERA_VOICE_URL:voice,VITE_ACADEMIC_AI_ENABLED:'false',VITE_ACADEMIC_CONTEXT_READY:env.VITE_ACADEMIC_CONTEXT_READY==='true'?'true':'false',VITE_ACADEMIC_MATERIALS_READY:env.VITE_ACADEMIC_MATERIALS_READY==='true'?'true':'false',VITE_STUDENT_MANAGEMENT_READY:env.VITE_STUDENT_MANAGEMENT_READY==='true'?'true':'false',VITE_STUDENT_DELETION_READY:env.VITE_STUDENT_DELETION_READY==='true'?'true':'false',...(env.VITE_LEARNING_ARCHITECT_ENABLED==='true'?{VITE_LEARNING_ARCHITECT_ENABLED:'true'}:{})}
 }
 
 export async function verifyProductionBuild(directory, configuration) {

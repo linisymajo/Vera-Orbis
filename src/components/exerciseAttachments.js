@@ -39,7 +39,7 @@ export function setupAttachmentDownloads(client,root=document) {
    host.querySelectorAll('[data-download-file]').forEach(button=>button.onclick=async()=>{
     const popup=window.open('about:blank','_blank');if(popup)popup.opener=null
     button.disabled=true
-    try{const url=await attachmentDownloadUrl(client,{assignmentId:section.dataset.attachmentAssignment,attachmentId:button.dataset.downloadFile});if(popup)popup.location.replace(url);else throw new Error('Allow the download window and try again.')}
+    try{const url=await attachmentDownloadUrl(client,{assignmentId:section.dataset.attachmentAssignment,attachmentId:button.dataset.downloadFile});if(popup){const link=popup.document.createElement('a');link.href=url;link.download=visible.find(f=>f.id===button.dataset.downloadFile)?.file_name||'academic-file';popup.document.body.append(link);link.click()}else throw new Error('Allow the download window and try again.')}
     catch(error){popup?.close();section.querySelector('[data-file-status]').textContent=error.message}
     finally{button.disabled=false}
    })

@@ -20,6 +20,7 @@ import { setupInboxHandlers } from './components/inbox.js'
 import { setupPassportBook } from './components/passportBook.js'
 import { normalizeInterfaceLanguage, t } from './lib/i18n.js'
 import { isStudentView, readStudentRoute, watchAcademicLocation, writeStudentRoute } from './lib/academicRoutes.js'
+import { privateFileDownload } from './lib/privateFileDownload.js'
 
 let currentStudent = null
 let platformNavigationId = 0
@@ -2585,36 +2586,16 @@ function setupGlobalPlatformFunctions() {
         const cleanPath = filePath.trim().replace(/^\/+/, '')
 
         // Pre-open a blank tab synchronously to satisfy the browser's user-gesture requirement
-        // for popup blockers before performing the asynchronous signed-url request.
+        // for popup blockers before the authenticated private-file request.
         try {
           targetWindow = window.open('about:blank', '_blank')
         } catch {
           targetWindow = null
         }
 
-        const { data, error } = await supabase
-          .storage
-          .from('materials')
-          .createSignedUrl(cleanPath, 3600)
+        const fileUrl = await privateFileDownload(supabase,'materials',cleanPath)
 
-        if (error) {
-          if (targetWindow && !targetWindow.closed) {
-            targetWindow.close()
-          }
-
-          console.error('Failed to generate signed URL for material:', error.message || error)
-
-          if (error.statusCode === '404' || error.message?.includes('not found') || error.message?.includes('NoSuchKey')) {
-            alert('This material file is not available in storage. Please contact your teacher.')
-          } else if (error.statusCode === '403' || error.message?.includes('security') || error.message?.includes('policy')) {
-            alert('You do not have permission to view this material.')
-          } else {
-            alert('Could not open this material. Please try again.')
-          }
-          return
-        }
-
-        if (!data?.signedUrl) {
+        if (!fileUrl) {
           if (targetWindow && !targetWindow.closed) {
             targetWindow.close()
           }
@@ -2623,11 +2604,18 @@ function setupGlobalPlatformFunctions() {
         }
 
         if (targetWindow && !targetWindow.closed) {
-          targetWindow.location.href = data.signedUrl
+          targetWindow.opener = null
+          if (/\.(?:docx?|pptx?|xlsx?)$/i.test(cleanPath)) {
+            const link = targetWindow.document.createElement('a')
+            link.href = fileUrl
+            link.download = cleanPath.split('/').pop()
+            targetWindow.document.body.append(link)
+            link.click()
+          } else targetWindow.location.href = fileUrl
         } else {
           // Fallback for browsers that blocked targetWindow pre-opening
           const link = document.createElement('a')
-          link.href = data.signedUrl
+          link.href = fileUrl
           link.target = '_blank'
           link.rel = 'noopener noreferrer'
           document.body.appendChild(link)
@@ -2639,8 +2627,7 @@ function setupGlobalPlatformFunctions() {
         if (targetWindow && !targetWindow.closed) {
           targetWindow.close()
         }
-        console.error('Unable to open material:', error?.message || 'Unknown error')
-        alert('Could not open this material. Please try again.')
+        alert('This private file could not be authorized. Verify your enrollment or contact your teacher.')
       }
     },
 

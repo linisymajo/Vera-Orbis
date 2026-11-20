@@ -10,6 +10,7 @@ import { hasTeacherAccess } from './lib/access.js'
 import { readEnrollmentAccess, renderEnrollmentGate, EnrollmentServiceError, renderEnrollmentServiceError } from './lib/enrollment.js'
 import { renderEnrollmentPanel, setupEnrollmentPanel } from './components/enrollmentPanel.js'
 import { readTeacherRoute, watchAcademicLocation } from './lib/academicRoutes.js'
+import './components/studentManagement.css'
 import {
   renderTeacherWorkspace,
   setupTeacherWorkspace,

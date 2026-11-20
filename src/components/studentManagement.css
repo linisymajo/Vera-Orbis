@@ -1,0 +1,16 @@
+.vo-student-management { min-width:0; display:grid; gap:1rem }
+.vo-student-management .vo-management-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr)); gap:1rem }
+.vo-student-management .vo-management-filters,.vo-student-management .vo-management-actions { display:flex; flex-wrap:wrap; align-items:end; gap:.75rem }
+.vo-student-management .vo-management-filters label { flex:1; min-width:min(100%,200px) }
+.vo-student-management dt { font-weight:600; margin-top:.5rem }
+.vo-student-management dd { margin:0; overflow-wrap:anywhere }
+.vo-student-management button,.vo-student-management a { min-height:44px }
+.vo-student-management button { border:1px solid var(--vo-border,#ccd4dc); border-radius:12px; padding:.6rem .85rem; background:var(--vo-paper,#fffdf8); color:var(--vo-navy,#18304b); cursor:pointer }
+.vo-student-management button:disabled { opacity:.6; cursor:not-allowed }
+.vo-student-management button:focus-visible,.vo-student-management a:focus-visible { outline:3px solid #7645f5; outline-offset:3px }
+.vo-student-management .teacher-danger-button { color:#9e2639; border-color:#ba435a }
+.vo-student-management dialog { box-sizing:border-box; width:min(620px,calc(100vw - 2rem)); max-height:85dvh; overflow:auto; border:1px solid var(--vo-border,#ddd); border-radius:20px; padding:1.5rem; color:var(--vo-navy,#18304b); background:var(--vo-paper,#fffdf8) }
+.vo-student-management dialog::backdrop { background:rgb(14 29 51 / .6) }
+.vo-student-management dialog form,.vo-student-management dialog label { display:grid; gap:.75rem }
+.vo-student-management dialog label { margin-block:.75rem; overflow-wrap:anywhere }
+.vo-student-management [data-managed-history] { min-width:0; overflow-wrap:anywhere }
