@@ -1,0 +1,7 @@
+{
+  "imports": {
+    "fflate": "npm:fflate@0.8.3",
+    "fast-xml-parser": "npm:fast-xml-parser@5.12.1",
+    "unpdf": "npm:unpdf@2.2.0"
+  }
+}

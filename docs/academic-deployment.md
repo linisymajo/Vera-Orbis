@@ -1,5 +1,51 @@
 # Academic workflow release and staging verification
 
+## 2026-11-20 ? production backend deployed
+
+The updated token passed production Edge Functions and Secrets read/write checks.
+`academic-ai` version 1 is ACTIVE with JWT verification enabled. All 16 reviewed
+files are unchanged; a function-local Deno map resolves only the three already
+reviewed parser dependencies. All three generation flags are false; unrelated
+secret digests and Vera Voice were preserved. No SQL was replayed and no provider
+call, billing change or account change occurred.
+
+Verification: 13 hosted HTTP/management checks, 22 focused Node tests and four
+actual Deno synthetic parser checks passed. A fresh encrypted backup covers 89
+database/Auth tables and all 32 private Storage objects. Full restore remains
+untested. Positive hosted teacher extraction and authenticated production browser
+E2E remain unverified because no authorized test login was available.
+
+The existing frontend material readiness switch is being activated through the
+existing Pages workflow; generation stays disabled. Confirm final workflow and
+public flag verification in the release receipt.
+See [backend activation](unified-academic-backend-production.md). Earlier entries
+below are historical and superseded by this update.
+
+
+## 2026-11-19 ? LIVE production academic activation
+
+Production commit `8bd92c0bd640f5f907ab285e0f9b2f3f5898b952` is LIVE through
+[the successful existing Pages workflow](https://github.com/linisymajo/Vera-Orbis/actions/runs/44573920717).
+The deployed assets confirm context readiness true, document processing false
+and AI inference false. 38 public-site/browser access-gate checks passed.
+Reviewed migrations 0028 and 0029 are committed with 255 checks and preservation
+of existing application/Auth/Storage rows. Eight further production read checks
+passed, including actual scoped academic/material records and anonymous RPC
+denials through PostgREST. A 19-check synthetic production SQL workflow passed
+and rolled back all fixture writes. 50 focused Node tests and four Chromium
+workflows passed locally. Full production teacher/student browser login remains
+unverified; no authorized test session was available.
+
+The verified encrypted backup contains 85 pre-migration database/Auth tables and
+all 32 private Storage objects. `academic-ai` currently returns 404; deploying
+the reviewed package is blocked before any secrets write by Management API HTTP
+401. The UI disables document processing without blocking academic review,
+manual/deterministic planning, approvals, publication or Journey links. No
+provider calls, account changes, Voice changes, staging replay or billing changes.
+See [current activation details](unified-academic-production-activation.md).
+Earlier entries below are historical and superseded by this result.
+
+
 ## 2026-11-19 ? authorized production database activation
 
 Reviewed migrations 0028 and 0029 are committed in production with 255 checks

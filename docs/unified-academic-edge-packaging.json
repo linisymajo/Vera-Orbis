@@ -1,0 +1,15 @@
+{
+  "target": "iopgzmvaqobigjwibual",
+  "function": "academic-ai",
+  "base_manifest_sha256": "3757db9297fffa45210e3f8027047c2f3f3d804de1262b871b298c375bc4c0ab",
+  "reviewed_files_unchanged": 16,
+  "configuration": {
+    "path": "supabase/functions/academic-ai/deno.json",
+    "bytes": 141,
+    "sha256": "84f92e3d594d990d0ef492245459af94534e6df956dce6705a558e37c20fe325"
+  },
+  "new_dependencies": false,
+  "new_functional_code": false,
+  "new_sql": false,
+  "provider_calls": 0
+}

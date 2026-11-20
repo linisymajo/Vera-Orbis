@@ -1,5 +1,27 @@
 # Unified academic production activation — 2026-11-19
 
+## 2026-11-20 ? production backend deployed
+
+The updated token passed production Edge Functions and Secrets read/write checks.
+`academic-ai` version 1 is ACTIVE with JWT verification enabled. All 16 reviewed
+files are unchanged; a function-local Deno map resolves only the three already
+reviewed parser dependencies. All three generation flags are false; unrelated
+secret digests and Vera Voice were preserved. No SQL was replayed and no provider
+call, billing change or account change occurred.
+
+Verification: 13 hosted HTTP/management checks, 22 focused Node tests and four
+actual Deno synthetic parser checks passed. A fresh encrypted backup covers 89
+database/Auth tables and all 32 private Storage objects. Full restore remains
+untested. Positive hosted teacher extraction and authenticated production browser
+E2E remain unverified because no authorized test login was available.
+
+The existing frontend material readiness switch is being activated through the
+existing Pages workflow; generation stays disabled. Confirm final workflow and
+public flag verification in the release receipt.
+See [backend activation](unified-academic-backend-production.md). Earlier entries
+below are historical and superseded by this update.
+
+
 The founder authorized the reviewed, non-destructive production release on
 2026-11-19. This supersedes the pending approval/staging prerequisites in the
 historical release proposal. The reviewed manifest is unchanged:
@@ -48,16 +70,25 @@ and document processing make zero Edge requests. Activating material processing
 does not activate generation. Existing Teacher Dashboard/Student Platform,
 3D cards, Language Passport and Vera Voice are preserved.
 
-Frontend publication uses the existing GitHub Pages workflow, based on live
-commit `7b305d129be1c2af2a7fb583f5e1126ba170606e`. Confirm the successful Nov19
-workflow and public-site verification before treating this frontend activation
-as live. The repository implementation status records the final outcome.
+Frontend activation is LIVE at commit
+`8bd92c0bd640f5f907ab285e0f9b2f3f5898b952` through the
+[successful existing Pages workflow](https://github.com/linisymajo/Vera-Orbis/actions/runs/44573920717),
+based on prior live commit `7b305d129be1c2af2a7fb583f5e1126ba170606e`.
+38 public-site checks passed: ten deployed assets, the actual readiness flags,
+production target, preserved Voice target, legacy redirect and unauthenticated
+browser gates. Actual production teacher/student browser login remains unverified.
 
 ## Edge deployment and provider status
 
 Only the reviewed `academic-ai` package (16 exact files), `verify_jwt=true`, is
 prepared for production. Management authentication returned HTTP 401 before
 secret writes/deployment. No new function or provider secret was installed.
+The production `academic-ai` endpoint currently returns 404. Eight further
+read-only production checks passed across the actual enrolled association, five
+authorized source records (including three material records), own Journey and
+PostgREST cache/anonymous denials. No published plan currently exists for that
+student; new plans become visible only after explicit teacher publication.
+
 The necessary credential is a valid `SUPABASE_ACCESS_TOKEN` with Edge Functions
 and Secrets read-write access to this production project. Its value belongs only
 in Windows User environment variables. Staging 0028 was not replayed.
