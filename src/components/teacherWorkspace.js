@@ -782,7 +782,7 @@ function materialsCard(items = [], studentMap = new Map()) {
 }
 
 async function loadExerciseStudio(panel) {
-  const params = new URLSearchParams(location.search), sid = params.get('academic_student'), plan = params.get('academic_plan'), n = Number(params.get('academic_lesson'))
+  const params = new URLSearchParams(globalThis.location?.search || ''), sid = params.get('academic_student'), plan = params.get('academic_plan'), n = Number(params.get('academic_lesson'))
   const valid = v => /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i.test(v || '')
   await mountExerciseStudio(panel, supabase, null, valid(sid) ? { studentId: sid, lesson: valid(plan) && Number.isInteger(n) && n >= 0 ? { versionId: plan, session: n } : null } : {})
 }

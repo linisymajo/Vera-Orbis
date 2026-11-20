@@ -546,7 +546,7 @@ export async function loadPlatform({ retryEnrollment = false } = {}) {
 
         supabase
           .from('student_packages')
-          .select('assignment_id, package_id, classes_total, classes_used, status, created_at, packages(name, class_count, duration_minutes, price, currency)')
+          .select('assignment_id, package_id, classes_used:classes_consumed, status, created_at:purchased_at, packages(name, class_count, duration_minutes, price, currency)')
           .eq('student_id', student.id),
 
         supabase

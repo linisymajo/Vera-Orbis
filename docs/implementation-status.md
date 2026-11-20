@@ -1,5 +1,34 @@
 # Vera Orbis implementation status
 
+## 2026-11-20 - Authenticated production academic workflow verified
+
+The existing founder teacher and existing Vera Test student passed real Supabase
+password authentication and real browser login at https://veraorbis.studio/.
+Vera Test is approved and associated with that teacher. No accounts were created,
+passwords changed, or other students used for test writes.
+
+Thirteen production workflow checks passed without browser response mocks:
+private DOCX/PPTX upload and student download, hosted text extraction, authorized
+context review, twelve editable deterministic lessons, draft save/reload,
+private approval and explicit publication, future scheduled class and material
+links, lesson-to-Exercise Studio handoff, one assignment, stored student response,
+teacher-approved feedback and synchronized student Journey. Student access to
+teacher context and another student's Journey was denied. Eleven future lessons
+remain upcoming; submission records progress without inventing class completion.
+Mobile and desktop Journey screenshots were inspected.
+
+All inference remains disabled. No provider calls, billing changes, Vera Voice
+changes, or SQL applications occurred in this verification. Templates are labeled
+deterministic. Sixty-three focused Node tests pass. The frontend correction uses
+the real package assignment columns through compatible aliases; a browser-global
+guard also fixes the existing workspace dispatch regression test. The missing
+production payment-summary view is a separate, unresolved finance integration;
+payment history is not included in the successful academic E2E claim.
+
+New student-management migrations 0030 and 0031 remain local, unapplied proposals.
+No account deletion was run. Earlier entries reporting unavailable production
+test sessions are historical and superseded by this verification.
+
 ## 2026-11-20 ? production backend deployed
 
 The updated token passed production Edge Functions and Secrets read/write checks.
