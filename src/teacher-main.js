@@ -1029,7 +1029,7 @@ function renderStudentInboxSection(profile, messages = []) {
                         <span class="teacher-badge ${m.is_read ? 'badge-published' : 'badge-draft'}">
                           ${m.is_read ? 'Read' : 'Unread'}
                         </span>
-                        <span style="font-size:11px;color:rgba(24,59,102,0.6);">${formatDate(m.created_at)}</span>
+                        <span style="font-size:11px;color:rgba(24,59,102,0.6);">${escapeHtml(formatDate(m.created_at))}</span>
                       </div>
                       <strong style="font-size:14px;color:var(--vo-navy);display:block;">${escapeHtml(m.subject)}</strong>
                       <p style="margin:4px 0 0;font-size:13px;color:rgba(24,59,102,0.85);white-space:pre-wrap;line-height:1.4;">${escapeHtml(m.body)}</p>
@@ -3204,6 +3204,13 @@ function renderSummaryItem(
 /* =========================================================
    GENERAL HELPERS
    ========================================================= */
+
+function formatDate(value) {
+  if (!value) return 'No date recorded'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return 'No date recorded'
+  return new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' }).format(date)
+}
 
 function normalizeProgress(value) {
   const numericValue =
