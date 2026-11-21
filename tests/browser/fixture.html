@@ -20,7 +20,7 @@ const identities={teacher:'10000000-0000-4000-8000-000000000001',teacher2:'10000
 async function send(input){try{return await(await fetch('/__academic_test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({actor,...input})})).json()}catch(error){return{error:{message:error.message}}}}
 class Query{
   constructor(table){this.table=table;this.filters=[];this.orders=[];this.mode='select'}
-  select(columns,options={}){this.head=Boolean(options.head);return this}
+  select(columns,options={}){this.columns=columns;this.head=Boolean(options.head);return this}
   order(key,{ascending=true}={}){this.orders.push([key,ascending]);return this}
   limit(number){this.rowLimit=number;return this}
   eq(key,value){this.filters.push([key,value]);return this}
@@ -30,7 +30,7 @@ class Query{
   update(payload){this.mode='update';this.payload=payload;return this}
   single(){this.single=true;return this}
   maybeSingle(){this.maybeSingle=true;return this}
-  then(resolve,reject){return send({table:this.table,filters:this.filters,orders:this.orders,limit:this.rowLimit,head:this.head,mode:this.mode,payload:this.payload,single:this.single===true,maybeSingle:this.maybeSingle===true}).then(resolve,reject)}
+  then(resolve,reject){return send({table:this.table,columns:this.columns,filters:this.filters,orders:this.orders,limit:this.rowLimit,head:this.head,mode:this.mode,payload:this.payload,single:this.single===true,maybeSingle:this.maybeSingle===true}).then(resolve,reject)}
 }
 const client={functions:{invoke:async(name,{body})=>send({architect:body})},auth:{getUser:async()=>({data:{user:{id:identities[actor]}}})},from:table=>new Query(table),rpc:(name,params)=>send({rpc:name,params}),storage:{from:bucket=>({
   async upload(path,file,options){const bytes=new Uint8Array(await file.arrayBuffer());let raw='';for(const byte of bytes)raw+=String.fromCharCode(byte);return send({storage:'upload',bucket,path,base64:btoa(raw),contentType:options.contentType})},

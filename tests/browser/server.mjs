@@ -182,7 +182,12 @@ const server=http.createServer(async(req,res)=>{
       }else if(input.table==='exercise_attempts')sql='select t.*,to_jsonb(a) exercise_assignments from exercise_attempts t join exercise_assignments a on a.id=t.assignment_id order by t.submitted_at desc'
       else{
         const orders=(input.orders||[]).map(([key,ascending])=>{if(!fieldNames.has(key))throw Error('Test order unsupported');return`${key} ${ascending?'asc':'desc'}`})
-        sql=`select * from ${input.table}${suffix}${orders.length?' order by '+orders.join(','):''}${Number.isInteger(input.limit)?' limit '+Math.min(2000,Math.max(1,input.limit)):''}`
+        let projection='*'
+        if(['feedback','final_results'].includes(input.table)&&input.columns&&input.columns!=='*'){
+          if(!/^[a-z_]+(?:,[a-z_]+)*$/.test(input.columns))throw Error('Test projection unsupported')
+          projection=input.columns
+        }
+        sql=`select ${projection} from ${input.table}${suffix}${orders.length?' order by '+orders.join(','):''}${Number.isInteger(input.limit)?' limit '+Math.min(2000,Math.max(1,input.limit)):''}`
       }
       const rows=(await tx.query(sql,args)).rows
       if(input.head)return{data:null,count:rows.length}

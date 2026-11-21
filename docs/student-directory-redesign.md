@@ -30,3 +30,7 @@ After publishing, verify the actual founder/Vera Test sessions, real metric mapp
 ## Rollback
 
 Republish 8287b3dcd57e17f3d4a28a2dca9e6f6df3c9b5db through the existing Pages workflow. There are no database or server configuration changes to revert. Preserve every existing academic record, enrollment, file and permission. The existing encrypted database/Auth/Storage backup and recovery procedure remain separate; this UI release does not perform a restore.
+
+## Published-assessment compatibility correction
+
+The actual production browser found that final_results has published_at, not a stored status column. The profile now selects published_at and derives private/published labels from that timestamp. No SQL was changed. The isolated PostgreSQL browser transport now honors explicit column projections for feedback/results, so unknown columns fail instead of being hidden by a SELECT-all test adapter. A sixth distinct Chromium scenario creates, assigns, submits, grades and explicitly publishes a synthetic final through existing RPCs, and verifies both result states in the profile. Sixteen focused Node tests pass. The desktop profile drawer is slightly wider to keep its section navigation readable. Final hosted verification follows publication.

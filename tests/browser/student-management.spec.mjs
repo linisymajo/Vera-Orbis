@@ -2,6 +2,17 @@ import {test,expect} from '@playwright/test'
 const S='20000000-0000-4000-8000-000000000001'
 async function seed(page,request,admin=false){await request.post('/__academic_test',{data:{reset:true}});await request.post('/__academic_test',{data:{seedManagement:true,admin}});await page.goto('/tests/browser/fixture.html?mode=teacher-management'+(admin?'&actor=teacher2':''));await page.waitForFunction(()=>window.testReady)}
 const row=page=>page.locator('.vo-dir-row[data-managed-student="'+S+'"]')
+test('assessment detail queries real SQL columns and distinguishes private results from published results',async({page,request})=>{
+ await seed(page,request)
+ const rpc=async(actor,name,params)=>{const response=await request.post('/__academic_test',{data:{actor,rpc:name,params}});const r=await response.json();expect(r.error).toBeFalsy();return r.data}
+ const final=await rpc('teacher','save_final_draft',{p_final_id:null,p_draft:{title:'Synthetic conversation assessment',language:'French',instructions:'Use a personal greeting.',exercise_type:'open_question',questions:[{prompt:'Greet a colleague.'}],attachment_mode:'none'},p_criteria:[{label:'Communication',max_points:100}],p_material_ids:[],p_request_id:crypto.randomUUID()})
+ await rpc('teacher','publish_final_assessment',{p_final_id:final.id,p_student_ids:[S],p_due_at:null})
+ const assignment=await page.evaluate(async id=>(await window.testClient.from('exercise_assignments').select('id').eq('exercise_id',id).single()).data,final.exercise_id)
+ const attempt=await rpc('student','submit_exercise',{p_assignment_id:assignment.id,p_answers:[{index:0,answer:'Bonjour, je suis Camille.'}],p_request_id:crypto.randomUUID()})
+ const result=await rpc('teacher','save_final_result',{p_attempt_id:attempt.id,p_scores:[85],p_feedback:'Synthetic assessment feedback.',p_request_id:crypto.randomUUID()})
+ await row(page).locator('[data-history]').first().click();let profile=page.locator('[data-student-detail]');await profile.getByRole('tab',{name:'Assessments & Feedback',exact:true}).click();await expect(profile).toContainText('85');await expect(profile).toContainText('Private draft');await expect(profile).not.toContainText('Some review records are unavailable');await profile.getByRole('button',{name:'Close student profile',exact:true}).click()
+ await rpc('teacher','publish_final_result',{p_result_id:result.id});await row(page).locator('[data-history]').first().click();await profile.getByRole('tab',{name:'Assessments & Feedback',exact:true}).click();await expect(profile).toContainText('Published result')
+})
 test('student handoff selects only that student in Exercise Studio without publishing an assignment',async({page,request})=>{
  await request.post('/__academic_test',{data:{reset:true}});await request.post('/__academic_test',{data:{seedManagement:true}});await page.goto('/tests/browser/fixture.html?mode=teacher-student-handoff');await page.waitForFunction(()=>window.testReady);const checked=page.locator('[name=student_ids]:checked');await expect(checked).toHaveCount(1);await expect(checked).toHaveValue(S);const assignments=await page.evaluate(async()=>await window.testClient.from('exercise_assignments').select('id'));expect(assignments.data).toHaveLength(0)
 })

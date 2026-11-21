@@ -75,7 +75,7 @@
 .vo-dir-empty p{margin:0 auto;max-width:440px;font-size:.875rem}
 .vo-student-management dialog{color:var(--dir-ink);font:inherit;background:#fffdfb;border:0;padding:0;box-shadow:-12px 0 60px #3023451c}
 .vo-student-management dialog::backdrop{background:#20162f70;backdrop-filter:blur(3px)}
-.vo-student-management .vo-dir-detail{width:min(980px,calc(100vw - 3rem));height:100dvh;max-height:100dvh;max-width:100%;margin:0 0 0 auto;border-radius:22px 0 0 22px;overflow:hidden}
+.vo-student-management .vo-dir-detail{width:min(1060px,calc(100vw - 3rem));height:100dvh;max-height:100dvh;max-width:100%;margin:0 0 0 auto;border-radius:22px 0 0 22px;overflow:hidden}
 .vo-dir-detail[open]{animation:vo-dir-slide-in .2s ease-out}
 .vo-dir-detail [data-managed-history]{display:flex;flex-direction:column;height:100%;min-height:0}
 .vo-dir-detail-header{position:relative;padding:1.6rem 1.7rem 1rem;flex:none;border-bottom:1px solid var(--dir-line);background:linear-gradient(120deg,#f5effd,#fffdfb 80%)}
