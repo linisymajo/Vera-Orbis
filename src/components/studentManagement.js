@@ -86,6 +86,7 @@ export async function mountStudentManagement(panel,client){
  root.addEventListener('keydown',e=>{if(e.key==='Escape'&&!dialog.open&&!detail.open)root.querySelectorAll('.vo-dir-menu[open]').forEach(d=>{d.open=false;d.querySelector('summary').focus()})})
  root.querySelectorAll('[data-manage-search],[data-manage-state],[data-manage-language]').forEach(el=>el.addEventListener(el.matches('input')?'input':'change',render));root.querySelector('[data-manage-refresh]').onclick=refresh
  detail.addEventListener('close',()=>{historyGeneration++;selected=null;root.querySelector('[data-managed-history]').replaceChildren()})
+ dialog.addEventListener('close',()=>{if(active()&&!pending){const count=filterDirectory(students,choices()).filter(s=>!teacherFilter||!s.teacher_id).length;status.textContent=`${count} of ${students.length} students`}})
  root.querySelector('[data-enrollment-link]').onclick=e=>{const enrollment=document.querySelector('#enrollment-panel');if(enrollment){e.preventDefault();enrollment.scrollIntoView({behavior:'smooth',block:'start'});enrollment.querySelector('input,button,select')?.focus({preventScroll:true})}}
  await refresh()
 
