@@ -47,7 +47,8 @@ client.functions.invoke=async(name,{body})=>{
  return r.error?r:{data:body.mode==='preview'?{preview:r.data}:{result:r.data}}
 }
 const app=document.querySelector('#test-app')
-if(mode==='teacher-management')await mountStudentManagement(app,client)
+ if(mode==='teacher-management')await mountStudentManagement(app,client)
+ else if(mode==='teacher-student-handoff')await mountExerciseStudio(app,client,null,{studentId:identities.student})
 else if(mode==='teacher-materials')await mountMaterialsStudio(app,client)
 else if(mode==='teacher-unified-plans')await mountLearningPlans(app,client)
 else if(mode==='student-journey')await mountStudentJourney(app,client,identities[actor])

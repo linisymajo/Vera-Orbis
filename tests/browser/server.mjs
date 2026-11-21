@@ -48,6 +48,7 @@ const vite=await createServer({define:{'import.meta.env.VITE_LEARNING_ARCHITECT_
 const rpcNames=new Set(['publish_exercise','submit_exercise','review_exercise_attempt','reserve_exercise_attachment','confirm_exercise_attachment','submit_exercise_with_attachments','revise_exercise_attachments','list_exercise_attachments','create_learning_plan_version','save_learning_plan_version','approve_learning_plan_version','set_learning_objective_completion','save_final_draft','publish_final_assessment','save_final_result','publish_final_result','review_academic_ai_draft','publish_academic_challenge','submit_academic_challenge','review_challenge_submission','mark_academic_notification_read'])
 const tables=new Set(['exercises','profiles','exercise_assignments','exercise_attempts','student_exercises','materials','learning_plan_versions','learning_plan_objective_progress','learning_plan_objective_events','final_assessments','final_results','student_finals','weekly_challenges','challenge_submissions','student_challenge_submissions','challenge_publications','ai_academic_drafts','academic_notifications'])
 const fieldNames=new Set(['id','teacher_id','status','exercise_id','student_id','version_id','objective_id','kind','recipient_id','read_at','created_at','updated_at','submitted_at','revision','version_number','name','title','assigned_at'])
+tables.add('feedback');fieldNames.add('attempt_id')
 for(const name of ['get_student_management_capabilities','get_managed_students','get_managed_student_history','manage_student_enrollment','list_student_deletion_jobs','preview_student_deletion','confirm_student_deletion'])rpcNames.add(name)
 for (const name of ['exercise_experience_capabilities','save_exercise_progress','get_exercise_practice_state','check_exercise_question','save_exercise_feedback','get_exercise_teacher_review']) rpcNames.add(name)
 for(const name of ['get_learning_architect_context','get_learning_architect_profile','get_learning_architect_draft','reserve_learning_architect_request','complete_learning_architect_request','publish_learning_architect_plan','set_academic_ai_consent'])rpcNames.add(name)
@@ -70,6 +71,16 @@ const server=http.createServer(async(req,res)=>{
     const input=JSON.parse(body)
     if(input.reset===true){unifiedFixtureProvider=false;await db.exec("truncate student_deletion_jobs,student_retention_holds,student_roster_states,student_management_events;update enrollments set status='approved',source='legacy',teacher_id=null;truncate academic_context_reviews,material_text_versions,teacher_notes,student_packages,packages cascade;update profiles set language='French',level=null,lessons_completed=0,total_lessons=null where id='"+student+"'");await db.exec('truncate public.exercises,public.learning_plan_versions,public.academic_ai_requests,public.academic_notifications,public.inbox_messages,public.classes,public.materials cascade;truncate storage.objects');objectBytes.clear();downloadTokens.clear();json(res,{data:{reset:true}});return}
     if(input.seedManagement===true){await db.exec('delete from academic_admins');await db.query("update enrollments set teacher_id=$1,status='approved',source='self' where student_id=$2",[teacher,student]);if(input.admin===true)await db.query('insert into academic_admins(user_id) values($1)',[teacher2]);json(res,{data:{seeded:true}});return}
+    if(input.seedDirectory===true){
+      await db.query("update profiles set language='English',level='B1',lessons_completed=3,total_lessons=100,goal='Speak with confidence in everyday conversations' where id=$1",[student])
+      const pkg=(await db.query("insert into packages(teacher_id,name,class_count) values($1,'Conversation Essentials',100) returning id",[teacher])).rows[0]
+      for(const id of [student,student2])await db.query('insert into student_packages(package_id,teacher_id,student_id,classes_consumed) values($1,$2,$3,0)',[pkg.id,teacher,id])
+      const cls=(await db.query("insert into classes(teacher_id,title,starts_at,status) values($1,'Everyday conversations',now()-interval '1 day','completed') returning id",[teacher])).rows[0]
+      await db.query('insert into class_participants(class_id,teacher_id,student_id) values($1,$2,$3)',[cls.id,teacher,student])
+      await db.query("insert into class_attendance values($1,$2,'present',null,now())",[cls.id,student])
+      await db.query("insert into feedback(teacher_id,student_id,title,message) values($1,$2,'Speaking confidence','Synthetic practice feedback: keep personalizing your expressions.')",[teacher,student])
+      json(res,{data:{seeded:true,synthetic_only:true}});return
+    }
     if(input.seedUnified===true){
       unifiedFixtureProvider=input.providerDisabled!==true
       await db.query("update profiles set language='English',level='B1',lessons_completed=5,total_lessons=12,goal='Use practical travel expressions' where id=$1",[student])

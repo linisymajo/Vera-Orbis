@@ -552,7 +552,7 @@ export async function mountExerciseStudio(panel, client, initialDraft = null, ac
     syncTypeCards()
     ;(initialDraft.questions || []).forEach(addQuestion)
     showStep(2)
-    const linkedStudent = initialDraft.settings?.learning_journey?.student_id || academicOptions.studentId
-    if (linkedStudent) form.querySelectorAll('[name="student_ids"]').forEach(input => { input.checked = input.value === linkedStudent })
   } else addQuestion()
+  const linkedStudent = initialDraft?.settings?.learning_journey?.student_id || academicOptions.studentId
+  if (linkedStudent) form.querySelectorAll('[name="student_ids"]').forEach(input => { input.checked = input.value === linkedStudent })
 }

@@ -1,0 +1,52 @@
+{
+  "base": "8287b3dcd57e17f3d4a28a2dca9e6f6df3c9b5db",
+  "target": "iopgzmvaqobigjwibual",
+  "kind": "frontend_only",
+  "database_changes": [],
+  "edge_changes": [],
+  "configuration_changes": [],
+  "provider_calls": 0,
+  "authorization": "User requested reviewed non-destructive production frontend deployment; database changes require separate approval",
+  "files": [
+    {
+      "path": "src/components/studentManagement.js",
+      "bytes": 33703,
+      "sha256": "85083d90dae48c365502cd58af99428cf5aeb0c70b20f1f18c0bec588d6913be"
+    },
+    {
+      "path": "src/components/studentManagement.css",
+      "bytes": 20874,
+      "sha256": "85ee0fa25cc9d041dccaed0a15e8b0d7773706a527255d1b4745fe23a0c9217a"
+    },
+    {
+      "path": "src/lib/studentDirectory.js",
+      "bytes": 2002,
+      "sha256": "5bcd539296acdc6a0ffcf980cb762cba5ad47e4ab8671b39a65578e54c0395d8"
+    },
+    {
+      "path": "src/components/exerciseStudio.js",
+      "bytes": 39958,
+      "sha256": "9e718381139bd4fd350fe453bd4f8d4e8df0c62caba172c349b2f66eda49bf6a"
+    },
+    {
+      "path": "tests/student-directory.test.mjs",
+      "bytes": 3054,
+      "sha256": "688af76a3945c45a17a951238c503ade94c666c7f030380488e6376815d820b8"
+    },
+    {
+      "path": "tests/browser/student-management.spec.mjs",
+      "bytes": 9969,
+      "sha256": "9b3b43a2a2b676e5f84e27710c9a776968236b71b0e3e3d6475c03988c3ea6a3"
+    },
+    {
+      "path": "tests/browser/server.mjs",
+      "bytes": 24454,
+      "sha256": "662a475944bb2e305e78907a0ba7f55b37599af23bb8198ef48ab55a25b3ea45"
+    },
+    {
+      "path": "tests/browser/fixture.html",
+      "bytes": 6451,
+      "sha256": "9cbb12ee864bd9388e129818c6f7445ff80e53410d9d91ca6bd037e794d77d2d"
+    }
+  ]
+}

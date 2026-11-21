@@ -1,5 +1,9 @@
 # Vera Orbis implementation status
 
+## 2026-11-21 - Compact Students directory production redesign
+
+The focused frontend redesign replaces oversized cards with compact rows/mobile cards, contextual actions and a seven-section student profile. Existing enrollment permissions, confirmation services and academic modules are preserved. A read-only production source check separates manual profile counters, attendance evidence, package allowance/consumption and enrollment teacher links; no real records are reconciled or changed. See docs/student-directory-redesign.md and its exact source manifest. Production deployment and final real-browser verification are pending until the release receipts confirm success.
+
 ## 2026-11-20 - Authenticated production academic workflow verified
 
 The existing founder teacher and existing Vera Test student passed real Supabase
