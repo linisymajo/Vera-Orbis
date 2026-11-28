@@ -121,6 +121,8 @@ document.querySelector('#app').innerHTML = `
           >
 
 
+          <label><input type="checkbox" id="adult-admission" required> Confirmo que tengo 18 años o más. Vera Orbis admite exclusivamente adultos.</label>
+          <label><input type="checkbox" id="eligible-region" required> Resido fuera del EEE/Unión Europea, Suiza y Reino Unido, regiones donde Vera Orbis no ofrece este servicio.</label>
           <p
             id="register-error"
             class="login-error"
@@ -214,6 +216,8 @@ registerForm.addEventListener('submit', async (event) => {
     return
   }
 
+  if(!document.querySelector('#adult-admission').checked||!document.querySelector('#eligible-region').checked){registerError.textContent='El registro requiere admisión de adultos y una región habilitada.';return}
+
   registerButton.disabled = true
   buttonText.textContent = 'Creando cuenta...'
 
@@ -227,7 +231,7 @@ registerForm.addEventListener('submit', async (event) => {
     options: {
       emailRedirectTo,
       data: {
-        name
+        name, adult_18_plus:true, service_region_eligible:true
       }
     }
   })

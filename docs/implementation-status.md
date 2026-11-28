@@ -1,5 +1,19 @@
 # Vera Orbis implementation status
 
+## 2026-11-28 — Adult-only admission and Gemini activation
+
+The founder confirms the academy is exclusively 18+, including all existing
+accounts, with no service in EEE/EU, Switzerland or UK. SQL 0032 enforces signup
+declarations plus staff-verified admission and preserves accepted exercise
+variants. Production passed 107 rollback checks and 106 application checks after
+a verified encrypted database/Auth/38-object Storage backup. Staging DNS is
+unavailable. Gemini returned a real valid synthetic exercise: three questions,
+264 input/820 output tokens. 26 distinct focused tests pass across focused runs.
+No private learner records reach Free Tier. The management token returns HTTP
+401, so the new Edge deployment and actual production UI generation acceptance
+remain pending renewal. No production provider, billing or Vera Voice setting
+was changed. See docs/gemini-adult-production.md and current release receipts.
+
 ## 2026-11-21 - Compact Students directory production redesign
 
 The focused frontend redesign replaces oversized cards with compact rows/mobile cards, contextual actions and a seven-section student profile. Existing enrollment permissions, confirmation services and academic modules are preserved. A read-only production source check separates manual profile counters, attendance evidence, package allowance/consumption and enrollment teacher links; no real records are reconciled or changed. See docs/student-directory-redesign.md and its exact source manifest. Production deployment and final real-browser verification are pending until the release receipts confirm success.

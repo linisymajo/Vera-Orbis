@@ -233,17 +233,18 @@ export async function mountLearningPlans(panel, client, { studentId = null, stud
           renderEditor(edited)
         }
       })
-      const regenerationAvailability = unifiedContext ? academicContextProviderStatus(client) : null
+      const anonymousGemini = learningArchitectEnabled()
+      const regenerationAvailability = unifiedContext && !anonymousGemini ? academicContextProviderStatus(client) : null
       form.querySelectorAll('[data-architect-regenerate]').forEach(button => {
-        button.disabled = unifiedContext || !learningArchitectEnabled()
-        if (unifiedContext) regenerationAvailability.then(s => { if (button.isConnected) button.disabled = !s.enabled })
+        button.disabled = !anonymousGemini
+        if (regenerationAvailability) regenerationAvailability.then(s => { if (button.isConnected) button.disabled = !s.enabled })
         button.onclick = async () => {
           const message = form.querySelector('[data-plan-edit-status]')
           try {
             if(JSON.stringify(validateLearningPlan(read()))!==JSON.stringify(validateLearningPlan(version.content))) throw new Error('Save your edits before regenerating a session.')
             busy(form,true); message.textContent='Regenerating the selected session…'
-            const ctx = unifiedContext ? await loadStudentAcademicContext(client, selectedStudent) : null
-            const saved = unifiedContext ? (await requestStudentAwareAcademic(client, { studentId: selectedStudent, reviewRevision: ctx.review?.revision, kind: 'learning_plan', regenerate: { versionId: version.id, revision: version.revision, session: Number(button.dataset.architectRegenerate) } })).result : await regenerateArchitectSession(client,version,Number(button.dataset.architectRegenerate))
+            const ctx = unifiedContext && !anonymousGemini ? await loadStudentAcademicContext(client, selectedStudent) : null
+            const saved = unifiedContext && !anonymousGemini ? (await requestStudentAwareAcademic(client, { studentId: selectedStudent, reviewRevision: ctx.review?.revision, kind: 'learning_plan', regenerate: { versionId: version.id, revision: version.revision, session: Number(button.dataset.architectRegenerate) } })).result : await regenerateArchitectSession(client,version,Number(button.dataset.architectRegenerate))
             if(saved.student_id!==selectedStudent)return
             selectedVersion=saved.id
             await refresh();status('Selected session regenerated and saved in the private draft. Other sessions were preserved.')
@@ -389,10 +390,14 @@ export async function mountLearningPlans(panel, client, { studentId = null, stud
     const target=workspace.querySelector('[data-plan-ai]')
     if(studentView||!selectedStudent){target.innerHTML='';return}
     const forStudent=selectedStudent
-    await (unifiedContext ? mountStudentAcademicAI : mountLearningArchitect)(target,client,{studentId:forStudent,onSaved:async version=>{
+    await (learningArchitectEnabled() ? mountLearningArchitect : unifiedContext ? mountStudentAcademicAI : mountLearningArchitect)(target,client,{studentId:forStudent,onSaved:async version=>{
       if(selectedStudent!==forStudent)return
       selectedVersion=version.id;await refresh();status('Plan draft saved. Review sessions, approve, then publish explicitly.')
     }})
+    if(learningArchitectEnabled() && unifiedContext && selectedStudent===forStudent){
+      const details=document.createElement('details');details.className='teacher-form-card';details.innerHTML='<summary>Academic records and confirmed course scope (kept in Vera Orbis)</summary><div data-private-context></div>';target.append(details)
+      details.addEventListener('toggle',()=>{if(details.open&&!details.dataset.loaded){details.dataset.loaded='true';mountStudentAcademicAI(details.querySelector('[data-private-context]'),client,{studentId:forStudent,onSaved:async version=>{selectedVersion=version.id;await refresh()}})}})
+    }
     if(selectedStudent!==forStudent)return
     // Retain importing previous-format recommendations without enabling other AI agents.
     try{aiDrafts=(await listAcademicDrafts(client)).filter(d=>d.student_id===forStudent&&d.kind==='learning_plan'&&d.status!=='rejected')}

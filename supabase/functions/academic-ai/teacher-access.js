@@ -24,4 +24,7 @@ export async function authorizeAdultArchitectTeacher(env, client, user) {
     || access.data?.email_verified !== true || access.data?.academic_access !== true) {
     throw new AcademicAIError('adult_teacher_required', 'Verified teacher authorization is required for generation.', 403)
   }
+  const registry = await client.rpc('verify_adult_teacher_eligibility')
+  if (registry.error || registry.data?.teacher_id !== user.id || registry.data?.adult_verified !== true
+    || access.data.adult_admitted !== true) throw new AcademicAIError('adult_teacher_required','Verified adult admission and teacher eligibility are required.',403)
 }

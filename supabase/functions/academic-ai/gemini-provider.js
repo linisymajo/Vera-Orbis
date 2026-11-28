@@ -1,6 +1,7 @@
 // Server only. Official Google GenAI SDK; no browser imports, tools or retries.
 import { AcademicAIError, readLimitedJson } from './core.js'
 import { buildArchitectProviderRequest } from './learning-architect.js'
+import { buildPedagogicalExerciseProviderRequest } from './pedagogical-exercises.js'
 
 export const GEMINI_ARCHITECT_MODEL = 'gemini-3.1-flash-lite'
 const ORIGIN = 'https://generativelanguage.googleapis.com'
@@ -8,9 +9,9 @@ const ORIGIN = 'https://generativelanguage.googleapis.com'
 export function createGeminiProvider({ apiKey, model = GEMINI_ARCHITECT_MODEL, GoogleGenAI, fetchImpl = fetch, timeoutMs = 90000 }) {
   if (!apiKey || model !== GEMINI_ARCHITECT_MODEL) throw new AcademicAIError('configuration', 'Configure GEMINI_API_KEY and the reviewed Gemini Flash-Lite model.', 503)
   return async (request, context) => {
-    if (request.mode !== 'learning_architect') throw new AcademicAIError('unsupported_task', 'This Gemini adapter supports Learning Architect only.', 400)
+    if (!['learning_architect','pedagogical_exercise'].includes(request.mode)) throw new AcademicAIError('unsupported_task', 'Choose a supported pedagogical generation task.', 400)
     const Constructor = GoogleGenAI || (await import('@google/genai')).GoogleGenAI
-    const payload = buildArchitectProviderRequest(request, context, model)
+    const payload = request.mode === 'learning_architect' ? buildArchitectProviderRequest(request, context, model) : buildPedagogicalExerciseProviderRequest(request)
     const controller = new AbortController(), timeout = setTimeout(() => controller.abort(), Math.min(90000, Math.max(1, timeoutMs)))
     try {
       const safeFetch = async (resource, options) => {

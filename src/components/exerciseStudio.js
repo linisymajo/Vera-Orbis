@@ -1,4 +1,6 @@
 import { mountStudentAcademicAI, renderAcademicSources } from './studentAcademicAI.js'
+import { mountPedagogicalExercises } from './pedagogicalExercises.js'
+import { learningArchitectEnabled } from '../lib/learningArchitect.js'
 import { loadAcademicProvenanceByRequest } from '../lib/studentAcademicContext.js'
 import { listLearningPlanVersions } from '../lib/learningPlans.js'
 import { prepareLessonExercise } from '../lib/academicPreparation.js'
@@ -240,7 +242,7 @@ export async function mountExerciseStudio(panel, client, initialDraft = null, ac
   aiHost.addEventListener('toggle', () => {
     if (aiHost.open && !aiHost.dataset.loaded) {
       aiHost.dataset.loaded = 'true'
-      mountStudentAcademicAI(aiHost.querySelector('[data-studio-ai]'), client, {
+      ;(learningArchitectEnabled()?mountPedagogicalExercises:mountStudentAcademicAI)(aiHost.querySelector('[data-studio-ai]'), client, {
         kind: 'exercise', ...academicOptions,
         onUseExercise: (draft, selectedLesson, selectedStudent) => mountExerciseStudio(panel, client, draft, { studentId: selectedStudent, lesson: selectedLesson })
       })

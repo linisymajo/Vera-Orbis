@@ -1,5 +1,17 @@
 # Academic workflow release and staging verification
 
+## 2026-11-28 — Adult admission applied; Gemini deployment pending credential
+
+The explicit adult-only/no-restricted-region policy supersedes the prior minors
+premise. SQL 0032 passed 107 rollback and 106 application/preservation checks,
+preceded by a verified encrypted database/Auth and 38-object Storage backup.
+Staging DB DNS is unavailable. The separate IA Architecture credential returned
+real synthetic exercise output using gemini-3.1-flash-lite. Production inference
+is not claimed: the management token receives HTTP 401; Edge publication,
+activation and actual production UI E2E remain pending. No existing academic
+records, billing or Vera Voice setting was changed. See
+docs/gemini-adult-production.md.
+
 ## 2026-11-21 - Compact Students directory production redesign
 
 The focused frontend redesign replaces oversized cards with compact rows/mobile cards, contextual actions and a seven-section student profile. Existing enrollment permissions, confirmation services and academic modules are preserved. A read-only production source check separates manual profile counters, attendance evidence, package allowance/consumption and enrollment teacher links; no real records are reconciled or changed. See docs/student-directory-redesign.md and its exact source manifest. Production deployment and final real-browser verification are pending until the release receipts confirm success.

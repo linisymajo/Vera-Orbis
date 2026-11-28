@@ -28,9 +28,9 @@ test('enrollment writes require confirmed persistence and never clear an unsucce
   assert.equal(removed, false)
   await acceptPendingInvitation(mock({ data: approved }), token, storage)
   assert.equal(removed, true)
-  await assert.rejects(createStudentInvitation(mock({ data: {} }), 'student@example.com'), /confirmed/)
+  await assert.rejects(createStudentInvitation(mock({ data: {} }), 'student@example.com',true), /confirmed/)
   await assert.rejects(reviewEnrollment(mock({ data: {} }), 'student', true), /teacher/)
-  await assert.rejects(reviewEnrollment(mock({ data: { student_id: 'student', status: 'pending' } }), 'student', true, 'teacher'), /confirmed/)
+  await assert.rejects(reviewEnrollment(mock({ data: { student_id: 'student', status: 'pending' } }), 'student', true, 'teacher',true), /confirmed/)
 })
 
 test('private invitation capture removes URL token and preserves it for email confirmation', () => {

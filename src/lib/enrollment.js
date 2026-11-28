@@ -231,20 +231,22 @@ export async function initializeEnrollmentProfile(client) {
   return profileId
 }
 
-export async function createStudentInvitation(client, email) {
+export async function createStudentInvitation(client, email, adultVerified = false) {
+  if(adultVerified!==true)throw new Error('Confirm adult admission and eligible service region before inviting.')
   const normalized = String(email || '').trim().toLowerCase()
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) throw new Error('Enter a valid email.')
-  const result = await rpc(client, 'create_student_invitation', { p_email: normalized })
+  const result = await rpc(client, 'create_student_invitation', { p_email: normalized, p_adult_verified:true })
   if (!result.id || !TOKEN_PATTERN.test(result.token || '') || !result.expires_at) {
     throw new Error('Invitation persistence could not be confirmed.')
   }
   return result
 }
 
-export async function reviewEnrollment(client, studentId, approve, teacherId = null) {
+export async function reviewEnrollment(client, studentId, approve, teacherId = null, adultVerified = false) {
   if (!studentId || (approve && !teacherId)) throw new Error('Assign a teacher before approval.')
+  if(approve && adultVerified!==true)throw new Error('Verify adult admission and eligible service region before approval.')
   const result = await rpc(client, 'review_student_enrollment', {
-    p_student_id: studentId, p_approve: Boolean(approve), p_teacher_id: approve ? teacherId : null
+    p_student_id: studentId, p_approve: Boolean(approve), p_teacher_id: approve ? teacherId : null, p_adult_verified:adultVerified===true
   })
   if (result.student_id !== studentId || result.status !== (approve ? 'approved' : 'rejected')) {
     throw new Error('Enrollment review could not be confirmed.')

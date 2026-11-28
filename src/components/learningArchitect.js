@@ -57,6 +57,15 @@ export async function mountLearningArchitect(target, client, { studentId, onSave
     form.elements.level.value = LEVELS.includes(profile.level) ? profile.level : ''
     form.elements.goal.value = isPedagogicalObjective(profile.goal) ? profile.goal : DEFAULT_PEDAGOGICAL_OBJECTIVE
     profileStatus.textContent = `Academic profile: ${profile.language || 'language not recorded'} · ${profile.level || 'level not recorded'}. ${profile.ai_consent ? 'AI consent granted.' : 'Student AI consent is required.'} Last 24 hours: ${profile.request_count_24h || 0}/10 requests · ${profile.input_tokens_24h || 0} input / ${profile.output_tokens_24h || 0} output tokens. Currency cost is available in the provider project billing dashboard.`
+    const scope=await client.rpc('get_student_academic_context',{p_student_id:studentId})
+    if(!target.contains(form))return
+    const settings=scope.data?.review?.settings
+    if(settings?.confirmed===true && Number.isInteger(settings.total) && Number.isInteger(settings.completed)){
+      const remaining=settings.total-settings.completed
+      form.elements.classes.value=Math.min(12,Math.max(1,remaining))
+      profileStatus.textContent+=` Confirmed course scope: ${remaining} remaining lessons. Generate up to 12 per draft.`
+      if(remaining===0){profileStatus.textContent+=' Confirm a new course scope before generating.';button.disabled=true;return}
+    }
     button.disabled = !enabled || !profile.ai_consent
   } catch { profileStatus.textContent = 'Academic profile integration is not yet ready. Manual learning plans remain available.' }
   form.onsubmit = async event => {

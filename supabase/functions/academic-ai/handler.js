@@ -3,6 +3,7 @@ import { createOpenAIProvider } from './provider.js'
 import { generateLearningArchitect } from './learning-architect.js'
 import { createGeminiProvider, GEMINI_ARCHITECT_MODEL } from './gemini-provider.js'
 import { authorizeAdultArchitectTeacher } from './teacher-access.js'
+import { generatePedagogicalExercise } from './pedagogical-exercises.js'
 import { indexAcademicMaterial } from './material-extraction.js'
 import { generateUnifiedAcademic, uuid, sameKeys } from './academic-context.js'
 import { authorizeUnifiedTeacher, unifiedProviderStatus, selectUnifiedProvider } from './unified-providers.js'
@@ -43,7 +44,7 @@ export function createAcademicAIHandler({ env, createClient, providerFactory = c
       const provider = selectUnifiedProvider(env)
       return Response.json(await generateUnifiedAcademic(client, input, provider), { status: 201, headers })
     }
-    if (input?.mode === 'learning_architect') {
+    if (['learning_architect','pedagogical_exercise'].includes(input?.mode)) {
       if (env('ACADEMIC_AI_ARCHITECT_ENABLED') !== 'true' || env('ACADEMIC_AI_PROVIDER') !== 'gemini' || env('ACADEMIC_AI_FREE_TIER_CONFIRMED') !== 'true') throw new AcademicAIError('not_configured', 'Gemini Learning Architect is disabled until free-tier staging testing is configured.', 503)
       await authorizeAdultArchitectTeacher(env, client, data.user)
       // The shared staging project is a synthetic test client only.
@@ -52,6 +53,7 @@ export function createAcademicAIHandler({ env, createClient, providerFactory = c
         throw new AcademicAIError('privacy_gate', 'Staging generation is restricted to authorized synthetic fixtures.', 403)
       }
       const provider = geminiProviderFactory({ apiKey: env('GEMINI_API_KEY'), model: env('ACADEMIC_AI_MODEL') || GEMINI_ARCHITECT_MODEL, GoogleGenAI })
+      if(input.mode==='pedagogical_exercise')return Response.json({draft:await generatePedagogicalExercise(client,input,provider)},{status:201,headers})
       const version = await generateLearningArchitect(client, input, provider)
       return Response.json({ version }, { status: 201, headers })
     }

@@ -21,6 +21,7 @@ export async function setupEnrollmentPanel({ retryEnrollment = false } = {}) {
       <p>Invite a student with a link for their email. They must verify that email before the invitation grants access. Links expire in seven days.</p>
       ${canInvite ? `<form id="student-invitation-form" class="teacher-inline-form">
         <label>Student email<input type="email" name="email" required autocomplete="email"></label>
+        <label><input type="checkbox" name="adult_verified" required> I verified this learner is 18+ and outside EEE/EU, Switzerland and UK. Vera Orbis admits adults only.</label>
         <button type="submit" class="teacher-primary-action">Create invitation link</button>
       </form>` : '<p>Teacher invitation links are created by the assigned teacher.</p>'}
       <div id="invitation-link-result"></div>
@@ -31,7 +32,7 @@ export async function setupEnrollmentPanel({ retryEnrollment = false } = {}) {
         <tbody>${(requests.data || []).map(request => `<tr>
           <td>${escapeHtml(request.name || 'Student')}</td><td>${escapeHtml(request.email)}<br><small>${request.email_verified ? 'Email verified' : 'Email verification pending'}</small></td>
           <td><select data-enrollment-teacher="${escapeHtml(request.student_id)}"><option value="">Select teacher</option>${(teachers.data || []).map(teacher => `<option value="${escapeHtml(teacher.id)}">${escapeHtml(teacher.email)}</option>`).join('')}</select></td>
-          <td><button type="button" data-enrollment-approve="${escapeHtml(request.student_id)}" ${!request.email_verified ? 'disabled' : ''}>Approve</button>
+          <td><label><input type="checkbox" data-adult-verified="${escapeHtml(request.student_id)}"> I verified adult admission (18+) and eligible service region</label><button type="button" data-enrollment-approve="${escapeHtml(request.student_id)}" ${!request.email_verified ? 'disabled' : ''}>Approve</button>
           <button type="button" data-enrollment-reject="${escapeHtml(request.student_id)}">Reject</button></td>
         </tr>`).join('') || '<tr><td colspan="4">No pending requests.</td></tr>'}</tbody></table></div>` : '<p>Self-registration requests require administrator approval.</p>'}`
     const status = panel.querySelector('#enrollment-staff-status')
@@ -41,7 +42,7 @@ export async function setupEnrollmentPanel({ retryEnrollment = false } = {}) {
       button.disabled = true
       status.textContent = ''
       try {
-        const invite = await createStudentInvitation(supabase, new FormData(event.currentTarget).get('email'))
+        const invite = await createStudentInvitation(supabase, new FormData(event.currentTarget).get('email'),new FormData(event.currentTarget).get('adult_verified')==='on')
         const link = invitationRegistrationUrl(window.location.origin, invite.token)
         panel.querySelector('#invitation-link-result').innerHTML = `<label>Copy this private invitation link and share it with the student<input type="text" readonly value="${escapeHtml(link)}"></label>`
         status.textContent = 'Invitation saved. Share the link with the invited student.'
@@ -55,7 +56,7 @@ export async function setupEnrollmentPanel({ retryEnrollment = false } = {}) {
         const teacherId = panel.querySelector(`[data-enrollment-teacher="${studentId}"]`)?.value
         button.disabled = true
         try {
-          await reviewEnrollment(supabase, studentId, approve, teacherId)
+          await reviewEnrollment(supabase, studentId, approve, teacherId,panel.querySelector(`[data-adult-verified="${studentId}"]`)?.checked===true)
           button.closest('tr').remove()
           status.textContent = approve ? 'Enrollment approved and saved.' : 'Enrollment rejected and saved.'
         } catch (error) { status.textContent = error.message; button.disabled = false }
