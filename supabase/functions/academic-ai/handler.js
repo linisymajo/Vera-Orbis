@@ -47,6 +47,12 @@ export function createAcademicAIHandler({ env, createClient, providerFactory = c
     if (['learning_architect','pedagogical_exercise'].includes(input?.mode)) {
       if (env('ACADEMIC_AI_ARCHITECT_ENABLED') !== 'true' || env('ACADEMIC_AI_PROVIDER') !== 'gemini' || env('ACADEMIC_AI_FREE_TIER_CONFIRMED') !== 'true') throw new AcademicAIError('not_configured', 'Gemini Learning Architect is disabled until free-tier staging testing is configured.', 503)
       await authorizeAdultArchitectTeacher(env, client, data.user)
+      if(input.mode==='learning_architect' && input.regenerate===null){
+        const scope=await client.rpc('get_student_academic_context',{p_student_id:input.studentId})
+        if(scope.error)throw new AcademicAIError('forbidden','The assigned student course scope could not be verified.',403)
+        const s=scope.data?.review?.settings
+        if(s?.confirmed===true && Number.isInteger(s.total) && Number.isInteger(s.completed) && input.classes>s.total-s.completed)throw new AcademicAIError('invalid_pedagogy','Generate no more than the confirmed remaining lessons. Review the course scope first.',422)
+      }
       // The shared staging project is a synthetic test client only.
       if (url === 'https://duinvkphfnugoyvvlbbq.supabase.co'
         && !(env('ACADEMIC_AI_SYNTHETIC_STUDENT_IDS') || '').split(',').map(x => x.trim()).filter(Boolean).includes(input.studentId)) {

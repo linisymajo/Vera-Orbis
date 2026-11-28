@@ -44,15 +44,31 @@ DB/Auth plus 38 private Storage objects were verified before application. Full
 platform recovery remains untested. Staging DNS is unavailable; it is not claimed
 as a hosted staging pass.
 
-Local focused verification: 26 distinct passing tests across admission, actual
+Local focused verification: 59 distinct passing Node tests across admission, actual
 PostgreSQL/RLS/persistence, official SDK outbound bytes, provider contracts,
-private approval/publication and permissions, across focused runs. A real
+private approval/publication and permissions, across focused runs, plus two
+distinct Chromium scenarios (responsive roster/profile and student-specific
+Studio handoff including the active-student generation selector). A real
 synthetic provider call returned three valid questions, 264 input/820 output
 tokens; a preceding explicit attempt failed without a saved draft. This provider
 check is not the final production UI acceptance test.
 
-Production publication and real teacher/Vera Test E2E are recorded separately in
-the release receipts; they remain pending until those receipts report success.
+The admission frontend is LIVE in commit
+8d261477c25d7f1bcd3d70929dbccb69a98e469f, workflow 46148793218. Four actual
+production UI/session checks passed: required mobile adult/region declarations,
+teacher login/profile scope, rejection of an unverified invitation, selected
+Vera Test Learning Plans, retained Student Journey and student registry denial.
+Vera Test's synthetic consent was false and was enabled through its own verified
+student session for the authorized tests; no real learner's consent was changed.
+The management credential returns HTTP 401. This blocks deploying the prepared
+Edge revision and securely installing the Gemini secret; no production inference
+activation or completed real production generation E2E is claimed. The remaining
+external action is renewal of SUPABASE_ACCESS_TOKEN with production Functions
+and Secrets read/write. Backend generation and the frontend switch remain off.
+Source selection also excludes inactive/unapproved students, and generation
+rejects a count exceeding the confirmed remaining course scope before inference.
+
+Real generation/edit/approval/publication E2E remains pending that credential.
 Rollback: disable ACADEMIC_AI_ARCHITECT_ENABLED and VITE_LEARNING_ARCHITECT_ENABLED,
 then republish the previous frontend/backend artifact if needed. Preserve the
 adult-only admission boundary and all academic data. Do not restore/delete data

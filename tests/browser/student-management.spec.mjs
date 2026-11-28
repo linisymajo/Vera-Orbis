@@ -15,6 +15,9 @@ test('assessment detail queries real SQL columns and distinguishes private resul
 })
 test('student handoff selects only that student in Exercise Studio without publishing an assignment',async({page,request})=>{
  await request.post('/__academic_test',{data:{reset:true}});await request.post('/__academic_test',{data:{seedManagement:true}});await page.goto('/tests/browser/fixture.html?mode=teacher-student-handoff');await page.waitForFunction(()=>window.testReady);const checked=page.locator('[name=student_ids]:checked');await expect(checked).toHaveCount(1);await expect(checked).toHaveValue(S);const assignments=await page.evaluate(async()=>await window.testClient.from('exercise_assignments').select('id'));expect(assignments.data).toHaveLength(0)
+ await expect(page.locator('[data-pedagogical-exercise]')).toBeVisible()
+ await expect(page.locator('[data-pedagogical-exercise] [name=studentId]')).toHaveValue(S)
+ await expect(page.locator('[data-pedagogical-exercise] [name=studentId] option')).toHaveCount(2)
 })
 async function menu(page){const d=row(page).locator('.vo-dir-menu');if(!await d.evaluate(e=>e.open))await d.locator('summary').click()}
 test('teacher roster keeps actions contextual and preserves confirmation, inactive history and safe reactivation',async({page,request})=>{

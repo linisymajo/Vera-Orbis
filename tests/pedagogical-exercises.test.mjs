@@ -5,8 +5,19 @@ import {unifiedAcademicFixture,T,S} from './fixtures/unified-academic-db.mjs'
 import {buildPedagogicalExerciseProviderRequest,generatePedagogicalExercise} from '../supabase/functions/academic-ai/pedagogical-exercises.js'
 import {createGeminiProvider} from '../supabase/functions/academic-ai/gemini-provider.js'
 import {pedagogicalExerciseToStudio} from '../src/lib/pedagogicalExercises.js'
+import {createAcademicAIHandler} from '../supabase/functions/academic-ai/handler.js'
 const request={mode:'pedagogical_exercise',studentId:S,language:'English',level:'B1',goal:'Everyday communication',duration:60,exerciseType:'fill_blank',lessonNumber:2}
 const content=()=>({title:'A friendly request',objective:'Make a polite request',language:'English',level:'B1',steps:['Listen','Repeat','Personalize','Use'].map(stage=>({stage,activity:stage+' a practical polite request.'})),exercise_type:'fill_blank',questions:[{prompt:'Could you ___ me, please?',answer:'help',accepted_answers:['please help'],explanation:'Use help to ask for assistance.',options:[],left:[],right:[],items:[],passage:null}],feedback:null})
+test('HTTP generation rejects student tokens and excess confirmed remaining lessons before provider construction',async()=>{
+ const config={SUPABASE_URL:'https://iopgzmvaqobigjwibual.supabase.co',SUPABASE_ANON_KEY:'synthetic',ACADEMIC_AI_ARCHITECT_ENABLED:'true',ACADEMIC_AI_PROVIDER:'gemini',ACADEMIC_AI_FREE_TIER_CONFIRMED:'true',ACADEMIC_AI_DATA_MODE:'anonymous_pedagogy_v1',ACADEMIC_AI_CLIENT_SCOPE:'adult_teacher_only',ACADEMIC_AI_ADULT_CLIENT_CONFIRMED:'true',ACADEMIC_AI_ADULT_TEACHER_IDS:T}
+ let calls=0,role='teacher'
+ const client={auth:{getUser:async()=>({data:{user:{id:T}}})},from:()=>({select:()=>({eq:()=>({maybeSingle:async()=>({data:{id:T}})})})}),rpc:async name=>({data:name==='get_my_enrollment'?{student_id:T,role,email_verified:true,academic_access:true,adult_admitted:true}:name==='verify_adult_teacher_eligibility'?{teacher_id:T,adult_verified:true}:{review:{settings:{confirmed:true,total:12,completed:5}}}})}
+ const handler=createAcademicAIHandler({env:k=>config[k],createClient:()=>client,geminiProviderFactory:()=>{calls++;throw Error('Must not construct provider')}})
+ const input={mode:'learning_architect',studentId:S,requestId:crypto.randomUUID(),language:'English',level:'B1',goal:'Everyday communication',classes:8,duration:60,regenerate:null}
+ const send=()=>handler(new Request('https://example.test',{method:'POST',headers:{Authorization:'Bearer synthetic','Content-Type':'application/json'},body:JSON.stringify(input)}))
+ assert.equal((await send()).status,422);assert.equal(calls,0)
+ role='student';assert.equal((await send()).status,403);assert.equal(calls,0)
+})
 test('official Gemini SDK exercise outbound bytes contain only fixed pedagogical inputs',async()=>{
  let count=0
  const provider=createGeminiProvider({apiKey:'synthetic-invalid',fetchImpl:async(resource,options)=>{count++;const body=JSON.parse(options.body),text=JSON.stringify(body);for(const marker of [S,'PRIVATE_CANARY','secret@example.test','private.docx'])assert.ok(!text.includes(marker));const input=JSON.parse(body.contents[0].parts[0].text);assert.deepEqual(Object.keys(input).sort(),['language','cefr_level','communicative_objective','lesson_count','class_duration_minutes','practice_areas','exercise_type','lesson_number'].sort());return Response.json({candidates:[{finishReason:'STOP',content:{parts:[{text:JSON.stringify(content())}]}}],usageMetadata:{promptTokenCount:200,candidatesTokenCount:300}})}})
